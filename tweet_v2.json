@@ -1,0 +1,62 @@
+{
+    "data":[
+        {
+            "author_id":"6253282",
+            "created_at":"2018-10-10T20:19:24.000Z",
+            "entities":{
+                "annotations":[
+                    {
+                        "start":168,
+                        "end":174,
+                        "probability":0.6123,
+                        "type":"Product",
+                        "normalized_text":"Twitter"
+                    },
+                    {
+                        "start":215,
+                        "end":221,
+                        "probability":0.6982,
+                        "type":"Product",
+                        "normalized_text":"Twitter"
+                    }
+                ],
+                "urls":[
+                    {
+                        "start":254,
+                        "end":277,
+                        "url":"https://t.co/Nx1XZmRCXA",
+                        "expanded_url":"https://twittercommunity.com/t/new-update-to-the-twitter-text-library-emoji-character-count/114607",
+                        "display_url":"twittercommunity.com/t/new-update-t…",
+                        "images":[
+                            {
+                                "url":"https://pbs.twimg.com/news_img/1238385891296440321/fQc87FKK?format=jpg&name=orig",
+                                "width":1200,
+                                "height":630
+                            },
+                            {
+                                "url":"https://pbs.twimg.com/news_img/1238385891296440321/fQc87FKK?format=jpg&name=150x150",
+                                "width":150,
+                                "height":150
+                            }
+                        ],
+                        "status":200,
+                        "title":"New update to the Twitter-Text library: Emoji character count",
+                        "description":"Over the years, we have made several updates to the way that people can communicate on Twitter. One of the more notable changes made last year was to increase the number of characters per Tweet from 140 to 280 characters. Today, we continue to expand people’s ability to express themselves by announcing a change to the way that we count emojis. Due to the differences in the way written text and emojis are encoded, many emojis (including emojis where you can apply gender and skin tone) have count...",
+                        "unwound_url":"https://twittercommunity.com/t/new-update-to-the-twitter-text-library-emoji-character-count/114607"
+                    }
+                ]
+            },
+            "id":"1050118621198921728",
+            "lang":"en",
+            "possibly_sensitive":false,
+            "public_metrics":{
+                "retweet_count":159,
+                "reply_count":35,
+                "like_count":305,
+                "quote_count":30
+            },
+            "source":"Twitter Web Client",
+            "text":"To make room for more expression, we will now count all emojis as equal—including those with gender‍‍‍ ‍‍and skin tone modifiers 👍🏻👍🏽👍🏿. This is now reflected in Twitter-Text, our Open Source library. \n\nUsing Twitter-Text? See the forum post for detail: https://t.co/Nx1XZmRCXA"
+        }
+    ]
+}

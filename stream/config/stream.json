@@ -1,0 +1,38 @@
+[
+    {
+        "keywords": [
+            "simon and garfunkel"
+        ],
+        "lang": [
+            "en"
+        ],
+        "locales": [
+            "en"
+        ],
+        "slug": "simongarfunkel",
+        "storage_mode": "s3-es",
+        "image_storage_mode": "inactive",
+        "model_endpoints": {},
+        "compile_trending_tweets": false,
+        "compile_trending_topics": false,
+        "compile_data_dump_ids": false
+    },
+    {
+        "keywords": [
+            "flabbergasted"
+        ],
+        "lang": [
+            "en"
+        ],
+        "locales": [
+            "en"
+        ],
+        "slug": "flabbergasted",
+        "storage_mode": "s3-es",
+        "image_storage_mode": "inactive",
+        "model_endpoints": {},
+        "compile_trending_tweets": false,
+        "compile_trending_topics": false,
+        "compile_data_dump_ids": false
+    }
+]
