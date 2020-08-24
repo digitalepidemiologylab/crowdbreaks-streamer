@@ -2,22 +2,25 @@ import logging
 import os
 import json
 
-from .config import Config
+from .config import Conf
 
 logger = logging.getLogger(__name__)
+
+# Why always pass the config around? Why not just have it as an attribute?
 
 
 class StreamConfig():
     """Read, write and validate project configs."""
 
-    def __init__(self):
-        self.config_path = self._get_config_path()
+    def __init__(self, config=None):
+        self.config_path = os.path.join(
+            Conf.CONFIG_PATH, Conf.STREAM_CONFIG_FILENAME)
         self.required_keys = [
             'keywords', 'es_index_name', 'lang', 'locales', 'slug',
             'storage_mode', 'image_storage_mode', 'model_endpoints',
             'compile_trending_tweets', 'compile_trending_topics',
             'compile_data_dump_ids']
-        self.validations = {
+        self.required_types = {
             'keywords': list,
             'lang': list,
             'es_index_name': str,
@@ -29,98 +32,89 @@ class StreamConfig():
             'compile_trending_tweets': bool,
             'compile_trending_topics': bool,
             'compile_data_dump_ids': bool}
+        if config is None:
+            config = self.load(self.config_path)
+        self._validate(config)
+        # Any keywords other than required will be ignored
+        self.config = self._extract_required_config(config)
+
+    def get_conf_by_index_name(self, es_index_name):
+        for conf in self.config:
+            if conf['es_index_name'] == es_index_name:
+                return conf
+
+    def get_conf_by_slug(self, slug):
+        for conf in self.config:
+            if conf['slug'] == slug:
+                return conf
+
+    def get_es_index_names(self):
+        return [d['es_index_name'] for d in self.config]
 
     def get_pooled_config(self):
-        """Pool all configs to run in single stream"""
-        config = self.read()
-        res = {'keywords': set(), 'lang': set()}
-        for stream in config:
-            res['keywords'].update(stream['keywords'])
-            res['lang'].update(stream['lang'])
-        return res
+        """Pools all filtering configs to run everything in a single stream."""
+        filter_conf = {'keywords': set(), 'lang': set()}
+        for stream in self.config:
+            filter_conf['keywords'].update(stream['keywords'])
+            filter_conf['lang'].update(stream['lang'])
+        return filter_conf
 
-    def read(self):
-        if not os.path.isfile(self.config_path):
-            return []
-        with open(self.config_path, 'r') as f:
+    def get_tracking_info(self, slug):
+        """Adds tracking info to all tweets before pushing into S3."""
+        for conf in self.config:
+            if conf['slug'] == slug:
+                info = {
+                    key: conf[key]
+                    for key in ['lang', 'keywords', 'es_index_name']}
+                return info
+
+    def load(self, config_path):
+        self._check_file_exists()
+        with open(config_path, 'r') as f:
             config = json.load(f)
         return config
 
-    def write(self, config):
-        config = self._extract_config(config)
+    def write(self):
         with open(self.config_path, 'w') as f:
-            json.dump(config, f, indent=4)
+            json.dump(self.config, f, indent=4)
 
-    def get_tracking_info(self, project):
-        """Added to all tweets before pushing into S3"""
-        config = self.read()
-        for stream in config:
-            if stream['slug'] == project:
-                info = {key: stream[key] for key in ['lang', 'keywords', 'es_index_name']}
-                return info
-
-    def get_es_index_names(self, config):
-        return [d['es_index_name'] for d in config]
-
-    def is_valid(self, config):
-        """Checks incoming new config whether it is valid. Returns boolean (is_valid) and msg pair"""
+    def _check_empty_or_none(self, config):
         if config is None:
-            return False, 'Configuration empty'
-        for d in config:
-            if not self._keys_are_present(d):
-                msg = "One or more of the following keywords are not present in the sent configuration: {}".format(self.required_keys)
-                return False, msg
-            if not self._validate_data_types(d):
-                msg = "One or more of the following configurations is of wrong type: {}".format(d)
-                return False, msg
-        return True, None
-
-    def get_config_by_slug(self, project):
-        config = self.read()
-        for stream in config:
-            if stream['slug'] == project:
-                return stream
-
-    def get_config_by_index_name(self, es_index_name):
-        config = self.read()
-        for stream in config:
-            if stream['es_index_name'] == es_index_name:
-                return stream
-
-    def validate_streaming_config(self):
-        """Validate streaming config before start of stream"""
-        if not os.path.isfile(self.config_path):
-            return False, 'Configuration file is not present.'
-        config = self.read()
+            raise ValueError('Config is None.')
         if len(config) == 0:
-            return False, 'Configuration contains no streams.'
-        is_valid, resp = self.is_valid(config)
-        if not is_valid:
-            return False, resp
-        return True, ''
+            raise ValueError('Config contains no streams.')
 
-    def _keys_are_present(self, obj):
-        """Test if all keys present"""
+    def _check_file_exists(self):
+        if not os.path.isfile(self.config_path):
+            raise ValueError('Config file does not exist.')
+
+    def _check_required_keys(self, conf):
+        """Tests if all required keys are present."""
         for k in self.required_keys:
-            if k not in obj:
-                return False
-        return True
+            if k not in conf:
+                raise ValueError(
+                    "One or more of the following keywords are not "
+                    f"present in the sent config: {self.required_keys}.")
 
-    def _validate_data_types(self, obj):
-        for key, data_type in self.validations.items():
-            if not isinstance(obj[key], data_type):
-                return False
-        return True
+    def _check_required_types(self, conf):
+        for key, data_type in self.required_types.items():
+            if not isinstance(conf[key], data_type):
+                raise TypeError(
+                    f"Config:\n{conf}.\n"
+                    "One or more of the values is of the wrong type. "
+                    f"The required types are: {self.required_types}.")
 
-    def _extract_config(self, config):
-        new_config = []
-        for d in config:
-            _d = {}
+    def _extract_required_config(self, config):
+        required_config = []
+        for conf in config:
+            req_conf = {}
             for k in self.required_keys:
-                _d[k] = d[k]
-            new_config.append(_d)
-        return new_config
+                req_conf[k] = conf[k]
+            required_config.append(req_conf)
+        return required_config
 
-    def _get_config_path(self):
-        config = Config()
-        return os.path.join(config.CONFIG_PATH, config.STREAM_CONFIG_FILE_PATH)
+    def _validate(self, config):
+        self._check_empty_or_none(config)
+        for conf in config:
+            self._check_required_keys(conf)
+            self._check_required_types(conf)

@@ -1,5 +1,6 @@
 import logging
 import time
+import json
 
 import tweepy
 
@@ -37,18 +38,19 @@ class StreamManager():
 
 class StreamListener(tweepy.StreamListener):
     """Handles data received from the stream."""
-    def __init__(self, test_mode=False):
+    def __init__(self):
         super(StreamListener, self).__init__()
         self.rate_error_count = 0
-        self.tweet_count = 0
-        self.test_mode = test_mode
 
     def on_status(self, status):
-        if (self.test_mode and self.tweet_count < 100) or not self.test_mode:
+        try:
             handle_tweet(status._json)
-            self.tweet_count += 1
-            return True
-        return False
+        except KeyError as e:
+            logger.error(
+                '%s: %s\n%s',
+                type(e).__name__, str(e), json.dumps(status._json))
+            raise e
+        return True
 
     def on_error(self, status_code):
         if status_code in ERROR_CODES:

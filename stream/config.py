@@ -1,10 +1,12 @@
 """Application configuration."""
 import os
+from enum import Enum
 from dotenv import load_dotenv
 
 load_dotenv()
 
-class Config(object):
+
+class Conf(Enum):
     """Base configuration."""
     # Environment
     ENV = os.environ.get('ENV', 'dev')
@@ -15,7 +17,7 @@ class Config(object):
     CONFIG_PATH = os.path.abspath(os.path.join(APP_DIR, 'config'))
 
     # Stream config
-    STREAM_CONFIG_FILE_PATH = os.path.join('stream.json')
+    STREAM_CONFIG_FILENAME = os.path.join('stream.json')
 
     # Twitter API
     CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
@@ -32,19 +34,19 @@ class Config(object):
     TIMEZONE = os.environ.get('TIMEZONE', 'Europe/Zurich')
 
 
-class ProdConfig(Config):
+class ProdConfig(Conf):
     """Production configuration."""
     CONFIG_ENV = 'prod'
     DEBUG = False
 
 
-class DevConfig(Config):
+class DevConfig(Conf):
     """Development configuration."""
     CONFIG_ENV = 'dev'
     DEBUG = True
 
 
-class TestConfig(Config):
+class TestConfig(Conf):
     """Test configuration."""
     TESTING = True
     DEBUG = True

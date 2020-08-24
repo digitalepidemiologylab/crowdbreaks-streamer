@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 class ReverseTweetMatcher():
-    """Tries to reverse match a tweet object given a set of keyword lists and languages."""
+    """Tries to reverse match a tweet object given a set of
+    keyword lists and languages.
+    """
 
     def __init__(self, tweet=None):
         self.is_retweet = self._is_retweet(tweet)
@@ -35,11 +37,7 @@ class ReverseTweetMatcher():
         """
         def fetch_from_status(status, text):
             if status['truncated']:
-                try:
-                    text += status['extended_tweet']['full_text']
-                except KeyError as e:
-                    logger.error('%s: %s\n%s', type(e).__name__, str(e), json.dumps(status))
-                    raise e
+                text += status['extended_tweet']['full_text']
             else:
                 text += status['text']
             text += self._fetch_user_mentions(status)
@@ -67,17 +65,20 @@ class ReverseTweetMatcher():
     def _match_to_project_keywords(self, relevant_text, project):
         """Match project keywords with text."""
         # Filter by language setting
-        if self.tweet['lang'] in project['lang'] or len(project['lang']) == 0 or self.tweet['lang'] == 'und':
+        if self.tweet['lang'] in project['lang'] or \
+                len(project['lang']) == 0 or self.tweet['lang'] == 'und':
             matching_keywords = defaultdict(list)
             keywords = [kw.lower().split() for kw in project['keywords']]
             for keyword_list in keywords:
                 if len(keyword_list) == 1:
                     if keyword_list[0] in relevant_text:
-                        matching_keywords[project['slug']].append(keyword_list[0])
+                        matching_keywords[project['slug']].append(
+                            keyword_list[0])
                 else:
                     # Keywords with more than one word:
                     # Check if all words are contained in text
-                    match_result = re.findall(r'{}'.format('|'.join(keyword_list)), relevant_text)
+                    match_result = re.findall(
+                        r'{}'.format('|'.join(keyword_list)), relevant_text)
                     if set(match_result) == set(keyword_list):
                         matching_keywords[project['slug']].extend(keyword_list)
             return matching_keywords
