@@ -2,4 +2,7 @@
 *.vscode
 *.DS_Store
 *__pycache__
+*.egg-info
 logs
+*.ipynb_checkpoints*
+*.ipynb

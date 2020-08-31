@@ -6,12 +6,12 @@ from http.client import IncompleteRead
 from tweepy import OAuthHandler, TweepError
 from urllib3.exceptions import ProtocolError
 
-from stream.config import Conf
-from stream.stream import StreamListener
-from stream.stream import StreamManager
-from stream.logging import setup_logging
+from .env import Env, TwiEnv
+from .stream import StreamListener
+from .stream import StreamManager
+from .setup_logging import setup_logging
 
-from stream.stream_config import StreamConfig
+from .firehose import create_delivery_stream
 
 logger = logging.getLogger(__name__)
 
@@ -21,27 +21,30 @@ def main():
     and connect to the Twitter streaming API.
     """
     # Setting things up
-    listener = StreamListener()
     auth = get_auth()
+    listener = StreamListener()
     # Wait for a bit before connecting, in case container will be paused
-    logger.debug('Streaming container is ready, waiting 10 s')
+    logger.debug('Streaming container is ready, waiting 10 s.')
     time.sleep(10)
     last_error_time = 0
     n_errors_last_hour = 0
     while True:
-        logger.debug('Trying to connect to Twitter API')
+        logger.debug('Trying to connect to Twitter API.')
         stream = StreamManager(auth, listener)
         try:
             stream.start()
         except KeyboardInterrupt:
             sys.exit()
-        except IncompleteRead:
-            # This error occurrs sometimes under high volume, simply reconnect
-            stream.stop()
-            logger.error('Stream exception %s: %s', type(e).__name__, str(e))
-        except Exception as e:
-            stream.stop()
-            logger.error('Stream exception %s: %s', type(e).__name__, str(e))
+        except Exception as exc:
+            logger.error(
+                'Stream starting exception %s: %s.',
+                type(exc).__name__, str(exc))
+            try:
+                stream.stop()
+            except Exception as exc:
+                logger.error(
+                    'Stream stopping exception %s: %s.',
+                    type(exc).__name__, str(exc))
             n_errors_last_hour = update_error_count(
                 n_errors_last_hour, last_error_time)
             last_error_time = time.time()
@@ -64,14 +67,15 @@ def wait_some_time(n_errors_last_hour):
 
 
 def get_auth():
-    if Conf.CONSUMER_KEY is None or Conf.CONSUMER_SECRET is None or \
-            Conf.OAUTH_TOKEN is None or Conf.OAUTH_TOKEN_SECRET is None:
+    if TwiEnv.CONSUMER_KEY is None or TwiEnv.CONSUMER_SECRET is None or \
+            TwiEnv.OAUTH_TOKEN is None or TwiEnv.OAUTH_TOKEN_SECRET is None:
         raise Exception('Twitter API keys needed for streaming to work.')
-    auth = OAuthHandler(Conf.CONSUMER_KEY, Conf.CONSUMER_SECRET)
-    auth.set_access_token(Conf.OAUTH_TOKEN, Conf.OAUTH_TOKEN_SECRET)
+    auth = OAuthHandler(TwiEnv.CONSUMER_KEY, TwiEnv.CONSUMER_SECRET)
+    auth.set_access_token(TwiEnv.OAUTH_TOKEN, TwiEnv.OAUTH_TOKEN_SECRET)
     return auth
 
 
 if __name__ == '__main__':
     setup_logging()
+    Env.STREAM_CONFIG_PATH
     main()

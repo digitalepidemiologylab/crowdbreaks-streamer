@@ -4,11 +4,13 @@ import json
 
 import tweepy
 
-from .errors import ERROR_CODES
-from .stream_config import StreamConfig
+from .utils.errors import ERROR_CODES
+from .config import ConfigManager
 from .tasks import handle_tweet
 
 logger = logging.getLogger(__name__)
+
+config_manager = ConfigManager()
 
 
 class StreamManager():
@@ -17,23 +19,19 @@ class StreamManager():
         self.stream = tweepy.Stream(
             auth=auth, listener=listener, tweet_mode='extended',
             parser=tweepy.parsers.JSONParser())
-        self.stream_config = StreamConfig()
 
     def start(self):
-        config = self.stream_config.get_pooled_config()
+        config = config_manager.filter_config
         logger.info(
             'Starting to track for keywords %s in languages %s',
-            config['keywords'], config['lang'])
+            config.keywords, config.lang)
         self.stream.filter(
-            track=config['keywords'], languages=config['lang'],
+            track=config.keywords, languages=config.lang,
             encoding='utf-8', stall_warnings=True)
 
     def stop(self):
         logger.info('Stopping stream...')
-        try:
-            self.stream.disconnect()
-        except Exception:
-            pass
+        self.stream.disconnect()
 
 
 class StreamListener(tweepy.StreamListener):
@@ -44,12 +42,12 @@ class StreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
         try:
-            handle_tweet(status._json)
-        except KeyError as e:
+            handle_tweet(status._json, config_manager.config)
+        except KeyError as exc:
             logger.error(
                 '%s: %s\n%s',
-                type(e).__name__, str(e), json.dumps(status._json))
-            raise e
+                type(exc).__name__, str(exc), json.dumps(status._json))
+            raise exc
         return True
 
     def on_error(self, status_code):

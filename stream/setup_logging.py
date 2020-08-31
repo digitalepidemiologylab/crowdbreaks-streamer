@@ -4,11 +4,11 @@ import time
 from enum import Enum
 from pathlib import Path
 
-from .config import Conf
+from .env import Env
 
 
 class LogDirs(Enum):
-    LOGS = os.path.join(Conf.PROJECT_ROOT, 'logs')
+    LOGS = os.path.join(Env.PROJECT_ROOT, 'logs')
 
     # Stream
     STREAM = os.path.join(LOGS, 'stream')
@@ -19,7 +19,7 @@ class LogDirs(Enum):
     # Tweets
     TWEETS = os.path.join(LOGS, 'tweets')
     UNMATCHED = os.path.join(TWEETS, 'unmatched')
-    REVERSE_MATCH_TEST = os.path.join(TWEETS, 'reverse_match_test')
+    MATCH_TEST = os.path.join(TWEETS, 'match_test')
     KEY_ERRORS = os.path.join(TWEETS, 'key_errors')
 
     @classmethod
@@ -38,18 +38,19 @@ def setup_logging(debug=False):
     handlers.append(stream_handler)
 
     info_file_handler = logging.FileHandler(os.path.join(
-        LogDirs.STREAM_INFO, time.strftime("info_%Y%m%d_%H%M%S.log")))
+        LogDirs.STREAM_INFO.value, time.strftime("info_%Y%m%d_%H%M%S.log")))
     info_file_handler.setLevel(logging.INFO)
     handlers.append(info_file_handler)
 
     warn_file_handler = logging.FileHandler(os.path.join(
-        LogDirs.STREAM_WARN, time.strftime("warn_%Y%m%d_%H%M%S.log")))
+        LogDirs.STREAM_WARN.value, time.strftime("warn_%Y%m%d_%H%M%S.log")))
     warn_file_handler.setLevel(logging.WARN)
     handlers.append(warn_file_handler)
 
     if debug:
         debug_file_handler = logging.FileHandler(os.path.join(
-            LogDirs.STREAM_DEBUG, time.strftime("warn_%Y%m%d_%H%M%S.log")))
+            LogDirs.STREAM_DEBUG.value,
+            time.strftime("warn_%Y%m%d_%H%M%S.log")))
         debug_file_handler.setLevel(logging.DEBUG)
         handlers.append(debug_file_handler)
 

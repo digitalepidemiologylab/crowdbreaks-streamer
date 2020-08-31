@@ -1,52 +1,93 @@
-"""Application configuration."""
+import logging
 import os
+import json
+
 from enum import Enum
-from dotenv import load_dotenv
+from typing import List, Dict, Set, Optional
+from dataclasses import dataclass, asdict, field
 
-load_dotenv()
+from .env import Env
+from .utils.enforce_types import enforce_types
+from .utils.convert import convert
 
-
-class Conf(Enum):
-    """Base configuration."""
-    # Environment
-    ENV = os.environ.get('ENV', 'dev')
-
-    # Paths
-    APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
-    PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
-    CONFIG_PATH = os.path.abspath(os.path.join(APP_DIR, 'config'))
-
-    # Stream config
-    STREAM_CONFIG_FILENAME = os.path.join('stream.json')
-
-    # Twitter API
-    CONSUMER_KEY = os.environ.get('CONSUMER_KEY')
-    CONSUMER_SECRET = os.environ.get('CONSUMER_SECRET')
-    OAUTH_TOKEN = os.environ.get('OAUTH_TOKEN')
-    OAUTH_TOKEN_SECRET = os.environ.get('OAUTH_TOKEN_SECRET')
-
-    # AWS (for storing in S3, accessing Elasticsearch)
-    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
-    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
-    AWS_REGION = os.environ.get('AWS_REGION', 'eu-central-1')
-
-    # Other
-    TIMEZONE = os.environ.get('TIMEZONE', 'Europe/Zurich')
+logger = logging.getLogger(__name__)
 
 
-class ProdConfig(Conf):
-    """Production configuration."""
-    CONFIG_ENV = 'prod'
-    DEBUG = False
+class StorageMode(Enum):
+    TEST_MODE = 1
+    S3_ES = 2
+    S3_ES_NO_RETWEETS = 3
 
 
-class DevConfig(Conf):
-    """Development configuration."""
-    CONFIG_ENV = 'dev'
-    DEBUG = True
+class ImageStorageMode(Enum):
+    ACTIVE = 1
+    INACTIVE = 2
 
 
-class TestConfig(Conf):
-    """Test configuration."""
-    TESTING = True
-    DEBUG = True
+converter = {
+    StorageMode: lambda x: StorageMode[x],
+}
+
+
+@enforce_types
+@convert(converter=converter)
+@dataclass(frozen=True)
+class Conf:
+    keywords: List[str]
+    lang: List[str]
+    locales: List[str]
+    slug: str
+    storage_mode: StorageMode
+    image_storage_mode: ImageStorageMode
+    model_endpoints: Optional[Dict[str, str]]
+
+
+@enforce_types
+@dataclass(frozen=True)
+class FilterConf:
+    keywords: Set[str] = field(default_factory=set)
+    lang: Set[str] = field(default_factory=set)
+
+
+class ConfigManager():
+    """Read, write and validate project configs."""
+    def __init__(self, config=None):
+        self.config_path = os.path.join(
+            Env.CONFIG_PATH, Env.STREAM_CONFIG_PATH)
+        self.config = self._load() if config is None else self._load(config)
+        self.filter_config = self._pool_config()
+
+    def get_conf_by_slug(self, slug):
+        for conf in self.config:
+            if conf.slug == slug:
+                return conf
+
+    def get_tracking_info(self, slug):
+        """Adds tracking info to all tweets before pushing into S3."""
+        for conf in self.config:
+            if conf.slug == slug:
+                info = {
+                    key: getattr(conf, key)
+                    for key in ['lang', 'keywords', 'es_index_name']}
+                return info
+
+    def write(self):
+        with open(self.config_path, 'w') as f:
+            json.dump([asdict(conf) for conf in self.config], f, indent=4)
+
+    def _load(self, raw=None):
+        if raw is None:
+            with open(self.config_path, 'r') as f:
+                raw = json.load(f)
+        config = set()
+        for conf in raw:
+            config.add(Conf(**conf))
+        return config
+
+    def _pool_config(self):
+        """Pools all filtering configs to run everything in a single stream."""
+        filter_conf = FilterConf()
+        for conf in self.config:
+            filter_conf.keywords.update(conf.keywords)
+            filter_conf.lang.update(conf.lang)
+        return filter_conf

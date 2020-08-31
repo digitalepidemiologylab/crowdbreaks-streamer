@@ -1,0 +1,88 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "s3:AbortMultipartUpload",
+                "s3:GetBucketLocation",
+                "s3:GetObject",
+                "s3:ListBucket",
+                "s3:ListBucketMultipartUploads",
+                "s3:PutObject"
+            ],
+            "Resource": [
+                "arn:aws:s3:::BUCKET_NAME",
+                "arn:aws:s3:::BUCKET_NAME/*"
+            ]
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "lambda:InvokeFunction",
+                "lambda:GetFunctionConfiguration"
+            ],
+            "Resource": "arn:aws:lambda:REGION:ACCOUNT_NUM:function:%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:GenerateDataKey",
+                "kms:Decrypt"
+            ],
+            "Resource": [
+                "arn:aws:kms:REGION:ACCOUNT_NUM:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "kms:ViaService": "s3.REGION.amazonaws.com"
+                },
+                "StringLike": {
+                    "kms:EncryptionContext:aws:s3:arn": [
+                        "arn:aws:s3:::%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%/*"
+                    ]
+                }
+            }
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:REGION:ACCOUNT_NUM:log-group:/aws/kinesisfirehose/mock-stream:log-stream:*"
+            ]
+        },
+        {
+            "Sid": "",
+            "Effect": "Allow",
+            "Action": [
+                "kinesis:DescribeStream",
+                "kinesis:GetShardIterator",
+                "kinesis:GetRecords",
+                "kinesis:ListShards"
+            ],
+            "Resource": "arn:aws:kinesis:REGION:ACCOUNT_NUM:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "kms:Decrypt"
+            ],
+            "Resource": [
+                "arn:aws:kms:REGION:ACCOUNT_NUM:key/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+            ],
+            "Condition": {
+                "StringEquals": {
+                    "kms:ViaService": "kinesis.REGION.amazonaws.com"
+                },
+                "StringLike": {
+                    "kms:EncryptionContext:aws:kinesis:arn": "arn:aws:kinesis:REGION:ACCOUNT_NUM:stream/%FIREHOSE_POLICY_TEMPLATE_PLACEHOLDER%"
+                }
+            }
+        }
+    ]
+}
