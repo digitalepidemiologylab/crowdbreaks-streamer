@@ -1,6 +1,5 @@
-import pytest
-
-from stream.config import Conf, FilterConf, ConfigManager
+from stream.config import (Conf, StorageMode, ImageStorageMode, FilterConf,
+                           ConfigManager)
 
 config = [
         {
@@ -42,8 +41,8 @@ def test_init():
             "lang": ["en"],
             "locales": ["en"],
             "slug": "simongarfunkel",
-            "storage_mode": "TEST_MODE",
-            "image_storage_mode": "INACTIVE",
+            "storage_mode": StorageMode.TEST_MODE,
+            "image_storage_mode": ImageStorageMode.INACTIVE,
             "model_endpoints": None
         }),
         Conf(**{
@@ -51,8 +50,8 @@ def test_init():
             "lang": ["en"],
             "locales": ["en"],
             "slug": "flabbergasted",
-            "storage_mode": "TEST_MODE",
-            "image_storage_mode": "INACTIVE",
+            "storage_mode": StorageMode.TEST_MODE,
+            "image_storage_mode": ImageStorageMode.INACTIVE,
             "model_endpoints": None
         }),
         Conf(**{
@@ -60,15 +59,15 @@ def test_init():
             "lang": ["en"],
             "locales": ["en"],
             "slug": "flabberstonished",
-            "storage_mode": "TEST_MODE",
-            "image_storage_mode": "INACTIVE",
+            "storage_mode": StorageMode.TEST_MODE,
+            "image_storage_mode": ImageStorageMode.INACTIVE,
             "model_endpoints": None
         })
     ], 'Incorrect load.'
 
     assert config_manager.filter_config == FilterConf(**{
-        "keywords": (
-            "simon and garfunkel", "flabbergasted", "astonished"
+        "keywords": set(
+            ["simon and garfunkel", "flabbergasted", "astonished"]
         ),
-        "lang": ("en")
+        "lang": set(["en"])
     })

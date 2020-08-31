@@ -6,9 +6,9 @@ from enum import Enum
 from typing import List, Dict, Set, Optional
 from dataclasses import dataclass, asdict, field
 
+import dacite
+
 from .env import Env
-from .utils.enforce_types import enforce_types
-from .utils.convert import convert
 
 logger = logging.getLogger(__name__)
 
@@ -26,11 +26,10 @@ class ImageStorageMode(Enum):
 
 converter = {
     StorageMode: lambda x: StorageMode[x],
+    ImageStorageMode: lambda x: ImageStorageMode[x],
 }
 
 
-@enforce_types
-@convert(converter=converter)
 @dataclass(frozen=True)
 class Conf:
     keywords: List[str]
@@ -42,7 +41,6 @@ class Conf:
     model_endpoints: Optional[Dict[str, str]]
 
 
-@enforce_types
 @dataclass(frozen=True)
 class FilterConf:
     keywords: Set[str] = field(default_factory=set)
@@ -79,9 +77,11 @@ class ConfigManager():
         if raw is None:
             with open(self.config_path, 'r') as f:
                 raw = json.load(f)
-        config = set()
+        config = []
         for conf in raw:
-            config.add(Conf(**conf))
+            config.append(dacite.from_dict(
+                data_class=Conf, data=conf,
+                config=dacite.Config(type_hooks=converter)))
         return config
 
     def _pool_config(self):

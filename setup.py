@@ -9,7 +9,7 @@ setuptools.setup(
     url="https://github.com/crowdbreaks/crowdbreaks-streamer-2",
     packages=setuptools.find_packages(),
     # Updated for fasttext model
-    install_requires=['aenum', 'boto3', 'tweepy'],
+    install_requires=['aenum', 'dacite', 'boto3', 'tweepy'],
     entry_points={'console_scripts': [
         'run-stream=stream.run:main']},
     classifiers=[
