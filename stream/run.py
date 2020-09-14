@@ -1,22 +1,26 @@
 import logging
 import sys
 import time
-from http.client import IncompleteRead
 
-from tweepy import OAuthHandler, TweepError
-from urllib3.exceptions import ProtocolError
+from tweepy import OAuthHandler
 
-from .env import Env, TwiEnv
+from .env import TwiEnv
 from .stream import StreamListener
 from .stream import StreamManager
+
+from .config import ConfigManager
+from .aws_firehose import create_delivery_stream
+from .aws_lambda import create_s3_to_es_lambda
+
 from .setup_logging import setup_logging
 
-from .firehose import create_delivery_stream
-
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+
+config_manager = ConfigManager()
 
 
-def main():
+def run():
     """Here we instantiate the stream manager, listener
     and connect to the Twitter streaming API.
     """
@@ -37,13 +41,13 @@ def main():
             sys.exit()
         except Exception as exc:
             logger.error(
-                'Stream starting exception %s: %s.',
+                'Stream starting exception %s: %s',
                 type(exc).__name__, str(exc))
             try:
                 stream.stop()
             except Exception as exc:
                 logger.error(
-                    'Stream stopping exception %s: %s.',
+                    'Stream stopping exception %s: %s',
                     type(exc).__name__, str(exc))
             n_errors_last_hour = update_error_count(
                 n_errors_last_hour, last_error_time)
@@ -63,7 +67,8 @@ def wait_some_time(n_errors_last_hour):
     if n_errors_last_hour == 0:
         time.sleep(base_delay)
     else:
-        time.sleep(min(base_delay * n_errors_last_hour, 1800))  # Don't wait longer than 30 min
+        # Don't wait longer than 30 min
+        time.sleep(min(base_delay * n_errors_last_hour, 1800))
 
 
 def get_auth():
@@ -75,7 +80,9 @@ def get_auth():
     return auth
 
 
-if __name__ == '__main__':
-    setup_logging()
-    Env.STREAM_CONFIG_PATH
-    main()
+def main():
+    setup_logging(debug=True)
+    create_s3_to_es_lambda()
+    # for conf in config_manager.config:
+    #     create_delivery_stream(conf.slug)
+    # run()

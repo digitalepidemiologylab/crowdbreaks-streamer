@@ -1,0 +1,1 @@
+[Policy for Firehose to write to S3](https://docs.aws.amazon.com/firehose/latest/dev/controlling-access.html#using-iam-s3)

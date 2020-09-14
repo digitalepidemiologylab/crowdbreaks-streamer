@@ -9,6 +9,7 @@ from .config import ConfigManager
 from .tasks import handle_tweet
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 config_manager = ConfigManager()
 
@@ -23,14 +24,14 @@ class StreamManager():
     def start(self):
         config = config_manager.filter_config
         logger.info(
-            'Starting to track for keywords %s in languages %s',
+            'Starting to track for keywords %s in languages %s.',
             config.keywords, config.lang)
         self.stream.filter(
             track=config.keywords, languages=config.lang,
             encoding='utf-8', stall_warnings=True)
 
     def stop(self):
-        logger.info('Stopping stream...')
+        logger.info('Stopping stream.')
         self.stream.disconnect()
 
 
@@ -42,7 +43,7 @@ class StreamListener(tweepy.StreamListener):
 
     def on_status(self, status):
         try:
-            handle_tweet(status._json, config_manager.config)
+            handle_tweet(status._json, config_manager)
         except KeyError as exc:
             logger.error(
                 '%s: %s\n%s',
@@ -58,7 +59,7 @@ class StreamListener(tweepy.StreamListener):
                 ERROR_CODES[status_code]['text'],
                 ERROR_CODES[status_code]['description'])
             if status_code == 420:
-                logger.info('Waiting for a bit...')
+                logger.info('Error 420. Waiting.')
                 self.rate_error_count += 1
                 # wait at least 15min
                 time.sleep(self.rate_error_count * 15 * 60)

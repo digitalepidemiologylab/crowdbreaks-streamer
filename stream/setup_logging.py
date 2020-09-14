@@ -50,10 +50,12 @@ def setup_logging(debug=False):
     if debug:
         debug_file_handler = logging.FileHandler(os.path.join(
             LogDirs.STREAM_DEBUG.value,
-            time.strftime("warn_%Y%m%d_%H%M%S.log")))
+            time.strftime("debug_%Y%m%d_%H%M%S.log")))
         debug_file_handler.setLevel(logging.DEBUG)
         handlers.append(debug_file_handler)
 
     logging.basicConfig(
         format='[%(asctime)s %(levelname)-4.4s %(name)s] %(message)s',
         handlers=handlers)
+
+    logging.info('bla')

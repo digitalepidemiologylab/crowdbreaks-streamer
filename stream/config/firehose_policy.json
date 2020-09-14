@@ -2,7 +2,6 @@
     "Version": "2012-10-17",
     "Statement": [
         {
-            "Sid": "",
             "Effect": "Allow",
             "Action": [
                 "s3:AbortMultipartUpload",
@@ -18,7 +17,6 @@
             ]
         },
         {
-            "Sid": "",
             "Effect": "Allow",
             "Action": [
                 "lambda:InvokeFunction",
@@ -47,7 +45,6 @@
             }
         },
         {
-            "Sid": "",
             "Effect": "Allow",
             "Action": [
                 "logs:PutLogEvents"
@@ -57,7 +54,6 @@
             ]
         },
         {
-            "Sid": "",
             "Effect": "Allow",
             "Action": [
                 "kinesis:DescribeStream",

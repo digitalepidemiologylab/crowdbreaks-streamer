@@ -11,6 +11,7 @@ import dacite
 from .env import Env
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class StorageMode(Enum):
@@ -66,7 +67,7 @@ class ConfigManager():
             if conf.slug == slug:
                 info = {
                     key: getattr(conf, key)
-                    for key in ['lang', 'keywords', 'es_index_name']}
+                    for key in ['lang', 'keywords', 'slug']}
                 return info
 
     def write(self):

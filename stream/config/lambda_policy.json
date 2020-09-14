@@ -1,0 +1,34 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:REGION:ACCOUNT_NUM:*"  
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": [
+                "arn:aws:logs:REGION:ACCOUNT_NUM:log-group:*"
+            ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "es:ESHttpPost"
+            ],
+            "Resource": "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject"
+            ],
+            "Resource": "arn:aws:s3:::BUCKET_NAME"
+        }
+    ]
+}

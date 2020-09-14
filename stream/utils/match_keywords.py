@@ -8,6 +8,7 @@ import re
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def match_keywords(status, config):
@@ -26,7 +27,7 @@ def fetch_relevant_text(status):
     """
     def fetch_from_status(status, text):
         if status['truncated']:
-            text += status['extended_status']['full_text']
+            text += status['extended_tweet']['full_text']
         else:
             text += status['text']
         text += _fetch_user_mentions(status)
@@ -36,12 +37,17 @@ def fetch_relevant_text(status):
     if 'retweeted_status' in status:
         status = status['retweeted_status']
 
-    text = ''
-    text = fetch_from_status(status, text)
+    try:
+        text = ''
+        text = fetch_from_status(status, text)
 
-    # Pool together with text from quoted status
-    if 'quoted_status' in status:
-        text = fetch_from_status(status['quoted_status'], text)
+        # Pool together with text from quoted status
+        if 'quoted_status' in status:
+            text = fetch_from_status(status['quoted_status'], text)
+    except KeyError as exc:
+        logger.error(
+            'Update tweet JSON schema. %s: %s',
+            type(exc).__name__, str(exc))
 
     return text.lower()
 
