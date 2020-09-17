@@ -16,5 +16,14 @@
         "storage_mode": "S3_ES",
         "image_storage_mode": "INACTIVE",
         "model_endpoints": null
+    },
+    {
+        "keywords": ["absolute"],
+        "lang": ["en"],
+        "locales": ["en"],
+        "slug": "absolute",
+        "storage_mode": "S3_ES",
+        "image_storage_mode": "INACTIVE",
+        "model_endpoints": null
     }
 ]

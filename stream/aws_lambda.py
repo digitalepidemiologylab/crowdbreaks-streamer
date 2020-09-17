@@ -1,5 +1,7 @@
 import logging
 import time
+import hashlib
+import sys
 
 import boto3
 
@@ -33,7 +35,8 @@ def get_function_name_arn():
     function_name = '{}-lambda-bucket-{}-es-{}'.format(
         LEnv.APP_NAME.lower(),
         LEnv.BUCKET_NAME, ESEnv.DOMAIN)
-    function_arn = f'arn:aws:iam::{LEnv.ACCOUNT_NUM}:lambda/{function_name}'
+    function_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
+                   f'function:{function_name}'
     return function_name, function_arn
 
 
@@ -45,7 +48,7 @@ def get_layer_name_arn():
 
 
 def get_role_name_arn():
-    role_name = 'service-role/{}LambdaBucket-{}'.format(
+    role_name = '{}LambdaBucket-{}'.format(
         LEnv.APP_NAME.capitalize(),
         LEnv.BUCKET_NAME)
     role_arn = f'arn:aws:iam::{LEnv.ACCOUNT_NUM}:role/{role_name}'
@@ -63,6 +66,7 @@ def get_policy_name_arn():
 def create_lambda_role():
     role_name, _ = get_role_name_arn()
     policy_name, policy_arn = get_policy_name_arn()
+    function_name, _ = get_function_name_arn()
 
     with open(LEnv.ROLE_TRUST_RELATIONSHIP_PATH, 'r') as f:
         role_trust_relationship = f.read()
@@ -87,10 +91,29 @@ def create_lambda_role():
             ]
         )
 
+        # response = iam.create_service_linked_role(
+        #     AWSServiceName='lambda.amazonaws.com',
+        #     Description=f'Role automatically created for Lambda '
+        #                 f'by {LEnv.APP_NAME}.'
+        # )
+
+        # role_name = response['Role']['RoleName']
+        # role_arn = response['Role']['Arn']
+
         logger.debug('Response:\n\n%s\n', response)
         logger.info(
             'Created role %s with ID %s for Lambda.',
             response['Role']['RoleName'], response['Role']['RoleId'])
+
+        # response = iam.tag_role(
+        #     RoleName=role_name,
+        #     Tags=[
+        #         {
+        #             'Key': 'project',
+        #             'Value': LEnv.APP_NAME
+        #         },
+        #     ]
+        # )
     except iam.exceptions.EntityAlreadyExistsException:
         pass
 
@@ -100,6 +123,7 @@ def create_lambda_role():
         policy = policy.replace('BUCKET_NAME', LEnv.BUCKET_NAME)
         policy = policy.replace('REGION', LEnv.REGION)
         policy = policy.replace('DOMAIN', ESEnv.DOMAIN)
+        policy = policy.replace('FUNCTION_NAME', function_name)
 
     try:
         response = iam.create_policy(
@@ -129,37 +153,77 @@ def create_lambda_role():
     return
 
 
-def create_s3_to_es_lambda(
-        push_func=False, push_layer=False, create_layer=False
-):
+def check_s3_diff(bucket, key, local_path):
+    s3_obj = None
+    try:
+        response = s3.get_object(
+            Bucket=bucket,
+            Key=key
+        )
+        s3_obj = response['Body'].read()
+    except s3.exceptions.NoSuchKey:
+        pass
+
+    # print(type(s3_obj), s3_obj, sys.getsizeof(s3_obj))
+    s3_obj_hash = hashlib.sha256(s3_obj).digest()
+
+    with open(local_path, 'rb') as f:
+        local_obj_hash = hashlib.sha256(f.read()).digest()
+
+    return s3_obj_hash == local_obj_hash
+
+
+def create_lambda_layer(push_layer=False, create_layer=False):
+    layer_name, _ = get_layer_name_arn()
+    layer_key = 'lambda/layer.zip'
+    s3_diff = check_s3_diff(LEnv.BUCKET_NAME, layer_key, LEnv.PATH_TO_LAYER)
+
+    if push_layer:
+        if not s3_diff:
+            s3.upload_file(
+                LEnv.PATH_TO_LAYER, LEnv.BUCKET_NAME, layer_key)
+            logger.info('Layer %s pushed to S3.', layer_name)
+        else:
+            logger.info(
+                'Layer %s not pushed to S3: '
+                'local zip is the same as on S3.',
+                layer_name)
+
+        if (push_layer and not s3_diff) or create_layer:
+            response = aws_lambda.publish_layer_version(
+                LayerName=layer_name,
+                Description='Layer created automatically for Lambda '
+                            f'by {LEnv.APP_NAME}.',
+                Content={
+                    'S3Bucket': LEnv.BUCKET_NAME,
+                    'S3Key': 'lambda/layer.zip'
+                },
+                CompatibleRuntimes=[
+                    'python3.7'
+                ]
+            )
+
+            if 'CreatedDate' in response:
+                logger.info('Layer %s created.', layer_name)
+
+
+def create_s3_to_es_lambda(push_func=False):
+    _, role_arn = get_role_name_arn()
     function_name, function_arn = get_function_name_arn()
     layer_name, layer_arn = get_layer_name_arn()
+    lambda_key = 'lambda/lambda.zip'
 
+    # If push_func is True and the code has been changed
     if push_func:
-        s3.upload_file(
-            LEnv.PATH_TO_FUNC, LEnv.BUCKET_NAME, 'lambda/lambda.zip')
-        logger.info('Function %s pushed to S3.', function_name)
-    if push_layer:
-        s3.upload_file(
-            LEnv.PATH_TO_FUNC, LEnv.BUCKET_NAME, 'lambda/layer.zip')
-        logger.info('Layer %s pushed to S3.', layer_name)
-
-    if push_layer or create_layer:
-        response = aws_lambda.publish_layer_version(
-            LayerName=layer_name,
-            Description='Layer created automatically for Lambda '
-                        f'by {LEnv.APP_NAME}.',
-            Content={
-                'S3Bucket': LEnv.BUCKET_NAME,
-                'S3Key': 'lambda/layer.zip'
-            },
-            CompatibleRuntimes=[
-                'python3.7'
-            ]
-        )
-
-        if 'CreatedDate' in response:
-            logger.info('Layer %s created.', layer_name)
+        if not check_s3_diff(LEnv.BUCKET_NAME, lambda_key, LEnv.PATH_TO_FUNC):
+            s3.upload_file(
+                LEnv.PATH_TO_FUNC, LEnv.BUCKET_NAME, lambda_key)
+            logger.info('Function %s pushed to S3.', function_name)
+        else:
+            logger.info(
+                'Function %s not pushed to S3: '
+                'local zip is the same as on S3.',
+                function_name)
 
     # Create lambda role
     create_lambda_role()
@@ -196,11 +260,11 @@ def create_s3_to_es_lambda(
                 response = aws_lambda.create_function(
                     FunctionName=function_name,
                     Runtime='python3.7',
-                    Role=get_role_name_arn()[1],
+                    Role=role_arn,
                     Handler=LEnv.HANDLER,
                     Code={
                         'S3Bucket': LEnv.BUCKET_NAME,
-                        'S3Key': 'lambda/lambda.zip'
+                        'S3Key': lambda_key
                     },
                     Description=LEnv.DESCRIPTION,
                     Timeout=LEnv.TIMEOUT,
@@ -226,9 +290,19 @@ def create_s3_to_es_lambda(
                 count += 1
                 time.sleep(60)
 
+        response = aws_lambda.add_permission(
+            FunctionName=function_name,
+            StatementId='1',
+            Action='lambda:InvokeFunction',
+            Principal='s3.amazonaws.com',
+            SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
+        )
+
+        print(response)
+
         # Add S3 event trigger to the lambda
         response = s3.put_bucket_notification_configuration(
-            Bucket=get_bucket_arn(LEnv.BUCKET_NAME),
+            Bucket=LEnv.BUCKET_NAME,
             NotificationConfiguration={
                 'LambdaFunctionConfigurations': [{
                     'LambdaFunctionArn': function_arn,
@@ -236,6 +310,8 @@ def create_s3_to_es_lambda(
                 }]
             }
         )
+
+        print(response)
 
         # Wait until lambda is active
         response = aws_lambda.get_function(FunctionName=function_name)

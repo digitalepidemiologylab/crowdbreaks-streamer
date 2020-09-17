@@ -10,7 +10,8 @@ from .stream import StreamManager
 
 from .config import ConfigManager
 from .aws_firehose import create_delivery_stream
-from .aws_lambda import create_s3_to_es_lambda
+from .aws_lambda import create_s3_to_es_lambda, create_lambda_layer
+from .elasticsearch import create_index
 
 from .setup_logging import setup_logging
 
@@ -82,7 +83,9 @@ def get_auth():
 
 def main():
     setup_logging(debug=True)
-    create_s3_to_es_lambda()
-    # for conf in config_manager.config:
-    #     create_delivery_stream(conf.slug)
-    # run()
+    create_lambda_layer(push_layer=True, create_layer=False)
+    create_s3_to_es_lambda(push_func=True)
+    for conf in config_manager.config:
+        create_delivery_stream(conf.slug)
+        create_index(conf.slug)
+    run()

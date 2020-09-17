@@ -1,0 +1,38 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "eu-central-1",
+            "eventTime": "2020-09-15T13:43:45.397Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AROA4XNVFOJVOFNFIKICP:AWSFirehoseToS3"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "18.196.90.5"
+            },
+            "responseElements": {
+                "x-amz-request-id": "16403A0A6095A8F9",
+                "x-amz-id-2": "9nwZG58Pt7ydt+OpL299c59j1VDjNU91E4oSGIh7oZYDXk4pdpnbiE08cJRVwIHN/SmC/4bcm+0Go/8HrdITMZG5JbwPAmRK"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "MzU4Yjk3NjItYzY0Yi00ZTk0LThhNmUtZGIzYjc2MWJkNjg4",
+                "bucket": {
+                    "name": "crowdbreaks-stg",
+                    "ownerIdentity": {
+                        "principalId": "A3Q8AY8RFTGCV1"
+                    },
+                    "arn": "arn:aws:s3:::crowdbreaks-stg"
+                },
+                "object": {
+                    "key": "tweets/project_flabbergasted/2020/09/15/13/crowdbreaks-flabbergasted-1-2020-09-15-13-38-46-3682a32d-858e-4336-928e-9bae6ed6b20c.gz",
+                    "size": 5510,
+                    "eTag": "c55f48ad2e711a9b923365382389695c",
+                    "sequencer": "005F60C5137A303822"
+                }
+            }
+        }
+    ]
+}

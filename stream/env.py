@@ -54,7 +54,7 @@ class KFEnv(AWSEnv):
         AWSEnv.CONFIG_PATH,
         os.environ.get('AWS_KF_POLICY_PATH'))
     BUFFER_SIZE = int(os.environ.get('AWS_KF_BUFFER_SIZE', '50'))
-    BUFFER_INTERVAL = int(os.environ.get('AWS_KF_BUFFER_INTERVAL', '300'))
+    BUFFER_INTERVAL = int(os.environ.get('AWS_KF_BUFFER_INTERVAL', '60'))
 
 
 class LEnv(AWSEnv):
@@ -71,7 +71,7 @@ class LEnv(AWSEnv):
         'AWS_L_DESCRIPTION',
         'Take new tweets from S3, preprocess and put to ES.')
     TIMEOUT = int(os.environ.get('AWS_L_TIMEOUT', '300'))
-    MEMORY_SIZE = int(os.environ.get('AWS_L_MEMORY_SIZE', '1024'))
+    MEMORY_SIZE = int(os.environ.get('AWS_L_MEMORY_SIZE', '128'))
     PATH_TO_FUNC = os.environ.get('AWS_L_PATH_TO_FUNC')
     PATH_TO_LAYER = os.environ.get('AWS_L_PATH_TO_LAYER')
 

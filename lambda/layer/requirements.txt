@@ -1,5 +1,0 @@
-aenum==2.2.4
-boto3==1.14.48
-botocore==1.17.48
-requests-aws4auth==1.0
-elasticsearch==6.8.0

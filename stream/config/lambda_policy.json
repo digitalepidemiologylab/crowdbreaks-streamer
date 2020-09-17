@@ -4,7 +4,7 @@
         {
             "Effect": "Allow",
             "Action": "logs:CreateLogGroup",
-            "Resource": "arn:aws:logs:REGION:ACCOUNT_NUM:*"  
+            "Resource": "arn:aws:logs:REGION:ACCOUNT_NUM:*"
         },
         {
             "Effect": "Allow",
@@ -12,23 +12,19 @@
                 "logs:CreateLogStream",
                 "logs:PutLogEvents"
             ],
+            "Resource": "arn:aws:logs:REGION:ACCOUNT_NUM:log-group:/aws/lambda/FUNCTION_NAME:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "es:ESHttpPut"
+            ],
             "Resource": [
-                "arn:aws:logs:REGION:ACCOUNT_NUM:log-group:*"
+                "arn:aws:s3:::BUCKET_NAME",
+                "arn:aws:s3:::BUCKET_NAME/*",
+                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*"
             ]
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "es:ESHttpPost"
-            ],
-            "Resource": "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN"
-        },
-        {
-            "Effect": "Allow",
-            "Action": [
-                "s3:GetObject"
-            ],
-            "Resource": "arn:aws:s3:::BUCKET_NAME"
         }
     ]
 }

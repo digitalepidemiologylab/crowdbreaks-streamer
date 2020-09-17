@@ -31,7 +31,9 @@ s3 = boto3.client(
     's3',
     region_name=ESEnv.REGION,
     aws_access_key_id=credentials.access_key,
-    aws_secret_access_key=credentials.secret_key)
+    aws_secret_access_key=credentials.secret_key,
+    aws_session_token=credentials.token
+)
 
 
 def preprocess(status):

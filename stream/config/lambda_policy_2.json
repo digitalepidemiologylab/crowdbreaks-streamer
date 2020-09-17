@@ -1,0 +1,48 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "es:DescribeInboundCrossClusterSearchConnections",
+                "es:DescribeReservedElasticsearchInstanceOfferings",
+                "es:DescribeReservedElasticsearchInstances",
+                "es:ListDomainNames",
+                "logs:CreateLogStream",
+                "es:ListElasticsearchInstanceTypeDetails",
+                "es:DescribeOutboundCrossClusterSearchConnections",
+                "es:ListElasticsearchInstanceTypes",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents",
+                "es:DescribeElasticsearchInstanceTypeLimits",
+                "es:ListElasticsearchVersions"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": [
+                "es:ESHttpGet",
+                "es:DescribeElasticsearchDomainConfig",
+                "es:ListTags",
+                "es:GetUpgradeHistory",
+                "es:ESCrossClusterGet",
+                "s3:GetObject",
+                "es:ESHttpHead",
+                "es:DescribeElasticsearchDomain",
+                "es:ESHttpPost",
+                "es:GetCompatibleElasticsearchVersions",
+                "es:GetUpgradeStatus",
+                "es:DescribeElasticsearchDomains",
+                "es:ESHttpPut"
+            ],
+            "Resource": [
+                "arn:aws:es:eu-central-1:874942657130:domain/crowdbreaks-stg-es",
+                "arn:aws:s3:::crowdbreaks-stg",
+                "arn:aws:s3:::crowdbreaks-stg/*"
+            ]
+        }
+    ]
+}

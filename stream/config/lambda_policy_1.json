@@ -1,0 +1,29 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Sid": "VisualEditor0",
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:CreateLogGroup",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Sid": "VisualEditor1",
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "es:ESHttpPost",
+                "es:ESHttpPut"
+            ],
+            "Resource": [
+                "arn:aws:s3:::crowdbreaks-stg",
+                "arn:aws:s3:::crowdbreaks-stg/*",
+                "arn:aws:es:eu-central-1:874942657130:domain/crowdbreaks-stg-es"
+            ]
+        }
+    ]
+}
