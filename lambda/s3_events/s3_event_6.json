@@ -1,0 +1,38 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "eu-central-1",
+            "eventTime": "2020-09-22T07:44:15.733Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AROA4XNVFOJVK4OOBU2U3:AWSFirehoseToS3"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "3.121.116.130"
+            },
+            "responseElements": {
+                "x-amz-request-id": "1DE34EB4A4643BBB",
+                "x-amz-id-2": "oa1WiPPSWFySRGov5/p1hIYKFDx8wdELKlPLH2Yl/NijEbaWh0dLLT3r4RVKuyfja1Fe3aE+Xyxy9zcBeGzQ+BnEYgb5AE+0"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "MWYzMzc5NzktY2UxMC00MTFiLThhY2ItMTQ2YzdlOGZiNGIz",
+                "bucket": {
+                    "name": "crowdbreaks-stg",
+                    "ownerIdentity": {
+                        "principalId": "A3Q8AY8RFTGCV1"
+                    },
+                    "arn": "arn:aws:s3:::crowdbreaks-stg"
+                },
+                "object": {
+                    "key": "tweets/project_absolute/2020/09/22/07/crowdbreaks-absolute-1-2020-09-22-07-43-18-d7f0cbab-1ff8-4445-94e1-cbb9e248e87c.gz",
+                    "size": 51069,
+                    "eTag": "b7e84f256c94af755214c2e71357d84e",
+                    "sequencer": "005F69AB53229A58B6"
+                }
+            }
+        }
+    ]
+}
