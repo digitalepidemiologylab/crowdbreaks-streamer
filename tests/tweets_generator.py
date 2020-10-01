@@ -10,7 +10,7 @@ from datetime import datetime
 from faker import Faker
 from faker.providers import profile, date_time, lorem
 
-tweet_example = {  
+tweet_example = {
     "created_at": "Thu May 10 15:24:15 +0000 2018",
     "id_str": "850006245121695744",
     "text": "Here is the Tweet message.",
@@ -61,7 +61,8 @@ with open(datetime.now().strftime('%Y-%m-%d_%H-%M-%S.txt'), 'w') as f:
 
         if args.keywords is not None:
             for k_i in random.sample(range(0, len(text)), n_keywords):
-                text[k_i] = random.sample(args.keywords, n_keywords) + ' ' + text[k_i]
+                text[k_i] = \
+                    random.sample(args.keywords, n_keywords) + ' ' + text[k_i]
 
         text = ' '.join(text)
 
