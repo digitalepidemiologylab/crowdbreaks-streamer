@@ -6,7 +6,16 @@
         "slug": "simongarfunkel",
         "storage_mode": "S3_ES",
         "image_storage_mode": "INACTIVE",
-        "model_endpoints": null
+        "model_endpoints": {
+            "sentiment": {
+                "active": {
+                    "mock-fasttext": {
+                        "run_name": "fasttext_v1",
+                        "model_type": "fasttext"
+                    }
+                }
+            }
+        }
     },
     {
         "keywords": ["flabbergasted"],
@@ -15,7 +24,16 @@
         "slug": "flabbergasted",
         "storage_mode": "S3_ES",
         "image_storage_mode": "INACTIVE",
-        "model_endpoints": null
+        "model_endpoints": {
+            "sentiment": {
+                "active": {
+                    "mock-fasttext": {
+                        "run_name": "fasttext_v1",
+                        "model_type": "fasttext"
+                    }
+                }
+            }
+        }
     },
     {
         "keywords": ["absolute"],
@@ -24,6 +42,15 @@
         "slug": "absolute",
         "storage_mode": "S3_ES",
         "image_storage_mode": "INACTIVE",
-        "model_endpoints": null
+        "model_endpoints": {
+            "sentiment": {
+                "active": {
+                    "mock-fasttext": {
+                        "run_name": "fasttext_v1",
+                        "model_type": "fasttext"
+                    }
+                }
+            }
+        }
     }
 ]

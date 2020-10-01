@@ -1,0 +1,109 @@
+[
+    {
+        "keywords": [
+            "crispr"
+        ],
+        "es_index_name": "project_crispr",
+        "lang": [
+            "en"
+        ],
+        "locales": [
+            "en"
+        ],
+        "slug": "crispr",
+        "storage_mode": "s3-es",
+        "image_storage_mode": "inactive",
+        "model_endpoints": {},
+        "compile_trending_tweets": false,
+        "compile_trending_topics": false,
+        "compile_data_dump_ids": false
+    },
+    {
+        "keywords": [
+            "wuhan",
+            "ncov",
+            "coronavirus",
+            "covid",
+            "sars-cov-2"
+        ],
+        "es_index_name": "project_wuhan",
+        "lang": [
+            "en"
+        ],
+        "locales": [
+            "en"
+        ],
+        "slug": "covid",
+        "storage_mode": "s3",
+        "image_storage_mode": "inactive",
+        "model_endpoints": {},
+        "compile_trending_tweets": true,
+        "compile_trending_topics": true,
+        "compile_data_dump_ids": true
+    },
+    {
+        "keywords": [
+            "vacina",
+            "vacina\u00e7\u00e3o",
+            "vacinado",
+            "vacinar",
+            "vacinal"
+        ],
+        "es_index_name": "project_paho",
+        "lang": [
+            "pt"
+        ],
+        "locales": [
+            "pt"
+        ],
+        "slug": "vaccination-sentiment-in-brazil",
+        "storage_mode": "s3-es",
+        "image_storage_mode": "inactive",
+        "model_endpoints": {},
+        "compile_trending_tweets": false,
+        "compile_trending_topics": false,
+        "compile_data_dump_ids": true
+    },
+    {
+        "keywords": [
+            "vaccine",
+            "vaccination",
+            "vaxxer",
+            "vaxxed",
+            "vaccinated",
+            "vaccinating",
+            "vacine",
+            "overvaccinate",
+            "undervaccinate",
+            "unvaccinated"
+        ],
+        "es_index_name": "project_vaccine_sentiment",
+        "lang": [
+            "en"
+        ],
+        "locales": [
+            "en"
+        ],
+        "slug": "vaccine-sentiment-tracking",
+        "storage_mode": "s3-es",
+        "image_storage_mode": "inactive",
+        "model_endpoints": {
+            "sentiment": {
+                "active": {
+                    "crowdbreaks-331b8421d3": {
+                        "run_name": "fasttext_v1",
+                        "model_type": "fasttext"
+                    },
+                    "crowdbreaks-6512709bc4": {
+                        "run_name": "fasttext_v2",
+                        "model_type": "fasttext"
+                    }
+                },
+                "primary": "crowdbreaks-6512709bc4"
+            }
+        },
+        "compile_trending_tweets": false,
+        "compile_trending_topics": false,
+        "compile_data_dump_ids": true
+    }
+]

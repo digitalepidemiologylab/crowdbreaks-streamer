@@ -62,7 +62,7 @@ class ConfigManager():
                 return conf
 
     def get_tracking_info(self, slug):
-        """Adds tracking info to all tweets before pushing into S3."""
+        """Adds tracking info to all tweets before pushing to S3."""
         for conf in self.config:
             if conf.slug == slug:
                 info = {

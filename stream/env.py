@@ -82,3 +82,8 @@ class ESEnv(AWSEnv):
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
     DOMAIN = os.environ.get(
         'AWS_ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV + '-es')
+
+
+class SMEnv(AWSEnv):
+    BATCH_SIZE_DEFAULT = int(os.environ.get('BATCH_SIZE_DEFAULT', '1'))
+    BATCH_SIZE_FASTTEXT = int(os.environ.get('BATCH_SIZE_FASTTEXT', '100'))

@@ -18,12 +18,14 @@
             "Effect": "Allow",
             "Action": [
                 "s3:GetObject",
-                "es:ESHttpPut"
+                "es:ESHttpPut",
+                "sagemaker:InvokeEndpoint"
             ],
             "Resource": [
                 "arn:aws:s3:::BUCKET_NAME",
                 "arn:aws:s3:::BUCKET_NAME/*",
-                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*"
+                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*",
+                "arn:aws:sagemaker:REGION:874942657130:endpoint/MODEL_NAME"
             ]
         }
     ]

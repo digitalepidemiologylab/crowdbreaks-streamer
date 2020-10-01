@@ -1,12 +1,11 @@
 import logging
 import time
 import hashlib
-import sys
+from base64 import b64encode
 
 import boto3
 
-from .env import LEnv
-from .env import ESEnv
+from .env import KFEnv, LEnv, ESEnv
 from .aws_firehose import get_bucket_arn
 
 logger = logging.getLogger(__name__)
@@ -124,6 +123,7 @@ def create_lambda_role():
         policy = policy.replace('REGION', LEnv.REGION)
         policy = policy.replace('DOMAIN', ESEnv.DOMAIN)
         policy = policy.replace('FUNCTION_NAME', function_name)
+        policy = policy.replace('MODEL_NAME', LEnv.APP_NAME + '-*')
 
     try:
         response = iam.create_policy(
@@ -170,13 +170,14 @@ def check_s3_diff(bucket, key, local_path):
     with open(local_path, 'rb') as f:
         local_obj_hash = hashlib.sha256(f.read()).digest()
 
-    return s3_obj_hash == local_obj_hash
+    return s3_obj_hash == local_obj_hash, local_obj_hash
 
 
 def create_lambda_layer(push_layer=False, create_layer=False):
     layer_name, _ = get_layer_name_arn()
     layer_key = 'lambda/layer.zip'
-    s3_diff = check_s3_diff(LEnv.BUCKET_NAME, layer_key, LEnv.PATH_TO_LAYER)
+    s3_diff, _ = check_s3_diff(
+        LEnv.BUCKET_NAME, layer_key, LEnv.PATH_TO_LAYER)
 
     if push_layer:
         if not s3_diff:
@@ -212,10 +213,12 @@ def create_s3_to_es_lambda(push_func=False):
     function_name, function_arn = get_function_name_arn()
     layer_name, layer_arn = get_layer_name_arn()
     lambda_key = 'lambda/lambda.zip'
+    hash_match, local_lambda_hash = check_s3_diff(
+        LEnv.BUCKET_NAME, lambda_key, LEnv.PATH_TO_FUNC)
 
     # If push_func is True and the code has been changed
     if push_func:
-        if not check_s3_diff(LEnv.BUCKET_NAME, lambda_key, LEnv.PATH_TO_FUNC):
+        if not hash_match:
             s3.upload_file(
                 LEnv.PATH_TO_FUNC, LEnv.BUCKET_NAME, lambda_key)
             logger.info('Function %s pushed to S3.', function_name)
@@ -231,26 +234,26 @@ def create_s3_to_es_lambda(push_func=False):
     time.sleep(10)
 
     try:
-        aws_lambda.get_function(
+        response = aws_lambda.list_layer_versions(
+            CompatibleRuntime='python3.7',
+            LayerName=layer_name
+        )
+
+        versions = [
+            version['Version'] for version in response['LayerVersions']]
+
+        latest_version = max(versions)
+    except aws_lambda.exceptions.ResourceNotFoundException:
+        raise Exception(
+            f'Layer {layer_name} does not exist. '
+            "Use 'push_layer=True' or 'create_layer=True' "
+            'if layer has already been pushed to S3.'
+        )
+
+    try:
+        response = aws_lambda.get_function(
             FunctionName=function_name)
     except aws_lambda.exceptions.ResourceNotFoundException:
-        try:
-            response = aws_lambda.list_layer_versions(
-                CompatibleRuntime='python3.7',
-                LayerName=layer_name
-            )
-
-            versions = [
-                version['Version'] for version in response['LayerVersions']]
-
-            latest_version = max(versions)
-        except aws_lambda.exceptions.ResourceNotFoundException:
-            raise Exception(
-                f'Layer {layer_name} does not exist. '
-                "Use 'push_layer=True' or 'create_layer=True' "
-                'if layer has already been pushed to S3.'
-            )
-
         response = None
         count = 0
         while response is None:
@@ -300,19 +303,6 @@ def create_s3_to_es_lambda(push_func=False):
 
         print(response)
 
-        # Add S3 event trigger to the lambda
-        response = s3.put_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME,
-            NotificationConfiguration={
-                'LambdaFunctionConfigurations': [{
-                    'LambdaFunctionArn': function_arn,
-                    'Events': ['s3:ObjectCreated:*']
-                }]
-            }
-        )
-
-        print(response)
-
         # Wait until lambda is active
         response = aws_lambda.get_function(FunctionName=function_name)
         status = response['Configuration']['State']
@@ -342,3 +332,65 @@ def create_s3_to_es_lambda(push_func=False):
                 'Waited too long for the activation of '
                 f'lambda {function_name}.'
             )
+
+        # Add S3 event trigger to the lambda
+        response = s3.put_bucket_notification_configuration(
+            Bucket=LEnv.BUCKET_NAME,
+            NotificationConfiguration={
+                'LambdaFunctionConfigurations': [{
+                    'LambdaFunctionArn': function_arn,
+                    'Events': ['s3:ObjectCreated:*'],
+                    'Filter': {
+                        'Key': {
+                            'FilterRules': [
+                                {
+                                    'Name': 'prefix',
+                                    'Value': KFEnv.BUCKET_PREFIX
+                                },
+                            ]
+                        }
+                    }
+                }]
+            },
+        )
+        logger.info('An S3 trigger is set for lambda %s.', function_name)
+
+        print(response)
+
+    aws_lambda_hash = response['Configuration']['CodeSha256']
+    # To produce the same hash as AWS's CodeSha256
+    # https://stackoverflow.com/questions/32038881/python-get-base64-encoded-md5-hash-of-an-image-object
+    local_lambda_hash_b64 = b64encode(local_lambda_hash).strip().decode()
+
+    aws_layer_version_num = \
+        int(response['Configuration']['Layers'][0]['Arn'].split(':')[-1])
+
+    if aws_lambda_hash != local_lambda_hash_b64:
+        # Publish a new version if the code on S3 got updated
+        response = aws_lambda.update_function_code(
+            FunctionName=function_name,
+            S3Bucket=LEnv.BUCKET_NAME,
+            S3Key=lambda_key,
+            Publish=True
+        )
+        logger.info(
+            'The code for lambda %s got updated from '
+            'the latest version in S3.',
+            function_name)
+    else:
+        logger.info('Lambda %s already exists.', function_name)
+
+    if aws_layer_version_num < latest_version:
+        response = aws_lambda.update_function_configuration(
+            FunctionName=function_name,
+            Layers=[
+                layer_arn + f':{latest_version}',
+            ]
+        )
+        logger.info(
+            'The layer for lambda %s got updated to the latest version.',
+            function_name)
+    else:
+        logger.info(
+            'The layer for lambda %s is already at the latest version.',
+            function_name)
