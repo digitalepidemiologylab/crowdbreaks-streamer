@@ -1,14 +1,14 @@
-FROM amazonlinux:2
-RUN yum install -y python37 && \
-    yum install -y python3-pip && \
-    yum install -y zip && \
-    yum install amazon-cloudwatch-agent && \
-    yum clean all
-RUN python3.7 -m pip install --upgrade pip && \
-    python3.7 -m pip install virtualenv
-COPY requirements.txt /tmp/
-RUN python3.7 -m venv lambda && \
-    source lambda/bin/activate && \
-    pip install -r /tmp/requirements.txt -t python/ && \
-    deactivate && \
-    zip -r python.zip python/
+# https://pythonspeed.com/articles/activate-virtualenv-dockerfile/
+FROM python:3.8
+
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
+# Install dependencies:
+RUN mkdir crowdbreaks-streamer-2 \
+    && cd crowdbreaks-streamer-2
+COPY . .
+RUN pip install -e .
+
+CMD run-stream

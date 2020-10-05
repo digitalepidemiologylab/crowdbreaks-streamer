@@ -8,6 +8,5 @@ docker rm $(docker ps -a -q)
 
 docker run -it --name lambdalayer lambdalayer:latest bash
 
-# Inside container's bash
-zip -r python.zip ./python/
+docker cp lambdalayer:python.zip .
 ```

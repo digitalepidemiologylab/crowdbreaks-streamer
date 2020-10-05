@@ -85,7 +85,7 @@ def main():
     setup_logging(debug=True)
     create_lambda_layer(push_layer=True, create_layer=False)
     create_s3_to_es_lambda(push_func=True)
-    # for conf in config_manager.config:
-    #     create_delivery_stream(conf.slug)
-    #     create_index(conf.slug)
+    for conf in config_manager.config:
+        create_delivery_stream(conf.slug)
+        create_index(conf.slug)
     run()
