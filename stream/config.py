@@ -17,7 +17,8 @@ logger.setLevel(logging.DEBUG)
 class StorageMode(Enum):
     TEST_MODE = 1
     S3_ES = 2
-    S3_ES_NO_RETWEETS = 3
+    S3_ES_NO_UNMATCHED = 3
+    S3_ES_NO_RETWEETS = 4
 
 
 class ImageStorageMode(Enum):

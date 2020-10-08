@@ -1,10 +1,11 @@
 import logging
 import sys
+import os
 import time
 
 from tweepy import OAuthHandler
 
-from .env import TwiEnv
+from .env import TwiEnv, KFEnv
 from .stream import StreamListener
 from .stream import StreamManager
 
@@ -82,9 +83,17 @@ def get_auth():
 
 
 def main():
-    setup_logging(debug=True)
-    create_lambda_layer(push_layer=True, create_layer=False)
-    create_s3_to_es_lambda(push_func=True)
+    setup_logging()
+    logger.info(os.path.dirname(os.path.realpath(__file__)))
+    logger.info(os.getcwd())
+    # create_lambda_layer(push_layer=True, create_layer=False)
+    # create_s3_to_es_lambda(push_func=True)
+
+    # Create a delivery stream for unmanched tweets
+    create_delivery_stream(
+        KFEnv.UNMATCHED_STREAM_NAME,
+        key_name=f'{KFEnv.UNMATCHED_STREAM_NAME}')
+    # Create delivery streams and ES indices for the lsited projects
     for conf in config_manager.config:
         create_delivery_stream(conf.slug)
         create_index(conf.slug)

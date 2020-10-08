@@ -8,8 +8,9 @@ setuptools.setup(
     description="Twitter API v1.1 streamer",
     url="https://github.com/crowdbreaks/crowdbreaks-streamer-2",
     packages=setuptools.find_packages(),
-    # Updated for fasttext model
-    install_requires=['aenum', 'dacite', 'boto3', 'tweepy'],
+    install_requires=[
+        'python-dotenv', 'aenum', 'dacite', 'tweepy',
+        'boto3', 'elasticsearch', 'requests_aws4auth'],
     entry_points={'console_scripts': [
         'run-stream=stream.run:main']},
     classifiers=[

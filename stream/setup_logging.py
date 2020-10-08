@@ -28,8 +28,10 @@ class LogDirs(Enum):
             Path(const.value).mkdir(parents=True, exist_ok=True)
 
 
-def setup_logging(debug=False):
-    LogDirs.create_folders()
+def setup_logging(
+        # debug=False
+):
+    # LogDirs.create_folders()
 
     handlers = []
 
@@ -37,25 +39,25 @@ def setup_logging(debug=False):
     stream_handler.setLevel(logging.INFO)
     handlers.append(stream_handler)
 
-    info_file_handler = logging.FileHandler(os.path.join(
-        LogDirs.STREAM_INFO.value, time.strftime("info_%Y%m%d_%H%M%S.log")))
-    info_file_handler.setLevel(logging.INFO)
-    handlers.append(info_file_handler)
+    # In the ECS container, there's no need in file handlers
+    # as the logs get streamed right into CloudWatch
+    # info_file_handler = logging.FileHandler(os.path.join(
+    #     LogDirs.STREAM_INFO.value, time.strftime("info_%Y%m%d_%H%M%S.log")))
+    # info_file_handler.setLevel(logging.INFO)
+    # handlers.append(info_file_handler)
 
-    warn_file_handler = logging.FileHandler(os.path.join(
-        LogDirs.STREAM_WARN.value, time.strftime("warn_%Y%m%d_%H%M%S.log")))
-    warn_file_handler.setLevel(logging.WARN)
-    handlers.append(warn_file_handler)
+    # warn_file_handler = logging.FileHandler(os.path.join(
+    #     LogDirs.STREAM_WARN.value, time.strftime("warn_%Y%m%d_%H%M%S.log")))
+    # warn_file_handler.setLevel(logging.WARN)
+    # handlers.append(warn_file_handler)
 
-    if debug:
-        debug_file_handler = logging.FileHandler(os.path.join(
-            LogDirs.STREAM_DEBUG.value,
-            time.strftime("debug_%Y%m%d_%H%M%S.log")))
-        debug_file_handler.setLevel(logging.DEBUG)
-        handlers.append(debug_file_handler)
+    # if debug:
+    #     debug_file_handler = logging.FileHandler(os.path.join(
+    #         LogDirs.STREAM_DEBUG.value,
+    #         time.strftime("debug_%Y%m%d_%H%M%S.log")))
+    #     debug_file_handler.setLevel(logging.DEBUG)
+    #     handlers.append(debug_file_handler)
 
     logging.basicConfig(
         format='[%(asctime)s %(levelname)-4.4s %(name)s] %(message)s',
         handlers=handlers)
-
-    logging.info('bla')

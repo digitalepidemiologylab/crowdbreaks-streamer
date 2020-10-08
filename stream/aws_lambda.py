@@ -200,7 +200,7 @@ def create_lambda_layer(push_layer=False, create_layer=False):
                     'S3Key': 'lambda/layer.zip'
                 },
                 CompatibleRuntimes=[
-                    'python3.7'
+                    'python3.8'
                 ]
             )
 
@@ -235,7 +235,7 @@ def create_s3_to_es_lambda(push_func=False):
 
     try:
         response = aws_lambda.list_layer_versions(
-            CompatibleRuntime='python3.7',
+            CompatibleRuntime='python3.8',
             LayerName=layer_name
         )
 
@@ -262,7 +262,7 @@ def create_s3_to_es_lambda(push_func=False):
             try:
                 response = aws_lambda.create_function(
                     FunctionName=function_name,
-                    Runtime='python3.7',
+                    Runtime='python3.8',
                     Role=role_arn,
                     Handler=LEnv.HANDLER,
                     Code={
@@ -345,7 +345,8 @@ def create_s3_to_es_lambda(push_func=False):
                             'FilterRules': [
                                 {
                                     'Name': 'prefix',
-                                    'Value': KFEnv.BUCKET_PREFIX
+                                    'Value': f'{KFEnv.BUCKET_FOLDER}'
+                                             f'{KFEnv.BUCKET_PREFIX}'
                                 },
                             ]
                         }

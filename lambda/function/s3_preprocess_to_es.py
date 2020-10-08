@@ -9,8 +9,7 @@ from requests_aws4auth import AWS4Auth
 from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 # from elasticsearch.helpers import bulk
 
-from env import ESEnv
-from env import SMEnv
+from env import Env, ESEnv, SMEnv
 from config import ConfigManager
 
 logger = logging.getLogger(__name__)
@@ -129,8 +128,10 @@ def handler(event, context):
         key = record['s3']['object']['key']
 
         # Get slug
-        # TODO: handle bucket prefix
-        slug = [name for name in key.split('/') if name.startswith('project_')]
+        slug = [
+            name for name in key.split('/')
+            if name.startswith(Env.S3_BUCKET_PREFIX)
+        ]
         if len(slug) != 1:
             logger.error('Slug len != 1.\nKey: %s.\nSlug: %s.', key, slug)
         slug = slug[0].split('_')[1]
@@ -140,7 +141,7 @@ def handler(event, context):
         model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
 
         # Get S3 object
-        records = ''
+        records = b''
         repeat = True
         while repeat:
             try:
@@ -168,7 +169,9 @@ def handler(event, context):
                 if 'End' in event:
                     repeat = False
                 if 'Records' in event:
-                    records += event['Records']['Payload'].decode('utf-8')
+                    records += event['Records']['Payload']
+
+        records = records.decode('utf-8')
 
         try:
             statuses = [json.loads(record) for record in records.splitlines()]
@@ -247,7 +250,8 @@ def handler(event, context):
                 # Happens when a document with the same ID
                 # already exists.
                 errors += 1
-                logger.warning('Rec %d, id %d already exists.', i, status['id'])
+                logger.warning(
+                    'Rec %d, id %d already exists.', i, status['id'])
                 # logger.error('%s: %s', type(exc).__name__, str(exc))
 
         logger.info(

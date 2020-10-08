@@ -29,7 +29,7 @@ es = Elasticsearch(
 def create_index(slug):
     index_name = ESEnv.INDEX_PREFIX + slug
 
-    with open('lambda/function/tweet_mapping.json', 'r') as f:
+    with open('lambda/function/config/tweet_mapping.json', 'r') as f:
         mapping = json.load(f)
 
     if es.indices.exists(index_name):

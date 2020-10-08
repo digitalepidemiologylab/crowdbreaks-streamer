@@ -14,6 +14,7 @@ class Env(Constant):
 
     # Other
     TIMEZONE = os.environ.get('TIMEZONE', 'Europe/Zurich')
+    S3_BUCKET_PREFIX = os.environ.get('S3_BUCKET_PREFIX', 'project_')
 
 
 class ESEnv(Constant):

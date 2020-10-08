@@ -15,6 +15,17 @@ class Env(Constant):
     assert DEBUG in ['True', 'False']
     DEBUG = int(DEBUG == 'True')
 
+    # Unmatched tweets
+    UNMATCHED_STORE_LOCALLY = os.environ.get(
+        'UNMATCHED_STORE_LOCALLY', 'False')
+    assert UNMATCHED_STORE_LOCALLY in ['True', 'False']
+    UNMATCHED_STORE_LOCALLY = int(UNMATCHED_STORE_LOCALLY == 'True')
+
+    UNMATCHED_STORE_S3 = os.environ.get(
+        'UNMATCHED_STORE_S3', 'True')
+    assert UNMATCHED_STORE_S3 in ['True', 'False']
+    UNMATCHED_STORE_S3 = int(UNMATCHED_STORE_S3 == 'True')
+
     # Paths
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
     PROJECT_ROOT = os.path.abspath(os.path.join(APP_DIR, os.pardir))
@@ -46,25 +57,29 @@ class AWSEnv(Env):
 
 
 class KFEnv(AWSEnv):
-    BUCKET_PREFIX = os.environ.get('AWS_KF_BUCKET_PREFIX', 'tweets/project_')
+    BUCKET_FOLDER = os.environ.get('AWS_KF_BUCKET_FOLDER', 'tweets/')
+    BUCKET_PREFIX = os.environ.get('AWS_KF_BUCKET_PREFIX', 'project_')
     ROLE_TRUST_RELATIONSHIP_PATH = os.path.join(
         AWSEnv.CONFIG_PATH,
         os.environ.get('AWS_KF_ROLE_TRUST_RELATIONSHIP_FILENAME'))
     POLICY_PATH = os.path.join(
         AWSEnv.CONFIG_PATH,
-        os.environ.get('AWS_KF_POLICY_PATH'))
+        os.environ.get('AWS_KF_POLICY_FILENAME'))
     BUFFER_SIZE = int(os.environ.get('AWS_KF_BUFFER_SIZE', '50'))
     BUFFER_INTERVAL = int(os.environ.get('AWS_KF_BUFFER_INTERVAL', '60'))
+    UNMATCHED_STREAM_NAME = os.environ.get(
+        'AWS_KF_UNMATCHED_STREAM_NAME', 'unmatched')
 
 
 class LEnv(AWSEnv):
-    BUCKET_PREFIX = os.environ.get('AWS_KF_BUCKET_PREFIX', 'tweets/project_')
+    BUCKET_FOLDER = os.environ.get('AWS_KF_BUCKET_FOLDER', 'tweets/')
+    BUCKET_PREFIX = os.environ.get('AWS_KF_BUCKET_PREFIX', 'project_')
     ROLE_TRUST_RELATIONSHIP_PATH = os.path.join(
         AWSEnv.CONFIG_PATH,
         os.environ.get('AWS_L_ROLE_TRUST_RELATIONSHIP_FILENAME'))
     POLICY_PATH = os.path.join(
         AWSEnv.CONFIG_PATH,
-        os.environ.get('AWS_L_POLICY_PATH'))
+        os.environ.get('AWS_L_POLICY_FILENAME'))
     HANDLER = os.environ.get(
         'AWS_L_HANDLER', 's3_preprocess_to_es.handler')
     DESCRIPTION = os.environ.get(

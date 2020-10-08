@@ -3,7 +3,7 @@
 ```
 docker build -f Dockerfile -t lambdalayer:latest .
 
-# Remove al stopped containers
+# Remove all stopped containers
 docker rm $(docker ps -a -q)
 
 docker run -it --name lambdalayer lambdalayer:latest bash

@@ -5,7 +5,7 @@ import json
 from .setup_logging import LogDirs
 from .config import StorageMode
 from .utils.match_keywords import match_keywords
-from .env import KFEnv
+from .env import Env, KFEnv
 from .aws_firehose import firehose
 
 logger = logging.getLogger(__name__)
@@ -13,7 +13,10 @@ logger.setLevel(logging.DEBUG)
 
 
 def handle_tweet(
-        status, config_manager, store_unmatched_tweets=False
+        status, config_manager,
+        store_unmatched_tweets_locally=False,
+        store_unmatched_tweets_s3=False,
+        store_for_testing=False
 ):
     status_id = status['id_str']
     # Reverse match to find project
@@ -26,12 +29,17 @@ def handle_tweet(
         logger.debug(
             'Status %s could not be matched against any existing projects.',
             status_id)
-        if store_unmatched_tweets:
+        if Env.UNMATCHED_STORE_LOCALLY == 1:
             # Store to a separate file for later analysis
             with open(os.path.join(
                     LogDirs.UNMATCHED.value, f"{status_id}.json"
             ), 'w') as f:
                 json.dump(status, f)
+        if Env.UNMATCHED_STORE_S3 == 1:
+            _ = firehose.put_record(
+                DeliveryStreamName=f'{KFEnv.APP_NAME}-'
+                                   f'{KFEnv.UNMATCHED_STREAM_NAME}',
+                Record={'Data': f'{json.dumps(status)}\n'.encode()})
         return
 
     logger.debug(
@@ -39,11 +47,13 @@ def handle_tweet(
         len(matching_projects), matching_projects)
     status['matching_keywords'] = matching_keywords
 
-    # Store for testing
-    with open(os.path.join(
-            LogDirs.MATCH_TEST.value, f"{status_id}.json"
-    ), 'w') as f:
-        json.dump(status, f)
+    if store_for_testing:
+        # Store for testing
+        with open(os.path.join(
+                LogDirs.MATCH_TEST.value, f"{status_id}.json"
+        ), 'w') as f:
+            json.dump(status, f)
+
     for slug in matching_projects:
         # Get config
         conf = config_manager.get_conf_by_slug(slug)
