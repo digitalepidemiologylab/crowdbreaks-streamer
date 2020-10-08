@@ -76,5 +76,5 @@ jobs:
       with:
         task-definition: ${{ steps.task-def.outputs.task-definition }}
         service: streamer-app-service
-        cluster: crowdbreaks-streamer-2
+        cluster: crowdbreaks-streamer
         wait-for-service-stability: true
