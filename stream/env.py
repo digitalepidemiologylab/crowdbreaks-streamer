@@ -1,9 +1,27 @@
 """Application configuration."""
 import os
+import json
+from json import JSONDecodeError
 from aenum import Constant
 from dotenv import load_dotenv
 
 load_dotenv()
+
+
+def get_secret(secret_name):
+    try:
+        with open(f'/run/secrets/{secret_name}', 'r') as f:
+            try:
+                return json.load(f)
+            except JSONDecodeError:
+                return None
+    except IOError:
+        return None
+
+
+twitter_data = get_secret('twitter')
+aws = get_secret('aws')
+es_data = get_secret('es')
 
 
 class Env(Constant):
@@ -40,17 +58,24 @@ class Env(Constant):
 
 class TwiEnv(Constant):
     """Twitter API config."""
-    CONSUMER_KEY = os.environ.get('TWI_CONSUMER_KEY')
-    CONSUMER_SECRET = os.environ.get('TWI_CONSUMER_SECRET')
-    OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN')
-    OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET')
+    # CONSUMER_KEY = os.environ.get('TWI_CONSUMER_KEY')
+    # CONSUMER_SECRET = os.environ.get('TWI_CONSUMER_SECRET')
+    # OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN')
+    # OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET')
+    CONSUMER_KEY = twitter_data['TWI_CONSUMER_KEY']
+    CONSUMER_SECRET = twitter_data['TWI_CONSUMER_SECRET']
+    OAUTH_TOKEN = twitter_data['TWI_OAUTH_TOKEN']
+    OAUTH_TOKEN_SECRET = twitter_data['TWI_OAUTH_TOKEN_SECRET']
 
 
 class AWSEnv(Env):
     """AWS config (for storing in S3, accessing Elasticsearch)."""
-    ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
-    SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
-    ACCOUNT_NUM = os.environ.get('AWS_ACCOUNT_NUM')
+    # ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
+    # SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
+    # ACCOUNT_NUM = os.environ.get('AWS_ACCOUNT_NUM')
+    ACCESS_KEY_ID = aws['AWS_ACCESS_KEY_ID']
+    SECRET_ACCESS_KEY = aws['AWS_SECRET_ACCESS_KEY']
+    ACCOUNT_NUM = aws['AWS_ACCOUNT_NUM']
     BUCKET_NAME = os.environ.get(
         'AWS_BUCKET_NAME', Env.APP_NAME + '-' + Env.ENV)
     REGION = os.environ.get('AWS_REGION', 'eu-central-1')
@@ -92,8 +117,10 @@ class LEnv(AWSEnv):
 
 
 class ESEnv(AWSEnv):
-    HOST = os.environ.get('ES_HOST')
-    PORT = os.environ.get('ES_PORT')
+    # HOST = os.environ.get('ES_HOST')
+    # PORT = os.environ.get('ES_PORT')
+    HOST = es_data['ES_HOST']
+    PORT = es_data['ES_PORT']
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
     DOMAIN = os.environ.get(
         'AWS_ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV + '-es')
