@@ -5,7 +5,7 @@ import time
 
 from tweepy import OAuthHandler
 
-from .env import TwiEnv, KFEnv
+# from .env import TwiEnv, KFEnv
 from .stream import StreamListener
 from .stream import StreamManager
 
@@ -27,7 +27,7 @@ def run():
     and connect to the Twitter streaming API.
     """
     # Setting things up
-    auth = get_auth()
+    # auth = get_auth()
     listener = StreamListener()
     # Wait for a bit before connecting, in case container will be paused
     logger.debug('Streaming container is ready, waiting 10 s.')
@@ -73,13 +73,13 @@ def wait_some_time(n_errors_last_hour):
         time.sleep(min(base_delay * n_errors_last_hour, 1800))
 
 
-def get_auth():
-    if TwiEnv.CONSUMER_KEY is None or TwiEnv.CONSUMER_SECRET is None or \
-            TwiEnv.OAUTH_TOKEN is None or TwiEnv.OAUTH_TOKEN_SECRET is None:
-        raise Exception('Twitter API keys needed for streaming to work.')
-    auth = OAuthHandler(TwiEnv.CONSUMER_KEY, TwiEnv.CONSUMER_SECRET)
-    auth.set_access_token(TwiEnv.OAUTH_TOKEN, TwiEnv.OAUTH_TOKEN_SECRET)
-    return auth
+# def get_auth():
+#     if TwiEnv.CONSUMER_KEY is None or TwiEnv.CONSUMER_SECRET is None or \
+#             TwiEnv.OAUTH_TOKEN is None or TwiEnv.OAUTH_TOKEN_SECRET is None:
+#         raise Exception('Twitter API keys needed for streaming to work.')
+#     auth = OAuthHandler(TwiEnv.CONSUMER_KEY, TwiEnv.CONSUMER_SECRET)
+#     auth.set_access_token(TwiEnv.OAUTH_TOKEN, TwiEnv.OAUTH_TOKEN_SECRET)
+#     return auth
 
 
 def main():
@@ -91,11 +91,11 @@ def main():
     # create_s3_to_es_lambda(push_func=True)
 
     # Create a delivery stream for unmanched tweets
-    create_delivery_stream(
-        KFEnv.UNMATCHED_STREAM_NAME,
-        key_name=f'{KFEnv.UNMATCHED_STREAM_NAME}')
+    # create_delivery_stream(
+    #     KFEnv.UNMATCHED_STREAM_NAME,
+    #     key_name=f'{KFEnv.UNMATCHED_STREAM_NAME}')
     # Create delivery streams and ES indices for the lsited projects
-    for conf in config_manager.config:
-        create_delivery_stream(conf.slug)
-        create_index(conf.slug)
-    run()
+    # for conf in config_manager.config:
+    #     create_delivery_stream(conf.slug)
+    #     create_index(conf.slug)
+    # run()
