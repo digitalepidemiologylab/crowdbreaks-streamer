@@ -3,74 +3,74 @@ import sys
 import os
 import time
 
-from tweepy import OAuthHandler
+# from tweepy import OAuthHandler
 
 # from .env import TwiEnv, KFEnv
-from .stream import StreamListener
-from .stream import StreamManager
+# from .stream import StreamListener
+# from .stream import StreamManager
 
-from .config import ConfigManager
-from .aws_firehose import create_delivery_stream
-from .aws_lambda import create_s3_to_es_lambda, create_lambda_layer
-from .elasticsearch import create_index
+# from .config import ConfigManager
+# from .aws_firehose import create_delivery_stream
+# from .aws_lambda import create_s3_to_es_lambda, create_lambda_layer
+# from .elasticsearch import create_index
 
 from .setup_logging import setup_logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-config_manager = ConfigManager()
+# config_manager = ConfigManager()
 
 
-def run():
-    """Here we instantiate the stream manager, listener
-    and connect to the Twitter streaming API.
-    """
-    # Setting things up
-    # auth = get_auth()
-    listener = StreamListener()
-    # Wait for a bit before connecting, in case container will be paused
-    logger.debug('Streaming container is ready, waiting 10 s.')
-    time.sleep(10)
-    last_error_time = 0
-    n_errors_last_hour = 0
-    while True:
-        logger.debug('Trying to connect to Twitter API.')
-        stream = StreamManager(auth, listener)
-        try:
-            stream.start()
-        except KeyboardInterrupt:
-            sys.exit()
-        except Exception as exc:
-            logger.error(
-                'Stream starting exception %s: %s',
-                type(exc).__name__, str(exc))
-            try:
-                stream.stop()
-            except Exception as exc:
-                logger.error(
-                    'Stream stopping exception %s: %s',
-                    type(exc).__name__, str(exc))
-            n_errors_last_hour = update_error_count(
-                n_errors_last_hour, last_error_time)
-            last_error_time = time.time()
-        wait_some_time(n_errors_last_hour)
-    logger.info('Shutting down...')
+# def run():
+#     """Here we instantiate the stream manager, listener
+#     and connect to the Twitter streaming API.
+#     """
+#     # Setting things up
+#     # auth = get_auth()
+#     listener = StreamListener()
+#     # Wait for a bit before connecting, in case container will be paused
+#     logger.debug('Streaming container is ready, waiting 10 s.')
+#     time.sleep(10)
+#     last_error_time = 0
+#     n_errors_last_hour = 0
+#     while True:
+#         logger.debug('Trying to connect to Twitter API.')
+#         stream = StreamManager(auth, listener)
+#         try:
+#             stream.start()
+#         except KeyboardInterrupt:
+#             sys.exit()
+#         except Exception as exc:
+#             logger.error(
+#                 'Stream starting exception %s: %s',
+#                 type(exc).__name__, str(exc))
+#             try:
+#                 stream.stop()
+#             except Exception as exc:
+#                 logger.error(
+#                     'Stream stopping exception %s: %s',
+#                     type(exc).__name__, str(exc))
+#             n_errors_last_hour = update_error_count(
+#                 n_errors_last_hour, last_error_time)
+#             last_error_time = time.time()
+#         wait_some_time(n_errors_last_hour)
+#     logger.info('Shutting down...')
 
 
-def update_error_count(n_errors, last_error_time):
-    if (time.time() - last_error_time) < 3600:
-        return n_errors + 1
-    return 0   # Reset to zero
+# def update_error_count(n_errors, last_error_time):
+#     if (time.time() - last_error_time) < 3600:
+#         return n_errors + 1
+#     return 0   # Reset to zero
 
 
-def wait_some_time(n_errors_last_hour):
-    base_delay = 60
-    if n_errors_last_hour == 0:
-        time.sleep(base_delay)
-    else:
-        # Don't wait longer than 30 min
-        time.sleep(min(base_delay * n_errors_last_hour, 1800))
+# def wait_some_time(n_errors_last_hour):
+#     base_delay = 60
+#     if n_errors_last_hour == 0:
+#         time.sleep(base_delay)
+#     else:
+#         # Don't wait longer than 30 min
+#         time.sleep(min(base_delay * n_errors_last_hour, 1800))
 
 
 # def get_auth():
