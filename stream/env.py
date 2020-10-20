@@ -40,7 +40,7 @@ class Env(Constant):
     UNMATCHED_STORE_LOCALLY = int(UNMATCHED_STORE_LOCALLY == 'True')
 
     UNMATCHED_STORE_S3 = os.environ.get(
-        'UNMATCHED_STORE_S3', 'True')
+        'UNMATCHED_STORE_S3', 'False')
     assert UNMATCHED_STORE_S3 in ['True', 'False']
     UNMATCHED_STORE_S3 = int(UNMATCHED_STORE_S3 == 'True')
 

@@ -14,8 +14,6 @@ logger.setLevel(logging.DEBUG)
 
 def handle_tweet(
         status, config_manager,
-        store_unmatched_tweets_locally=False,
-        store_unmatched_tweets_s3=False,
         store_for_testing=False
 ):
     status_id = status['id_str']
