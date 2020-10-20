@@ -31,7 +31,20 @@
             "dnsServers": null,
             "mountPoints": [],
             "workingDirectory": null,
-            "secrets": null,
+            "secrets": [
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8",
+                    "name": "twitter"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis",
+                    "name": "aws"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksESHostPort-qcZleE",
+                    "name": "es"
+                }
+            ],
             "dockerSecurityOptions": null,
             "memory": null,
             "memoryReservation": null,
@@ -64,7 +77,7 @@
         "EC2",
         "FARGATE"
     ],
-    "taskDefinitionArn": "arn:aws:ecs:eu-central-1:874942657130:task-definition/streamer-stg:2",
+    "taskDefinitionArn": "arn:aws:ecs:eu-central-1:874942657130:task-definition/streamer-stg:10",
     "family": "streamer-stg",
     "requiresAttributes": [
         {
@@ -95,6 +108,12 @@
             "targetId": null,
             "targetType": null,
             "value": null,
+            "name": "ecs.capability.secrets.asm.environment-variables"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
             "name": "ecs.capability.execution-role-ecr-pull"
         },
         {
@@ -116,7 +135,7 @@
     ],
     "networkMode": "awsvpc",
     "cpu": "512",
-    "revision": 2,
+    "revision": 10,
     "status": "ACTIVE",
     "inferenceAccelerators": null,
     "proxyConfiguration": null,
