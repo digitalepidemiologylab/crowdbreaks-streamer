@@ -7,25 +7,25 @@ from pathlib import Path
 from .env import Env
 
 
-class LogDirs(Enum):
-    LOGS = os.path.join(Env.PROJECT_ROOT, 'logs')
+# class LogDirs(Enum):
+#     LOGS = os.path.join(Env.PROJECT_ROOT, 'logs')
 
-    # Stream
-    STREAM = os.path.join(LOGS, 'stream')
-    STREAM_INFO = os.path.join(STREAM, 'all')
-    STREAM_WARN = os.path.join(STREAM, 'warnings')
-    STREAM_DEBUG = os.path.join(STREAM, 'debug')
+#     # Stream
+#     STREAM = os.path.join(LOGS, 'stream')
+#     STREAM_INFO = os.path.join(STREAM, 'all')
+#     STREAM_WARN = os.path.join(STREAM, 'warnings')
+#     STREAM_DEBUG = os.path.join(STREAM, 'debug')
 
-    # Tweets
-    TWEETS = os.path.join(LOGS, 'tweets')
-    UNMATCHED = os.path.join(TWEETS, 'unmatched')
-    MATCH_TEST = os.path.join(TWEETS, 'match_test')
-    KEY_ERRORS = os.path.join(TWEETS, 'key_errors')
+#     # Tweets
+#     TWEETS = os.path.join(LOGS, 'tweets')
+#     UNMATCHED = os.path.join(TWEETS, 'unmatched')
+#     MATCH_TEST = os.path.join(TWEETS, 'match_test')
+#     KEY_ERRORS = os.path.join(TWEETS, 'key_errors')
 
-    @classmethod
-    def create_folders(cls):
-        for const in cls:
-            Path(const.value).mkdir(parents=True, exist_ok=True)
+#     @classmethod
+#     def create_folders(cls):
+#         for const in cls:
+#             Path(const.value).mkdir(parents=True, exist_ok=True)
 
 
 def setup_logging(
