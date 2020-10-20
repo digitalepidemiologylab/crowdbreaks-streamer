@@ -84,7 +84,7 @@ logger.setLevel(logging.DEBUG)
 
 def main():
     setup_logging()
-    logger.error(os.listdir('/run/secrets'))
+    logger.error(os.listdir('/run'))
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
     # create_lambda_layer(push_layer=True, create_layer=False)
