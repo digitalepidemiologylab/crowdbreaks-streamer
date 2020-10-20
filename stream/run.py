@@ -27,7 +27,7 @@ def run():
     and connect to the Twitter streaming API.
     """
     # Setting things up
-    # auth = get_auth()
+    auth = get_auth()
     listener = StreamListener()
     # Wait for a bit before connecting, in case container will be paused
     logger.debug('Streaming container is ready, waiting 10 s.')
@@ -86,15 +86,15 @@ def main():
     setup_logging()
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
-    create_lambda_layer(push_layer=True, create_layer=False)
+    create_lambda_layer(push_layer=True, create_layer=True)
     create_s3_to_es_lambda(push_func=True)
 
     # Create a delivery stream for unmanched tweets
-    create_delivery_stream(
-        KFEnv.UNMATCHED_STREAM_NAME,
-        key_name=f'{KFEnv.UNMATCHED_STREAM_NAME}')
+    # create_delivery_stream(
+    #     KFEnv.UNMATCHED_STREAM_NAME,
+    #     key_name=f'{KFEnv.UNMATCHED_STREAM_NAME}')
     # Create delivery streams and ES indices for the lsited projects
-    for conf in config_manager.config:
-        create_delivery_stream(conf.slug)
-        create_index(conf.slug)
-    run()
+    # for conf in config_manager.config:
+    #     create_delivery_stream(conf.slug)
+    #     create_index(conf.slug)
+    # run()
