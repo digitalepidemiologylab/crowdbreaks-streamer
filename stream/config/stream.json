@@ -14,7 +14,7 @@
         ],
         "lang": ["en"],
         "locales": ["en"],
-        "slug": "vaccine_sentiment_tracking",
+        "slug": "vaccine",
         "storage_mode": "S3_ES",
         "image_storage_mode": "INACTIVE",
         "model_endpoints": {
