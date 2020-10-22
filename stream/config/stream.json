@@ -1,52 +1,27 @@
 [
     {
-        "keywords": ["simon and garfunkel"],
+        "keywords": [
+            "vaccine",
+            "vaccination",
+            "vaxxer",
+            "vaxxed",
+            "vaccinated",
+            "vaccinating",
+            "vacine",
+            "overvaccinate",
+            "undervaccinate",
+            "unvaccinated"
+        ],
         "lang": ["en"],
         "locales": ["en"],
-        "slug": "simongarfunkel",
+        "slug": "vaccine_sentiment_tracking",
         "storage_mode": "S3_ES",
         "image_storage_mode": "INACTIVE",
         "model_endpoints": {
             "sentiment": {
                 "active": {
-                    "mock-fasttext": {
-                        "run_name": "fasttext_v1",
-                        "model_type": "fasttext"
-                    }
-                }
-            }
-        }
-    },
-    {
-        "keywords": ["flabbergasted"],
-        "lang": ["en"],
-        "locales": ["en"],
-        "slug": "flabbergasted",
-        "storage_mode": "S3_ES",
-        "image_storage_mode": "INACTIVE",
-        "model_endpoints": {
-            "sentiment": {
-                "active": {
-                    "mock-fasttext": {
-                        "run_name": "fasttext_v1",
-                        "model_type": "fasttext"
-                    }
-                }
-            }
-        }
-    },
-    {
-        "keywords": ["absolute"],
-        "lang": ["en"],
-        "locales": ["en"],
-        "slug": "absolute",
-        "storage_mode": "S3_ES",
-        "image_storage_mode": "INACTIVE",
-        "model_endpoints": {
-            "sentiment": {
-                "active": {
-                    "mock-fasttext": {
-                        "run_name": "fasttext_v1",
+                    "crowdbreaks-6512709bc4": {
+                        "run_name": "fasttext_v2",
                         "model_type": "fasttext"
                     }
                 }
