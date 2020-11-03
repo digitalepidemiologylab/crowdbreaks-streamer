@@ -11,7 +11,10 @@ from .stream import StreamManager
 
 from .config import ConfigManager
 from .aws_firehose import create_delivery_stream
-from .aws_lambda import create_s3_to_es_lambda, create_lambda_layer
+from .aws_lambda import (create_s3_to_es_lambda,
+                         create_lambda_layer,
+                         zip_lambda_func,
+                         zip_lambda_layer)
 from .elasticsearch import create_index
 
 from .setup_logging import setup_logging
@@ -86,6 +89,8 @@ def main():
     setup_logging()
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
+    zip_lambda_func()
+    zip_lambda_layer()
     create_lambda_layer(push_layer=True, create_layer=True)
     create_s3_to_es_lambda(push_func=True)
 

@@ -2,6 +2,8 @@ import logging
 import os
 import json
 
+from twiprocess.tweet import Tweet
+
 from .setup_logging import LogDirs
 from .config import StorageMode
 from .utils.match_keywords import match_keywords
@@ -16,11 +18,12 @@ def handle_tweet(
         status, config_manager,
         store_for_testing=False
 ):
-    status_id = status['id_str']
+    tweet = Tweet(status)
+    status_id = tweet.id
     # Reverse match to find project
-    matching_keywords = match_keywords(status, config_manager.config)
+    matching_keywords = match_keywords(tweet, config_manager.config)
     matching_projects = list(matching_keywords.keys())
-    if len(matching_projects) == 0:
+    if matching_projects == []:
         # Could not match keywords.
         # This might occur quite frequently
         # e.g. when tweets are collected accross different languages/keywords
@@ -64,7 +67,7 @@ def handle_tweet(
 
         if conf.storage_mode in \
                 [StorageMode.S3_ES, StorageMode.S3_ES_NO_RETWEETS]:
-            if 'retweeted_status' in status and \
+            if tweet.is_retweet and \
                     conf.storage_mode == StorageMode.S3_ES_NO_RETWEETS:
                 # Do not store retweets on ES
                 return

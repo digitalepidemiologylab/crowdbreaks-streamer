@@ -112,8 +112,13 @@ class LEnv(AWSEnv):
         'Take new tweets from S3, preprocess and put to ES.')
     TIMEOUT = int(os.environ.get('AWS_L_TIMEOUT', '300'))
     MEMORY_SIZE = int(os.environ.get('AWS_L_MEMORY_SIZE', '128'))
-    PATH_TO_FUNC = os.environ.get('AWS_L_PATH_TO_FUNC')
-    PATH_TO_LAYER = os.environ.get('AWS_L_PATH_TO_LAYER')
+    PATH_TO_FUNC = os.environ.get('AWS_L_PATH_TO_FUNC', 'lambda/lambda')
+    PATH_TO_LAYER = os.environ.get('AWS_L_PATH_TO_LAYER', 'lambda/layer')
+    PATH_TO_FUNC_DIR = os.environ.get(
+        'AWS_L_PATH_TO_FUNC_DIR', 'lambda/function')
+    PATH_TO_LAYER_DIR = os.environ.get(
+        'AWS_L_PATH_TO_LAYER_DIR', 'lambda/layer')
+    EXTENSION = os.environ.get('AWS_L_EXTENSION', 'zip')
 
 
 class ESEnv(AWSEnv):

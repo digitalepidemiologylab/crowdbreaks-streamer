@@ -3,6 +3,11 @@ import time
 import hashlib
 from base64 import b64encode
 
+import shutil
+import subprocess
+import sys
+import os
+
 import boto3
 
 from .env import KFEnv, LEnv, ESEnv
@@ -28,6 +33,27 @@ s3 = boto3.client(
     region_name=LEnv.REGION,
     aws_access_key_id=LEnv.ACCESS_KEY_ID,
     aws_secret_access_key=LEnv.SECRET_ACCESS_KEY)
+
+
+def zip_lambda_func():
+    shutil.make_archive(
+        LEnv.PATH_TO_FUNC, LEnv.EXTENSION, LEnv.PATH_TO_FUNC_DIR)
+
+
+def zip_lambda_layer():
+    # Install requirements.txt to python
+    # https://stackoverflow.com/a/50255019/4949133
+    subprocess.check_call([
+        sys.executable, '-m',
+        'pip', 'install',
+        '-r', os.path.join(LEnv.PATH_TO_LAYER_DIR, 'requirements.txt'),
+        '-t', os.path.join(LEnv.PATH_TO_LAYER_DIR, 'python')])
+    # https://stackoverflow.com/a/25650295/4949133
+    # https://docs.python.org/3/library/shutil.html#archiving-example-with-base-dir
+    shutil.make_archive(
+        LEnv.PATH_TO_LAYER, LEnv.EXTENSION,
+        root_dir=LEnv.PATH_TO_LAYER_DIR,
+        base_dir='python')
 
 
 def get_function_name_arn():
@@ -175,7 +201,7 @@ def check_s3_diff(bucket, key, local_path):
 
 def create_lambda_layer(push_layer=False, create_layer=False):
     layer_name, _ = get_layer_name_arn()
-    layer_key = 'lambda/layer.zip'
+    layer_key = LEnv.PATH_TO_LAYER + '.' + LEnv.EXTENSION
     s3_diff, _ = check_s3_diff(
         LEnv.BUCKET_NAME, layer_key, LEnv.PATH_TO_LAYER)
 
@@ -197,7 +223,7 @@ def create_lambda_layer(push_layer=False, create_layer=False):
                             f'by {LEnv.APP_NAME}.',
                 Content={
                     'S3Bucket': LEnv.BUCKET_NAME,
-                    'S3Key': 'lambda/layer.zip'
+                    'S3Key': LEnv.PATH_TO_LAYER + '.' + LEnv.EXTENSION
                 },
                 CompatibleRuntimes=[
                     'python3.8'
@@ -212,7 +238,7 @@ def create_s3_to_es_lambda(push_func=False):
     _, role_arn = get_role_name_arn()
     function_name, function_arn = get_function_name_arn()
     layer_name, layer_arn = get_layer_name_arn()
-    lambda_key = 'lambda/lambda.zip'
+    lambda_key = LEnv.PATH_TO_FUNC + '.' + LEnv.EXTENSION
     hash_match, local_lambda_hash = check_s3_diff(
         LEnv.BUCKET_NAME, lambda_key, LEnv.PATH_TO_FUNC)
 

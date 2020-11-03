@@ -10,7 +10,8 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'python-dotenv', 'aenum', 'dacite', 'tweepy',
-        'boto3', 'elasticsearch', 'requests_aws4auth'],
+        'boto3', 'elasticsearch', 'requests_aws4auth',
+        'git+https://github.com/crowdbreaks/twiprocess.git'],
     entry_points={'console_scripts': [
         'run-stream=stream.run:main']},
     classifiers=[
