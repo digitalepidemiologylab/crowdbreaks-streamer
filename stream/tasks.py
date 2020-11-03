@@ -2,7 +2,7 @@ import logging
 import os
 import json
 
-from twiprocess.tweet import Tweet
+from twiprocess.tweets import ProcessTweet
 
 from .setup_logging import LogDirs
 from .config import StorageMode
@@ -18,7 +18,7 @@ def handle_tweet(
         status, config_manager,
         store_for_testing=False
 ):
-    tweet = Tweet(status)
+    tweet = ProcessTweet(status)
     status_id = tweet.id
     # Reverse match to find project
     matching_keywords = match_keywords(tweet, config_manager.config)
