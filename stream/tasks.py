@@ -2,7 +2,7 @@ import logging
 import os
 import json
 
-from twiprocess.tweets import ProcessTweet
+from twiprocess.processtweet import ProcessTweet
 
 from .setup_logging import LogDirs
 from .config import StorageMode
