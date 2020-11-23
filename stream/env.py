@@ -42,10 +42,6 @@ class TwiEnv(Constant):
     CONSUMER_SECRET = os.environ.get('TWI_CONSUMER_SECRET')
     OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN')
     OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET')
-    # CONSUMER_KEY = twitter_data['TWI_CONSUMER_KEY']
-    # CONSUMER_SECRET = twitter_data['TWI_CONSUMER_SECRET']
-    # OAUTH_TOKEN = twitter_data['TWI_OAUTH_TOKEN']
-    # OAUTH_TOKEN_SECRET = twitter_data['TWI_OAUTH_TOKEN_SECRET']
 
 
 class AWSEnv(Env):
@@ -54,14 +50,11 @@ class AWSEnv(Env):
     ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
     ACCOUNT_NUM = os.environ.get('AWS_ACCOUNT_NUM')
-    # ACCESS_KEY_ID = aws['AWS_ACCESS_KEY_ID']
-    # SECRET_ACCESS_KEY = aws['AWS_SECRET_ACCESS_KEY']
-    # ACCOUNT_NUM = aws['AWS_ACCOUNT_NUM']
     BUCKET_NAME = os.environ.get(
         'AWS_BUCKET_NAME', Env.APP_NAME + '-' + Env.ENV)
-    CONFIG_S3_KEY = os.path.join(
+    CONFIG_S3_KEY = os.environ.get(
         'CONFIG_S3_KEY', 'configs/stream/stream.json')
-    ENDPOINTS_PREFIX = os.path.join(
+    ENDPOINTS_PREFIX = os.environ.get(
         'ENDPOINTS_PREFIX', 'configs/models/')
 
 
