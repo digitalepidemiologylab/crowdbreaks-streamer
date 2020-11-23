@@ -11,8 +11,8 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 import twiprocess as twp
 
 
-from env import Env, ESEnv, SMEnv
-from config import ConfigManager, get_s3_object
+from .env import Env, ESEnv, SMEnv
+from .config import ConfigManager, get_s3_object
 
 
 logger = logging.getLogger(__name__)
@@ -204,9 +204,9 @@ def handler(event, context):
                 key = os.path.join(
                     ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
 
-                run_config = get_s3_object(
+                run_config = json.loads(get_s3_object(
                     s3, ESEnv.BUCKET_NAME, key,
-                    {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}})
+                    {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
 
                 preprocessing_configs[problem_type].append(
                     run_config['preprocess'])

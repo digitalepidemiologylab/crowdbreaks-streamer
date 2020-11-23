@@ -9,7 +9,7 @@ from .env import TwiEnv, KFEnv
 from .stream import StreamListener
 from .stream import StreamManager
 
-from .config import ConfigManager
+from .config import config_manager
 from .aws_firehose import create_delivery_stream
 from .aws_lambda import (create_s3_to_es_lambda,
                          create_lambda_layer,
@@ -21,8 +21,6 @@ from .setup_logging import setup_logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-config_manager = ConfigManager()
 
 
 def run():
@@ -44,19 +42,19 @@ def run():
             stream.start()
         except KeyboardInterrupt:
             sys.exit()
-        except Exception as exc:
-            logger.error(
-                'Stream starting exception %s: %s',
-                type(exc).__name__, str(exc))
-            try:
-                stream.stop()
-            except Exception as exc:
-                logger.error(
-                    'Stream stopping exception %s: %s',
-                    type(exc).__name__, str(exc))
-            n_errors_last_hour = update_error_count(
-                n_errors_last_hour, last_error_time)
-            last_error_time = time.time()
+        # except Exception as exc:
+        #     logger.error(
+        #         'Stream starting exception %s: %s',
+        #         type(exc).__name__, str(exc))
+        #     try:
+        #         stream.stop()
+        #     except Exception as exc:
+        #         logger.error(
+        #             'Stream stopping exception %s: %s',
+        #             type(exc).__name__, str(exc))
+        #     n_errors_last_hour = update_error_count(
+        #         n_errors_last_hour, last_error_time)
+        #     last_error_time = time.time()
         wait_some_time(n_errors_last_hour)
     logger.info('Shutting down...')
 

@@ -5,13 +5,11 @@ import json
 import tweepy
 
 from .utils.errors import ERROR_CODES
-from .config import ConfigManager
+from .config import config_manager
 from .tasks import handle_tweet
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-config_manager = ConfigManager()
 
 
 class StreamManager():

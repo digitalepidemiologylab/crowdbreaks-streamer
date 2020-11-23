@@ -5,7 +5,7 @@ import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
 from requests_aws4auth import AWS4Auth
 
-from stream.env import ESEnv
+from .env import ESEnv
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
