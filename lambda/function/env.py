@@ -16,9 +16,6 @@ class Env(Constant):
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
     CONFIG_PATH = os.path.abspath(os.path.join(APP_DIR, 'config'))
 
-    # Stream config
-    STREAM_CONFIG_PATH = os.path.join(CONFIG_PATH, 'stream.json')
-
     # Other
     TIMEZONE = os.environ.get('TIMEZONE', 'Europe/Zurich')
     S3_BUCKET_PREFIX = os.environ.get('S3_BUCKET_PREFIX', 'project_')
@@ -29,7 +26,7 @@ class AWSEnv(Env):
     REGION = os.environ.get('AWS_REGION', 'eu-central-1')
     BUCKET_NAME = os.environ.get(
         'AWS_BUCKET_NAME', Env.APP_NAME + '-' + Env.ENV)
-    STREAM_CONFIG_S3_KEY = os.path.join(
+    CONFIG_S3_KEY = os.path.join(
         'CONFIG_S3_KEY', 'configs/stream/stream.json')
     ENDPOINTS_PREFIX = os.path.join(
         'ENDPOINTS_PREFIX', 'configs/models/')

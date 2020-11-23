@@ -5,7 +5,6 @@ import os
 from copy import deepcopy
 
 import boto3
-from botocore.exceptions import ClientError
 from requests_aws4auth import AWS4Auth
 from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 # from elasticsearch.helpers import bulk
@@ -13,7 +12,8 @@ import twiprocess as twp
 
 
 from env import Env, ESEnv, SMEnv
-from config import ConfigManager
+from config import ConfigManager, get_s3_object
+
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -147,46 +147,9 @@ def predict(endpoint_name, preprocessing_config, texts, batch_size):
 
 
 def handler(event, context):
-    def get_s3_object(bucket, key, input_serialization):
-        # Get S3 object
-        records = b''
-        repeat = True
-        while repeat:
-            try:
-                response = s3.select_object_content(
-                    Bucket=bucket,
-                    Key=key,
-                    ExpressionType='SQL',
-                    Expression="select * from s3object",
-                    InputSerialization=input_serialization,
-                    OutputSerialization={'JSON': {}}
-                )
-            except ClientError as exc:
-                if exc.response['Error']['Code'] == 'NoSuchKey':
-                    logger.error(
-                        '%s: %s Key: %s',
-                        exc.response['Error']['Code'],
-                        exc.response['Error']['Message'],
-                        key)
-                    continue
-                else:
-                    raise exc
-
-            for event in response['Payload']:
-                if 'End' in event:
-                    repeat = False
-                if 'Records' in event:
-                    records += event['Records']['Payload']
-
-        return records.decode('utf-8')
-
     for record in event['Records']:
         # Get stream config from S3
-        config = get_s3_object(
-            ESEnv.BUCKET_NAME, ESEnv.STREAM_CONFIG_S3_KEY,
-            {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}})
-
-        config_manager = ConfigManager(config)
+        config_manager = ConfigManager(s3)
 
         # Get bucket name and key for new file
         bucket = record['s3']['bucket']['name']
@@ -207,7 +170,7 @@ def handler(event, context):
 
         # Get S3 object
         records = get_s3_object(
-            bucket, key,
+            s3, bucket, key,
             {'CompressionType': 'GZIP', 'JSON': {'Type': 'LINES'}})
 
         try:
@@ -242,7 +205,7 @@ def handler(event, context):
                     ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
 
                 run_config = get_s3_object(
-                    ESEnv.BUCKET_NAME, key,
+                    s3, ESEnv.BUCKET_NAME, key,
                     {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}})
 
                 preprocessing_configs[problem_type].append(
