@@ -1,6 +1,7 @@
 import logging
 import json
-import re
+# import re
+import os
 from copy import deepcopy
 
 import boto3
@@ -8,14 +9,14 @@ from botocore.exceptions import ClientError
 from requests_aws4auth import AWS4Auth
 from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 # from elasticsearch.helpers import bulk
+import twiprocess as twp
+
 
 from env import Env, ESEnv, SMEnv
 from config import ConfigManager
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
-
-config_manager = ConfigManager()
 
 credentials = boto3.Session().get_credentials()
 awsauth = AWS4Auth(
@@ -49,10 +50,10 @@ s3 = boto3.client(
 )
 
 
-def preprocess(status):
-    status = status.replace('\n', ' ')
-    status = re.sub(' +', ' ', status).strip()
-    return status
+# def preprocess(status):
+#     status = status.replace('\n', ' ')
+#     status = re.sub(' +', ' ', status).strip()
+#     return status
 
 
 def get_batch_size(model_type):
@@ -86,11 +87,35 @@ def labels_to_int(labels):
     return label_vals
 
 
-def predict(endpoint_name, texts, batch_size):
+def preprocess(preprocessing_config, texts):
+    # Preprocess data
+    try:
+        standardize_func_name = preprocessing_config['standardize_func_name']
+        del preprocessing_config['standardize_func_name']
+    except KeyError:
+        standardize_func_name = None
+    if standardize_func_name is not None:
+        logger.debug('Standardizing data...')
+        standardize_func = getattr(
+            __import__(
+                'twiprocess.standardize',
+                fromlist=[standardize_func_name]),
+            standardize_func_name)
+        logger.info(standardize_func)
+        texts = [standardize_func(text) for text in texts]
+    if preprocessing_config != {}:
+        logger.debug('Preprocessing data...')
+        texts = [
+            twp.preprocess(text, **preprocessing_config) for text in texts]
+    return texts
+
+
+def predict(endpoint_name, preprocessing_config, texts, batch_size):
     """Runs prediction in batches."""
     outputs = []
     for i in range(0, len(texts), batch_size):
-        batch = [preprocess(text) for text in texts[i:i + batch_size]]
+        logger.debug('Batch %d', i)
+        batch = preprocess(preprocessing_config, texts[i:i + batch_size])
         logger.debug('Batch:\n%s', batch)
 
         try:
@@ -122,24 +147,7 @@ def predict(endpoint_name, texts, batch_size):
 
 
 def handler(event, context):
-    for record in event['Records']:
-        # Get bucket name and key for new file
-        bucket = record['s3']['bucket']['name']
-        key = record['s3']['object']['key']
-
-        # Get slug
-        slug = [
-            name for name in key.split('/')
-            if name.startswith(Env.S3_BUCKET_PREFIX)
-        ]
-        if len(slug) != 1:
-            logger.error('Slug len != 1.\nKey: %s.\nSlug: %s.', key, slug)
-        slug = slug[0].split('_')[1]
-        logger.debug('Slug: %s.', slug)
-
-        # Get model endpoints from config
-        model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
-
+    def get_s3_object(bucket, key, input_serialization):
         # Get S3 object
         records = b''
         repeat = True
@@ -150,8 +158,7 @@ def handler(event, context):
                     Key=key,
                     ExpressionType='SQL',
                     Expression="select * from s3object",
-                    InputSerialization={
-                        'CompressionType': 'GZIP', 'JSON': {'Type': 'LINES'}},
+                    InputSerialization=input_serialization,
                     OutputSerialization={'JSON': {}}
                 )
             except ClientError as exc:
@@ -171,7 +178,37 @@ def handler(event, context):
                 if 'Records' in event:
                     records += event['Records']['Payload']
 
-        records = records.decode('utf-8')
+        return records.decode('utf-8')
+
+    for record in event['Records']:
+        # Get stream config from S3
+        config = get_s3_object(
+            ESEnv.BUCKET_NAME, ESEnv.STREAM_CONFIG_S3_KEY,
+            {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}})
+
+        config_manager = ConfigManager(config)
+
+        # Get bucket name and key for new file
+        bucket = record['s3']['bucket']['name']
+        key = record['s3']['object']['key']
+
+        # Get slug
+        slug = [
+            name for name in key.split('/')
+            if name.startswith(Env.S3_BUCKET_PREFIX)
+        ]
+        if len(slug) != 1:
+            logger.error('Slug len != 1.\nKey: %s.\nSlug: %s.', key, slug)
+        slug = slug[0].split('_')[1]
+        logger.debug('Slug: %s.', slug)
+
+        # Get model endpoints from config
+        model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
+
+        # Get S3 object
+        records = get_s3_object(
+            bucket, key,
+            {'CompressionType': 'GZIP', 'JSON': {'Type': 'LINES'}})
 
         try:
             statuses = [json.loads(record) for record in records.splitlines()]
@@ -189,6 +226,7 @@ def handler(event, context):
         endpoint_names = {}
         run_names = {}
         model_types = {}
+        preprocessing_configs = {}
         for problem_type in model_endpoints:
             endpoint_names[problem_type] = []
             run_names[problem_type] = []
@@ -200,18 +238,31 @@ def handler(event, context):
                 run_names[problem_type].append(info['run_name'])
                 model_types[problem_type].append(info['model_type'])
 
+                key = os.path.join(
+                    ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
+
+                run_config = get_s3_object(
+                    ESEnv.BUCKET_NAME, key,
+                    {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}})
+
+                preprocessing_configs[problem_type].append(
+                    run_config['preprocess'])
+
         metas = [deepcopy(meta)] * len(texts)
         logger.info('Endpoint names:\n%s.', endpoint_names)
 
         # Fill metadata with predictions
         for problem_type in endpoint_names:
-            for endpoint_name, model_type, run_name in zip(
+            for endpoint_name, model_type, run_name, preprocessing_config in zip(
                     endpoint_names[problem_type],
                     model_types[problem_type],
-                    run_names[problem_type]
+                    run_names[problem_type],
+                    preprocessing_configs[problem_type]
             ):
                 batch_size = get_batch_size(model_type)
-                outputs = predict(endpoint_name, texts, batch_size)
+
+                outputs = predict(
+                    endpoint_name, preprocessing_config, texts, batch_size)
 
                 if outputs is None:
                     continue

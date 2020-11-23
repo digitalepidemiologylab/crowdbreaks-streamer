@@ -79,6 +79,10 @@ class AWSEnv(Env):
     BUCKET_NAME = os.environ.get(
         'AWS_BUCKET_NAME', Env.APP_NAME + '-' + Env.ENV)
     REGION = os.environ.get('AWS_REGION', 'eu-central-1')
+    STREAM_CONFIG_S3_KEY = os.path.join(
+        'CONFIG_S3_KEY', 'configs/stream/stream.json')
+    ENDPOINTS_PREFIX = os.path.join(
+        'ENDPOINTS_PREFIX', 'configs/models/')
 
 
 class KFEnv(AWSEnv):
