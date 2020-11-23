@@ -7,10 +7,7 @@ class Env(Constant):
     """Base configuration."""
     # Environment
     ENV = os.environ.get('ENV', 'stg').lower()
-    APP_NAME = os.environ.get('APP_NAME').lower()
-    DEBUG = os.environ.get('DEBUG')
-    assert DEBUG in ['True', 'False']
-    DEBUG = int(DEBUG == 'True')
+    APP_NAME = os.environ.get('APP_NAME', 'crowdbreaks').lower()
 
     # Paths
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
