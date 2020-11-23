@@ -46,7 +46,6 @@ class TwiEnv(Constant):
 
 class AWSEnv(Env):
     """AWS config (for storing in S3, accessing Elasticsearch)."""
-    REGION = os.environ.get('AWS_REGION', 'eu-central-1')
     ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID')
     SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY')
     ACCOUNT_NUM = os.environ.get('AWS_ACCOUNT_NUM')
