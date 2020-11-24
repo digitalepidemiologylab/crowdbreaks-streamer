@@ -11,8 +11,8 @@ from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 import twiprocess as twp
 
 
-from .env import Env, ESEnv, SMEnv
-from .config import ConfigManager, get_s3_object
+from env import Env, ESEnv, SMEnv
+from config import ConfigManager, get_s3_object
 
 
 logger = logging.getLogger(__name__)
@@ -147,6 +147,7 @@ def predict(endpoint_name, preprocessing_config, texts, batch_size):
 
 
 def handler(event, context):
+    logger.debug(event)
     for record in event['Records']:
         # Get stream config from S3
         config_manager = ConfigManager(s3)
@@ -195,6 +196,7 @@ def handler(event, context):
             run_names[problem_type] = []
             model_types[problem_type] = []
             meta[problem_type] = {'endpoints': {}}
+            preprocessing_configs[problem_type] = []
             for endpoint_name, info in \
                     model_endpoints[problem_type]['active'].items():
                 endpoint_names[problem_type].append(endpoint_name)

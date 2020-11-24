@@ -8,7 +8,7 @@ from dataclasses import dataclass, asdict, field
 from botocore.exceptions import ClientError
 import dacite
 
-from .env import AWSEnv
+from env import AWSEnv
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -111,6 +111,8 @@ class ConfigManager():
         raw = json.loads(get_s3_object(
             s3_client, AWSEnv.BUCKET_NAME, AWSEnv.CONFIG_S3_KEY,
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+        latest_version = max([int(key.replace('_', '')) for key in raw])
+        raw = raw['_' + str(latest_version)]
         config = []
         for conf in raw:
             config.append(dacite.from_dict(
