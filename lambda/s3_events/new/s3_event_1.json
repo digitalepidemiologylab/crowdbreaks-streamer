@@ -1,0 +1,39 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "eu-central-1",
+            "eventTime": "2020-11-23T18:23:41.922Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AROA4XNVFOJVASHKZ5PFP:AWSFirehoseToS3"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "54.93.168.26"
+            },
+            "responseElements": {
+                "x-amz-request-id": "F02A800C640F3757",
+                "x-amz-id-2": "pKo+2r31R+s1i3dwIYgtKlubuH+QWd9mcjegHeh5Al0GQIyA6m3+in+R3nFNcc9CWVgoKNG7oa7bUc0ZaXHps/kxI/38mwHN"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "e6821825-2584-42aa-aa66-5e5a0884f481",
+                "bucket": {
+                    "name": "crowdbreaks-stg",
+                    "ownerIdentity": {
+                        "principalId": "A3Q8AY8RFTGCV1"
+                    },
+                    "arn": "arn:aws:s3:::crowdbreaks-stg"
+                },
+                "object": {
+                    "key": "tweets/project_vaccine/2020/11/23/18/crowdbreaks-vaccine-1-2020-11-23-18-22-46-d3ad49b8-1613-40c1-85bd-de348ef58157.gz",
+                    "size": 404838,
+                    "eTag": "833f3b4bf125627d04ac6bfa5dd04ad0",
+                    "versionId": "RyD3gm8rZgNYgvDokDxUtzsmsXrnny_b",
+                    "sequencer": "005FBBFE33F2E685A1"
+                }
+            }
+        }
+    ]
+}
