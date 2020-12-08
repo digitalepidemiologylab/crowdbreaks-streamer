@@ -14,7 +14,7 @@ setuptools.setup(
         'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git',
         'awstools @ git+https://github.com/crowdbreaks/streamer.git#egg=awstools&subdirectory=awstools'],
     entry_points={'console_scripts': [
-        'run-stream=stream.run:main']},
+        'run-stream=streamer.run:main']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
