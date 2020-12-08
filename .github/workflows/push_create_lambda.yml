@@ -1,4 +1,4 @@
-on: push
+on: [push]
 name: Push code for & create a new version of the Crowdbreaks Lambda
 jobs:
   push_create_lambda:
