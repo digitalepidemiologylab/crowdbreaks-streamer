@@ -202,10 +202,10 @@ def check_s3_diff(bucket, key, local_path):
 def create_lambda_layer(push_layer=False, create_layer=False):
     layer_name, _ = get_layer_name_arn()
     layer_key = LEnv.PATH_TO_LAYER + '.' + LEnv.EXTENSION
-    s3_diff, _ = check_s3_diff(
-        LEnv.BUCKET_NAME, layer_key, layer_key)
 
     if push_layer:
+        s3_diff, _ = check_s3_diff(
+            LEnv.BUCKET_NAME, layer_key, layer_key)
         if not s3_diff:
             s3.upload_file(
                 layer_key, LEnv.BUCKET_NAME, layer_key)
@@ -239,11 +239,11 @@ def create_s3_to_es_lambda(push_func=False):
     function_name, function_arn = get_function_name_arn()
     layer_name, layer_arn = get_layer_name_arn()
     lambda_key = LEnv.PATH_TO_FUNC + '.' + LEnv.EXTENSION
-    hash_match, local_lambda_hash = check_s3_diff(
-        LEnv.BUCKET_NAME, lambda_key, lambda_key)
 
     # If push_func is True and the code has been changed
     if push_func:
+        hash_match, local_lambda_hash = check_s3_diff(
+            LEnv.BUCKET_NAME, lambda_key, lambda_key)
         if not hash_match:
             s3.upload_file(
                 lambda_key, LEnv.BUCKET_NAME, lambda_key)
