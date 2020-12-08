@@ -39,7 +39,7 @@ class Conf:
     slug: str
     storage_mode: StorageMode
     image_storage_mode: ImageStorageMode
-    model_endpoints: Optional[Dict[str, str]]
+    model_endpoints: Optional[Dict]
 
 
 @dataclass(frozen=True)
