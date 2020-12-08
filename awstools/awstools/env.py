@@ -91,8 +91,8 @@ class LEnv(AWSEnv):
 
 
 class ESEnv(AWSEnv):
-    HOST = os.environ.get('ES_HOST')
-    PORT = os.environ.get('ES_PORT')
+    HOST = os.environ.get('ES_HOST', None)
+    PORT = os.environ.get('ES_PORT', None)
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
     DOMAIN = os.environ.get(
         'AWS_ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV + '-es')
