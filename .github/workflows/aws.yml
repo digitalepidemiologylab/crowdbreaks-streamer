@@ -27,7 +27,7 @@
 #   release:
 #     types: [created]
 
-on: push
+on: [push]
 
 name: Deploy to Amazon ECS
 
