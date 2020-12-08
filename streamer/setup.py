@@ -12,7 +12,7 @@ setuptools.setup(
         'python-dotenv', 'aenum', 'dacite', 'tweepy',
         'boto3', 'elasticsearch', 'requests_aws4auth',
         'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git',
-        'awstools @ https://github.com/crowdbreaks/streamer/tree/master/awstools'],
+        'awstools @ https://github.com/crowdbreaks/streamer.git@master#subdirectory=awstools/'],
     entry_points={'console_scripts': [
         'run-stream=stream.run:main']},
     classifiers=[
