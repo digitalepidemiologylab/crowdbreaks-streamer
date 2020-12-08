@@ -15,5 +15,5 @@ def main():
     logger.info(os.getcwd())
     zip_lambda_func()
     zip_lambda_layer()
-    create_lambda_layer(push_layer=True, create_layer=True)
-    create_s3_to_es_lambda(push_func=True)
+    create_lambda_layer(push_layer=False, create_layer=True)
+    create_s3_to_es_lambda(push_func=False)
