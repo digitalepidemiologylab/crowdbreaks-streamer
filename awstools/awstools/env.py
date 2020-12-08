@@ -36,14 +36,6 @@ class Env(Constant):
     S3_BUCKET_PREFIX = os.environ.get('S3_BUCKET_PREFIX', 'project_')
 
 
-class TwiEnv(Constant):
-    """Twitter API config."""
-    CONSUMER_KEY = os.environ.get('TWI_CONSUMER_KEY')
-    CONSUMER_SECRET = os.environ.get('TWI_CONSUMER_SECRET')
-    OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN')
-    OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET')
-
-
 class AWSEnv(Env):
     """AWS config (for storing in S3, accessing Elasticsearch)."""
     REGION = os.environ.get('AWS_REGION', 'eu-central-1')

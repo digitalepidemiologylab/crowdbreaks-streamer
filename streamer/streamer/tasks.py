@@ -3,12 +3,12 @@ import os
 import json
 
 from twiprocess.processtweet import ProcessTweet
+from awstools.env import Env, KFEnv
+from awstools.firehose import firehose
 
 from .setup_logging import LogDirs
 from .config import StorageMode
 from .utils.match_keywords import match_keywords
-from .env import Env, KFEnv
-from .aws_firehose import firehose
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

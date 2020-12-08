@@ -6,11 +6,11 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 # Install dependencies:
-RUN mkdir /home/crowdbreaks-streamer-2
-COPY . /home/crowdbreaks-streamer-2
-RUN cd /home/crowdbreaks-streamer-2 \
+RUN mkdir /home/streamer
+COPY ./streamer /home/streamer
+RUN cd /home/streamer \
     && pip install --upgrade pip \
     && pip install -e .
 
-WORKDIR /home/crowdbreaks-streamer-2
+WORKDIR /home/streamer
 CMD run-stream

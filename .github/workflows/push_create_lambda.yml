@@ -1,0 +1,26 @@
+on: push
+name: Push code for & create a new version of the Crowdbreaks Lambda
+jobs:
+  push_create_lambda:
+    name: Push & create
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.8'
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        cd awstools
+        pip install .
+        cd ..
+    - name: Run script
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_ACCOUNT_NUM: ${{ secrets.AWS_ACCOUNT_NUM }}
+        AWS_REGION: eu-central-1
+      run: |
+        python lambda/run.py

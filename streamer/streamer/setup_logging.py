@@ -4,7 +4,7 @@ import os
 from enum import Enum
 from pathlib import Path
 
-from .env import Env
+from awstools.env import Env
 
 
 class LogDirs(Enum):

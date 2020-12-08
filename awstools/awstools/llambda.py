@@ -11,7 +11,7 @@ import os
 import boto3
 
 from .env import KFEnv, LEnv, ESEnv
-from .aws_firehose import get_bucket_arn
+from .firehose import get_bucket_arn
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -269,12 +269,12 @@ def create_s3_to_es_lambda(push_func=False):
             version['Version'] for version in response['LayerVersions']]
 
         latest_version = max(versions)
-    except aws_lambda.exceptions.ResourceNotFoundException:
+    except aws_lambda.exceptions.ResourceNotFoundException as exc:
         raise Exception(
             f'Layer {layer_name} does not exist. '
             "Use 'push_layer=True' or 'create_layer=True' "
             'if layer has already been pushed to S3.'
-        )
+        ) from exc
 
     try:
         response = aws_lambda.get_function(
@@ -326,8 +326,6 @@ def create_s3_to_es_lambda(push_func=False):
             Principal='s3.amazonaws.com',
             SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
         )
-
-        print(response)
 
         # Wait until lambda is active
         response = aws_lambda.get_function(FunctionName=function_name)
