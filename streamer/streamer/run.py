@@ -5,18 +5,17 @@ import time
 
 from tweepy import OAuthHandler
 
-from .env import TwiEnv, KFEnv
+from awstools.env import TwiEnv, KFEnv
+from awstools.firehose import create_delivery_stream
+from awstools.llambda import (create_s3_to_es_lambda,
+                              create_lambda_layer,
+                              zip_lambda_func,
+                              zip_lambda_layer)
+from awstools.elasticsearch import create_index
+
 from .stream import StreamListener
 from .stream import StreamManager
-
 from .config import config_manager
-from .aws_firehose import create_delivery_stream
-from .aws_lambda import (create_s3_to_es_lambda,
-                         create_lambda_layer,
-                         zip_lambda_func,
-                         zip_lambda_layer)
-from .elasticsearch import create_index
-
 from .setup_logging import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -89,8 +88,8 @@ def main():
     logger.info(os.getcwd())
     zip_lambda_func()
     zip_lambda_layer()
-    create_lambda_layer(push_layer=True, create_layer=True)
-    create_s3_to_es_lambda(push_func=True)
+    create_lambda_layer(push_layer=False, create_layer=True)
+    create_s3_to_es_lambda(push_func=False)
 
     # Create a delivery stream for unmanched tweets
     create_delivery_stream(

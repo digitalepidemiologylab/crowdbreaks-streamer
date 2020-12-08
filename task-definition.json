@@ -74,7 +74,7 @@
             "memoryReservation": null,
             "volumesFrom": [],
             "stopTimeout": null,
-            "image": "874942657130.dkr.ecr.eu-central-1.amazonaws.com/crowdbreaks-streamer-2",
+            "image": "874942657130.dkr.ecr.eu-central-1.amazonaws.com/streamer",
             "startTimeout": null,
             "firelensConfiguration": null,
             "dependsOn": null,

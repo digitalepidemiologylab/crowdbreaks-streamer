@@ -5,54 +5,12 @@ from enum import Enum
 from typing import List, Dict, Set, Optional
 from dataclasses import dataclass, asdict, field
 
-import boto3
-from botocore.exceptions import ClientError
 import dacite
-
-from .env import AWSEnv
+from awstools.s3 import get_s3_object
+from awstools.env import AWSEnv
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-s3 = boto3.client(
-    's3',
-    region_name=AWSEnv.REGION,
-    aws_access_key_id=AWSEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=AWSEnv.SECRET_ACCESS_KEY)
-
-
-def get_s3_object(s3_client, bucket, key, input_serialization):
-    # Get S3 object
-    records = b''
-    repeat = True
-    while repeat:
-        try:
-            response = s3_client.select_object_content(
-                Bucket=bucket,
-                Key=key,
-                ExpressionType='SQL',
-                Expression="select * from s3object",
-                InputSerialization=input_serialization,
-                OutputSerialization={'JSON': {}}
-            )
-        except ClientError as exc:
-            if exc.response['Error']['Code'] == 'NoSuchKey':
-                logger.error(
-                    '%s: %s Key: %s',
-                    exc.response['Error']['Code'],
-                    exc.response['Error']['Message'],
-                    key)
-                continue
-            else:
-                raise exc
-
-        for event in response['Payload']:
-            if 'End' in event:
-                repeat = False
-            if 'Records' in event:
-                records += event['Records']['Payload']
-
-    return records.decode('utf-8')
 
 
 class StorageMode(Enum):
@@ -92,8 +50,8 @@ class FilterConf:
 
 class ConfigManager():
     """Read, write and validate project configs."""
-    def __init__(self, s3_client=s3):
-        self.config = self._load(s3_client)
+    def __init__(self):
+        self.config = self._load()
         self.filter_config = self._pool_config()
 
     def get_conf_by_slug(self, slug):
@@ -114,9 +72,9 @@ class ConfigManager():
         with open(path, 'w') as f:
             json.dump([asdict(conf) for conf in self.config], f, indent=4)
 
-    def _load(self, s3_client):
+    def _load(self):
         raw = json.loads(get_s3_object(
-            s3_client, AWSEnv.BUCKET_NAME, AWSEnv.CONFIG_S3_KEY,
+            AWSEnv.BUCKET_NAME, AWSEnv.CONFIG_S3_KEY,
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
         latest_version = max([int(key.replace('_', '')) for key in raw])
         raw = raw['_' + str(latest_version)]

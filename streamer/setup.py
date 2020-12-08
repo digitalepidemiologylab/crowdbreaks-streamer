@@ -1,17 +1,18 @@
 import setuptools
 
 setuptools.setup(
-    name="stream",
+    name="streamer",
     version="0.0.1",
     author="Crowdbreaks",
     author_email="info@crowdbreaks.org",
     description="Twitter API v1.1 streamer",
-    url="https://github.com/crowdbreaks/crowdbreaks-streamer-2",
+    url="https://github.com/crowdbreaks/streamer",
     packages=setuptools.find_packages(),
     install_requires=[
         'python-dotenv', 'aenum', 'dacite', 'tweepy',
         'boto3', 'elasticsearch', 'requests_aws4auth',
-        'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git'],
+        'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git',
+        'awstools @ https://github.com/crowdbreaks/streamer/tree/master/awstools'],
     entry_points={'console_scripts': [
         'run-stream=stream.run:main']},
     classifiers=[
