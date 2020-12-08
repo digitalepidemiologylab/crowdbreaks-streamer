@@ -5,7 +5,7 @@ import time
 
 from tweepy import OAuthHandler
 
-from awstools.env import TwiEnv, KFEnv
+from awstools.env import KFEnv
 from awstools.firehose import create_delivery_stream
 from awstools.llambda import (create_s3_to_es_lambda,
                               create_lambda_layer,
@@ -13,6 +13,7 @@ from awstools.llambda import (create_s3_to_es_lambda,
                               zip_lambda_layer)
 from awstools.elasticsearch import create_index
 
+from .env import TwiEnv
 from .stream import StreamListener
 from .stream import StreamManager
 from .config import config_manager
