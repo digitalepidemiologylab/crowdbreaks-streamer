@@ -179,7 +179,7 @@ def create_lambda_role():
     return
 
 
-def check_s3_diff(bucket, key, local_path):
+def check_s3_diff(bucket, key, local_path=None):
     s3_obj = None
     try:
         response = s3.get_object(
@@ -193,10 +193,13 @@ def check_s3_diff(bucket, key, local_path):
     # print(type(s3_obj), s3_obj, sys.getsizeof(s3_obj))
     s3_obj_hash = hashlib.sha256(s3_obj).digest()
 
-    with open(local_path, 'rb') as f:
-        local_obj_hash = hashlib.sha256(f.read()).digest()
+    if local_path:
+        with open(local_path, 'rb') as f:
+            local_obj_hash = hashlib.sha256(f.read()).digest()
 
-    return s3_obj_hash == local_obj_hash, local_obj_hash
+    diff = s3_obj_hash == local_obj_hash if local_path else None
+
+    return diff, s3_obj_hash
 
 
 def create_lambda_layer(push_layer=False, create_layer=False):
@@ -239,10 +242,12 @@ def create_s3_to_es_lambda(push_func=False):
     function_name, function_arn = get_function_name_arn()
     layer_name, layer_arn = get_layer_name_arn()
     lambda_key = LEnv.PATH_TO_FUNC + '.' + LEnv.EXTENSION
+    _, s3_lambda_hash = check_s3_diff(
+        LEnv.BUCKET_NAME, lambda_key)
 
     # If push_func is True and the code has been changed
     if push_func:
-        hash_match, local_lambda_hash = check_s3_diff(
+        hash_match, _ = check_s3_diff(
             LEnv.BUCKET_NAME, lambda_key, lambda_key)
         if not hash_match:
             s3.upload_file(
@@ -385,12 +390,12 @@ def create_s3_to_es_lambda(push_func=False):
     aws_lambda_hash = response['Configuration']['CodeSha256']
     # To produce the same hash as AWS's CodeSha256
     # https://stackoverflow.com/questions/32038881/python-get-base64-encoded-md5-hash-of-an-image-object
-    local_lambda_hash_b64 = b64encode(local_lambda_hash).strip().decode()
+    s3_lambda_hash_b64 = b64encode(s3_lambda_hash).strip().decode()
 
     aws_layer_version_num = \
         int(response['Configuration']['Layers'][0]['Arn'].split(':')[-1])
 
-    if aws_lambda_hash != local_lambda_hash_b64:
+    if aws_lambda_hash != s3_lambda_hash_b64:
         # Publish a new version if the code on S3 got updated
         response = aws_lambda.update_function_code(
             FunctionName=function_name,
