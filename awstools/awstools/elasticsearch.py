@@ -1,5 +1,7 @@
 import logging
 import json
+import os
+from pathlib import Path
 
 import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
@@ -29,7 +31,10 @@ es = Elasticsearch(
 def create_index(slug):
     index_name = ESEnv.INDEX_PREFIX + slug
 
-    with open('lambda/function/config/tweet_mapping.json', 'r') as f:
+    mapping_path = os.path.join(
+        Path(__file__).parent.absolute(),
+        'config/tweet_mapping.json')
+    with open(mapping_path, 'r') as f:
         mapping = json.load(f)
 
     if es.indices.exists(index_name):

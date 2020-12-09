@@ -11,7 +11,7 @@ setuptools.setup(
     install_requires=[
         'python-dotenv', 'aenum',
         'boto3', 'elasticsearch', 'requests_aws4auth'],
-    package_data={'awstools': ['../.env', 'config/*']},
+    package_data={'awstools': ['awstools.env', 'config/*']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",

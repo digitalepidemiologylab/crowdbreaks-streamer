@@ -1,9 +1,11 @@
 """Application configuration."""
 import os
+from pathlib import Path
 from aenum import Constant
 from dotenv import load_dotenv
 
-load_dotenv()
+env_path = os.path.join(Path(__file__).parent.absolute(), 'awstools.env')
+load_dotenv(dotenv_path=env_path)
 
 
 class Env(Constant):

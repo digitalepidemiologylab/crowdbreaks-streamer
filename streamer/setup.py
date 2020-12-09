@@ -15,6 +15,7 @@ setuptools.setup(
         'awstools @ git+https://github.com/crowdbreaks/streamer.git#egg=awstools&subdirectory=awstools'],
     entry_points={'console_scripts': [
         'run-stream=streamer.run:main']},
+    package_data={'streamer': ['streamer.env']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
