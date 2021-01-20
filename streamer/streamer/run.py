@@ -95,5 +95,5 @@ def main():
     # Create delivery streams and ES indices for the lsited projects
     for conf in config_manager.config:
         create_delivery_stream(conf.slug)
-        create_index(conf.slug, conf.lang)
+        create_index(conf.slug, conf.lang[0])
     run()
