@@ -14,6 +14,12 @@
                     "type": "text",
                     "analyzer": "english"
                 },
+                "source": {
+                    "type": "text"
+                },
+                "truncated": {
+                    "type": "boolean"
+                },
                 "in_reply_to_status_id": {
                     "type": "long"
                 },
@@ -40,43 +46,73 @@
                         "description": {
                             "type": "text",
                             "analyzer": "english"
+                        },
+                        "time_zone": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "geo_enabled": {
+                            "type": "boolean"
+                        },
+                        "lang": {
+                            "type": "keyword"
                         }
                     }
                 },
-                "geo_info": {
+                "coordinates": {
                     "type": "object",
                     "dynamic": true,
                     "properties": {
-                        "geo_type": {
-                            "type": "keyword"
-                        },
                         "coordinates": {
                             "type": "geo_point"
-                        },
-                        "country_code": {
-                            "type": "keyword"
-                        },
-                        "location_type": {
-                            "type": "keyword"
-                        },
-                        "geocode": {
-                            "type": "keyword"
                         }
                     }
                 },
-                "hashtags": {
+                "place": {
+                    "dynamic": true,
                     "properties": {
-                        "text": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword"
+                        "average_location": {
+                            "type": "geo_point"
+                        },
+                        "location_radius": {
+                            "type": "float"
+                        },
+                        "country": {
+                            "type": "keyword"
+                        },
+                        "country_code": {
+                            "type": "keyword",
+                            "index": false
+                        },
+                        "full_name": {
+                            "type": "keyword"
+                        },
+                        "id": {
+                            "type": "keyword"
+                        },
+                        "place_type": {
+                            "type": "keyword",
+                            "index": false
+                        }
+                    }
+                },
+                "entities": {
+                    "properties": {
+                        "hashtags": {
+                            "properties": {
+                                "text": {
+                                    "type": "text",
+                                    "fields": {
+                                        "keyword": {
+                                            "type": "keyword"
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
                 },
-                "has_quote": {
+                "is_quote": {
                     "type": "boolean"
                 },
                 "is_retweet": {
@@ -89,9 +125,6 @@
                     "type": "keyword"
                 },
                 "project": {
-                    "type": "keyword"
-                },
-                "matching_keywords": {
                     "type": "keyword"
                 }
             }
