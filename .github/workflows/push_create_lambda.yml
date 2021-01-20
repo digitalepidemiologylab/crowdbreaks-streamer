@@ -23,4 +23,11 @@ jobs:
         AWS_ACCOUNT_NUM: ${{ secrets.AWS_ACCOUNT_NUM }}
         AWS_REGION: eu-central-1
       run: |
-        python lambda/run.py
+          output=$(python lambda/run.py)
+          output="${output//'%'/'%25'}"
+          output="${output//$'\n'/'%0A'}"
+          output="${output//$'\r'/'%0D'}" 
+          echo "::set-output name=changelog::$output"
+        id: run_script
+    - name: Print changelog
+      run: echo "${{ steps.run_script.outputs.changelog }}"
