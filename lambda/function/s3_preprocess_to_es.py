@@ -8,8 +8,9 @@ import boto3
 from requests_aws4auth import AWS4Auth
 from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 # from elasticsearch.helpers import bulk
+from geocode.geocode import Geocode
 import twiprocess as twp
-
+from twiprocess.processtweet import ProcessTweet
 
 from env import Env, ESEnv, SMEnv
 from config import ConfigManager, get_s3_object
@@ -17,6 +18,9 @@ from config import ConfigManager, get_s3_object
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
+
+geo_code = Geocode()
+geo_code.load()
 
 credentials = boto3.Session().get_credentials()
 awsauth = AWS4Auth(
@@ -241,11 +245,18 @@ def handler(event, context):
                         'label_val': output['label_vals'][ind_max_prob]
                     }
 
+        # Process tweets for ES
+        statuses_es = []
+        for status in statuses:
+            statuses_es.append(ProcessTweet(
+                status, standardize_func='standardize', geo_code=geo_code
+            ).extract_es(extract_geo=True))
+
         # Add 'meta' field to statuses
         for i in range(len(statuses)):
             # This way, if prediction fails, we at least store the tweet
-            statuses[i]['meta'] = metas[i] \
-                if metas[i] != meta else None
+            statuses_es[i]['predictions'] = metas[i] \
+                if metas[i] != meta else []
 
         logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
 

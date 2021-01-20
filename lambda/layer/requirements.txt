@@ -5,3 +5,4 @@ requests-aws4auth==1.0
 elasticsearch==6.8.0
 dacite==1.5.1
 git+https://github.com/crowdbreaks/twiprocess.git
+local-geocode==0.0.1

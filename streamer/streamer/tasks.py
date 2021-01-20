@@ -63,7 +63,10 @@ def handle_tweet(
             return
 
         # Add tracking info
-        status['_tracking_info'] = config_manager.get_tracking_info(slug)
+        # 19.01.2021: lang, slug and matching_keywords are there anyway,
+        # and there's no point to store all keywords in every tweet
+        # status['_tracking_info'] = config_manager.get_tracking_info(slug)
+        status['project'] = slug
 
         if conf.storage_mode in \
                 [StorageMode.S3_ES, StorageMode.S3_ES_NO_RETWEETS]:

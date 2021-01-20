@@ -1,0 +1,98 @@
+{
+    "mappings": {
+        "dynamic": false,
+        "properties": {
+            "created_at": {
+                "type": "date",
+                "format": "EEE MMM dd HH:mm:ss Z yyyy"
+            },
+            "id": {
+                "type": "long"
+            },
+            "text": {
+                "type": "text",
+                "analyzer": "english"
+            },
+            "in_reply_to_status_id": {
+                "type": "long"
+            },
+            "in_reply_to_user_id": {
+                "type": "long"
+            },
+            "in_reply_to_screen_name": {
+                "type": "text"
+            },
+            "user": {
+                "properties": {
+                    "id": {
+                        "type": "long"
+                    },
+                    "name": {
+                        "type": "keyword"
+                    },
+                    "screen_name": {
+                        "type": "keyword"
+                    },
+                    "location": {
+                        "type": "keyword"
+                    },
+                    "description": {
+                        "type": "text",
+                        "analyzer": "english"
+                    }
+                }
+            },
+            "geo_info": {
+                "type": "object",
+                "dynamic": true,
+                "properties": {
+                    "geo_type": {
+                        "type": "keyword"
+                    },
+                    "coordinates": {
+                        "type": "geo_point"
+                    },
+                    "country_code": {
+                        "type": "keyword"
+                    },
+                    "location_type": {
+                        "type": "keyword"
+                    },
+                    "geocode": {
+                        "type": "keyword"
+                    }
+                }
+            },
+            "hashtags": {
+                "properties": {
+                    "text": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword"
+                            }
+                        }
+                    }
+                }
+            },
+            "has_quote": {
+                "type": "boolean"
+            },
+            "is_retweet": {
+                "type": "boolean"
+            },
+            "retweet_count": {
+                "type": "integer"
+            },
+            "lang": {
+                "type": "keyword"
+            },
+            "project": {
+                "type": "keyword"
+            },
+            "matching_keywords": {
+                "type": "keyword"
+            }
+        }
+    }
+}
