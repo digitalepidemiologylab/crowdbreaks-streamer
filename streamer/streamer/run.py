@@ -85,8 +85,8 @@ def main():
     setup_logging()
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
-    create_lambda_layer(push_layer=False, create_layer=True)
-    create_s3_to_es_lambda(push_func=False)
+    # create_lambda_layer(push_layer=False, create_layer=True)
+    # create_s3_to_es_lambda(push_func=False)
 
     # Create a delivery stream for unmanched tweets
     create_delivery_stream(
