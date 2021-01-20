@@ -17,6 +17,7 @@ jobs:
         pip install .
         cd ..
     - name: Run script
+      id: run_script
       env:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -28,6 +29,5 @@ jobs:
           output="${output//$'\n'/'%0A'}"
           output="${output//$'\r'/'%0D'}" 
           echo "::set-output name=changelog::$output"
-        id: run_script
     - name: Print changelog
       run: echo "${{ steps.run_script.outputs.changelog }}"
