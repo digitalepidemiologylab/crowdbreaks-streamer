@@ -11,6 +11,7 @@ logger.setLevel(logging.INFO)
 
 
 def main():
+    print('blabla')
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
     zip_lambda_func()
