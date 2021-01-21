@@ -278,7 +278,7 @@ def handler(event, context):
                 # already exists.
                 errors += 1
                 logger.warning(
-                    'Rec %d, id %d already exists.', i, status_es['id'])
+                    'Rec %d, id %s already exists.', i, status_es['id'])
                 # logger.error('%s: %s', type(exc).__name__, str(exc))
 
         logger.info(
