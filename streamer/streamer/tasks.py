@@ -46,7 +46,6 @@ def handle_tweet(
     logger.debug(
         'SUCCESS: Found %d project(s) %s that match this status.',
         len(matching_projects), matching_projects)
-    status['matching_keywords'] = matching_keywords
 
     if store_for_testing:
         # Store for testing
@@ -67,6 +66,7 @@ def handle_tweet(
         # and there's no point to store all keywords in every tweet
         # status['_tracking_info'] = config_manager.get_tracking_info(slug)
         status['project'] = slug
+        status['matching_keywords'] = matching_keywords.get(slug)
 
         if conf.storage_mode in \
                 [StorageMode.S3_ES, StorageMode.S3_ES_NO_RETWEETS]:
