@@ -267,11 +267,12 @@ def handler(event, context):
         loads = 0
         errors = 0
         for i, status_es in enumerate(statuses_es):
+            logger.debug(status_es)
             try:
                 es.create(
                     index=index_name, id=status_es['id'],
                     body=status_es, doc_type='tweet')
-                logger.debug('Loaded rec %d, id %d.', i, status_es['id'])
+                logger.debug('Loaded rec %d, id %s.', i, status_es['id'])
                 loads += 1
             except ConflictError as exc:
                 # Happens when a document with the same ID
