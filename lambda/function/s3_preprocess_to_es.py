@@ -8,7 +8,7 @@ import boto3
 from requests_aws4auth import AWS4Auth
 from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
 # from elasticsearch.helpers import bulk
-# from geocode.geocode import Geocode
+from geocode.geocode import Geocode
 import twiprocess as twp
 from twiprocess.processtweet import ProcessTweet
 
@@ -19,8 +19,8 @@ from config import ConfigManager, get_s3_object
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-# geo_code = Geocode()
-# geo_code.load()
+geo_code = Geocode()
+geo_code.load()
 
 credentials = boto3.Session().get_credentials()
 awsauth = AWS4Auth(
@@ -249,7 +249,7 @@ def handler(event, context):
         statuses_es = []
         for status in statuses:
             statuses_es.append(ProcessTweet(
-                status, standardize_func='standardize'  # geo_code=geo_code
+                status, standardize_func='standardize', geo_code=geo_code
             ).extract_es(extract_geo=True))
 
         # Add 'meta' field to statuses
