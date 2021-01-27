@@ -13,9 +13,8 @@ class Env(Constant):
     # Environment
     ENV = os.environ.get('ENV', 'stg').lower()
     APP_NAME = os.environ.get('APP_NAME').lower()
-    DEBUG = os.environ.get('DEBUG')
-    assert DEBUG in ['True', 'False']
-    DEBUG = int(DEBUG == 'True')
+    assert os.environ.get('DEBUG') in ['True', 'False']
+    DEBUG = os.environ.get('DEBUG') == 'True'
 
     # Unmatched tweets
     UNMATCHED_STORE_LOCALLY = os.environ.get(
