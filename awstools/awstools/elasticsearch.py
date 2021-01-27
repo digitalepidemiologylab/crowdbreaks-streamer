@@ -82,6 +82,8 @@ def create_index(slug, lang):
     with open(mapping_path, 'r') as f:
         mapping = json.load(f)
 
+    logger.info(mapping)
+
     mapping_str = json.dumps(mapping)
     es_lang = twi_langs[lang] if twi_langs[lang] in es_langs else 'english'
     mapping_str = mapping_str.replace('english', es_lang)

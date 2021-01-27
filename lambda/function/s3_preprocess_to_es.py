@@ -268,9 +268,10 @@ def handler(event, context):
         errors = 0
         for i, status_es in enumerate(statuses_es):
             logger.debug(status_es)
+            status_id = status_es.pop('id')
             try:
                 es.create(
-                    index=index_name, id=status_es['id'],
+                    index=index_name, id=status_id,
                     body=status_es, doc_type='tweet')
                 logger.debug('Loaded rec %d, id %s.', i, status_es['id'])
                 loads += 1
