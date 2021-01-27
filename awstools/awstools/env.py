@@ -92,6 +92,8 @@ class ESEnv(AWSEnv):
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
     DOMAIN = os.environ.get(
         'AWS_ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV + '-es')
+    CONFIG_S3_KEY = os.environ.get(
+        'CONFIG_S3_KEY', 'configs/stream/elasticsearch.json')
 
 
 class SMEnv(AWSEnv):

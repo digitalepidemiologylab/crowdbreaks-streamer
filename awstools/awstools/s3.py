@@ -37,6 +37,7 @@ def get_s3_object(bucket, key, input_serialization, s3_client=s3):
                     exc.response['Error']['Code'],
                     exc.response['Error']['Message'],
                     key)
+                repeat = False
                 continue
             else:
                 raise exc
