@@ -3,30 +3,30 @@
         "tweet": {
             "dynamic": false,
             "properties": {
+                "endpoint": {
+                    "type": "keyword"
+                },
                 "created_at": {
                     "type": "date",
                     "format": "EEE MMM dd HH:mm:ss Z yyyy"
-                },
-                "id": {
-                    "type": "text"
                 },
                 "text": {
                     "type": "text",
                     "analyzer": "english"
                 },
-                "in_reply_to_status_id": {
-                    "type": "text"
-                },
                 "in_reply_to_user_id": {
-                    "type": "text"
+                    "type": "keyword"
                 },
-                "in_reply_to_screen_name": {
-                    "type": "text"
+                "retweeted_user_id": {
+                    "type": "keyword"
+                },
+                "quoted_user_id": {
+                    "type": "keyword"
                 },
                 "user": {
                     "properties": {
                         "id": {
-                            "type": "long"
+                            "type": "keyword"
                         },
                         "name": {
                             "type": "keyword"
@@ -44,8 +44,6 @@
                     }
                 },
                 "geo_info": {
-                    "type": "object",
-                    "dynamic": true,
                     "properties": {
                         "geo_type": {
                             "type": "keyword"
@@ -57,9 +55,6 @@
                             "type": "keyword"
                         },
                         "location_type": {
-                            "type": "keyword"
-                        },
-                        "geocode": {
                             "type": "keyword"
                         }
                     }
@@ -75,6 +70,10 @@
                             }
                         }
                     }
+                },
+                "predictions": {
+                    "type": "object",
+                    "dynamic": true
                 },
                 "has_quote": {
                     "type": "boolean"
