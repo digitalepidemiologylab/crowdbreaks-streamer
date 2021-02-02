@@ -4,10 +4,10 @@ import json
 
 from twiprocess.processtweet import ProcessTweet
 from awstools.env import Env, KFEnv
+from awstools.config import StorageMode
 from awstools.firehose import firehose
 
 from .setup_logging import LogDirs
-from .config import StorageMode
 from .utils.match_keywords import match_keywords
 
 logger = logging.getLogger(__name__)
