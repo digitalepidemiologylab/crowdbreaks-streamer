@@ -1,24 +1,11 @@
 import logging
 import time
 
-import boto3
-
 from .env import KFEnv
+from .session import iam, firehose
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
-
-iam = boto3.client(
-    'iam',
-    region_name=KFEnv.REGION,
-    aws_access_key_id=KFEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=KFEnv.SECRET_ACCESS_KEY)
-
-firehose = boto3.client(
-    'firehose',
-    region_name=KFEnv.REGION,
-    aws_access_key_id=KFEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=KFEnv.SECRET_ACCESS_KEY)
 
 
 def get_bucket_arn(bucket_name):
@@ -128,7 +115,7 @@ def create_delivery_stream(slug, key_name=None):
 
     stream_name = f'{KFEnv.APP_NAME}-{slug}'
     if key_name is None:
-        key_name = f'{KFEnv.BUCKET_PREFIX}{slug}'
+        key_name = f'{KFEnv.STORAGE_BUCKET_PREFIX}{slug}'
 
     try:
         response = firehose.create_delivery_stream(
@@ -137,7 +124,7 @@ def create_delivery_stream(slug, key_name=None):
             S3DestinationConfiguration={
                 'RoleARN': role_arn,
                 'BucketARN': get_bucket_arn(KFEnv.BUCKET_NAME),
-                'Prefix': f'{KFEnv.BUCKET_FOLDER}{key_name}/',
+                'Prefix': f'{KFEnv.STORAGE_BUCKET_FOLDER}{key_name}/',
                 'ErrorOutputPrefix': f'{slug}/failed/',
                 'BufferingHints': {
                     'SizeInMBs': KFEnv.BUFFER_SIZE,
