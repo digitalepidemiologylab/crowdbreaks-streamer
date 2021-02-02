@@ -342,7 +342,7 @@ def create_s3_to_es_lambda(
 
         if s3_trigger:
             # Add permission to invoke from S3
-            response = aws_lambda.add_permission(
+            _ = aws_lambda.add_permission(
                 FunctionName=function_name,
                 StatementId='1',
                 Action='lambda:InvokeFunction',
@@ -351,7 +351,7 @@ def create_s3_to_es_lambda(
             )
 
             # Add S3 event trigger to the lambda
-            response = s3.put_bucket_notification_configuration(
+            _ = s3.put_bucket_notification_configuration(
                 Bucket=LEnv.BUCKET_NAME,
                 NotificationConfiguration={
                     'LambdaFunctionConfigurations': [{
