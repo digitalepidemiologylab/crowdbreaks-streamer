@@ -383,7 +383,7 @@ def create_s3_to_es_lambda(
 
     if aws_lambda_hash != s3_lambda_hash_b64:
         # Publish a new version if the code on S3 got updated
-        response = aws_lambda.update_function_code(
+        _ = aws_lambda.update_function_code(
             FunctionName=function_name,
             S3Bucket=LEnv.BUCKET_NAME,
             S3Key=lambda_key,
@@ -401,7 +401,7 @@ def create_s3_to_es_lambda(
         int(response['Configuration']['Layers'][0]['Arn'].split(':')[-1])
 
     if aws_layer_version_num < latest_version:
-        response = aws_lambda.update_function_configuration(
+        _ = aws_lambda.update_function_configuration(
             FunctionName=function_name,
             Layers=[
                 layer_arn + f':{latest_version}',
