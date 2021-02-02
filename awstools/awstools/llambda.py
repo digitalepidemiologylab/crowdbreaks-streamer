@@ -229,7 +229,7 @@ def create_s3_to_es_lambda(
     function_name, function_arn = get_function_name_arn(lambda_name)
     layer_name, layer_arn = get_layer_name_arn(lambda_name)
     lambda_key = os.path.join(
-        LEnv.BUCKET_FOLDER, f'{lambda_name}.{LEnv.EXTENSION}')
+        LEnv.BUCKET_FOLDER, f'{function_name}.{LEnv.EXTENSION}')
 
     # If push_to_s3 is True and the code has been changed
     if push_to_s3:
@@ -294,7 +294,8 @@ def create_s3_to_es_lambda(
                         'Variables': {
                             'ES_HOST': ESEnv.HOST,
                             'ES_PORT': ESEnv.PORT,
-                            'ES_INDEX_PREFIX': ESEnv.INDEX_PREFIX
+                            'ES_INDEX_PREFIX': ESEnv.INDEX_PREFIX,
+                            'AWS_ACCOUNT_NUM': ESEnv.ACCOUNT_NUM
                         }
                     },
                     Tags={
