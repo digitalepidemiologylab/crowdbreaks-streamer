@@ -1,0 +1,32 @@
+{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": "logs:CreateLogGroup",
+            "Resource": "arn:aws:logs:REGION:ACCOUNT_NUM:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "arn:aws:logs:REGION:ACCOUNT_NUM:log-group:/aws/lambda/FUNCTION_NAME:*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:GetObject",
+                "es:ESHttpPut",
+                "sagemaker:InvokeEndpoint"
+            ],
+            "Resource": [
+                "arn:aws:s3:::BUCKET_NAME",
+                "arn:aws:s3:::BUCKET_NAME/*",
+                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*",
+                "arn:aws:sagemaker:REGION:ACCOUNT_NUM:endpoint/MODEL_NAME"
+            ]
+        }
+    ]
+}

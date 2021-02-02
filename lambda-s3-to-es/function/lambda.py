@@ -4,16 +4,16 @@ import json
 import os
 from copy import deepcopy
 
-import boto3
-from requests_aws4auth import AWS4Auth
-from elasticsearch import Elasticsearch, RequestsHttpConnection, ConflictError
+from elasticsearch import ConflictError
 # from elasticsearch.helpers import bulk
 from geocode.geocode import Geocode
+
 import twiprocess as twp
 from twiprocess.processtweet import ProcessTweet
-
-from env import Env, ESEnv, SMEnv
-from config import ConfigManager, get_s3_object
+from awstools.env import ESEnv, SMEnv
+from awstools.config import config_manager
+from awstools.session import session, es
+from awstools.s3 import get_s3_object
 
 
 logger = logging.getLogger(__name__)
@@ -22,36 +22,8 @@ logger.setLevel(logging.INFO)
 geo_code = Geocode()
 geo_code.load()
 
-credentials = boto3.Session().get_credentials()
-awsauth = AWS4Auth(
-    credentials.access_key, credentials.secret_key,
-    ESEnv.REGION, "es",
-    session_token=credentials.token
-)
-
-sagemaker = boto3.client(
-    'sagemaker-runtime',
-    region_name=ESEnv.REGION,
-    aws_access_key_id=credentials.access_key,
-    aws_secret_access_key=credentials.secret_key,
-    aws_session_token=credentials.token
-)
-
-es = Elasticsearch(
-    hosts=[{'host': ESEnv.HOST, 'port': ESEnv.PORT}],
-    http_auth=awsauth,
-    use_ssl=True,
-    verify_certs=True,
-    connection_class=RequestsHttpConnection
-)
-
-s3 = boto3.client(
-    's3',
-    region_name=ESEnv.REGION,
-    aws_access_key_id=credentials.access_key,
-    aws_secret_access_key=credentials.secret_key,
-    aws_session_token=credentials.token
-)
+credentials = session.get_credentials()
+sagemaker = session.client('sagemaker-runtime')
 
 
 # def preprocess(status):
@@ -153,9 +125,6 @@ def predict(endpoint_name, preprocessing_config, texts, batch_size):
 def handler(event, context):
     logger.debug(event)
     for record in event['Records']:
-        # Get stream config from S3
-        config_manager = ConfigManager(s3)
-
         # Get bucket name and key for new file
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
@@ -163,7 +132,7 @@ def handler(event, context):
         # Get slug
         slug = [
             name for name in key.split('/')
-            if name.startswith(Env.S3_BUCKET_PREFIX)
+            if name.startswith(ESEnv.STORAGE_BUCKET_PREFIX)
         ]
         if len(slug) != 1:
             logger.error('Slug len != 1.\nKey: %s.\nSlug: %s.', key, slug)
@@ -175,7 +144,7 @@ def handler(event, context):
 
         # Get S3 object
         records = get_s3_object(
-            s3, bucket, key,
+            bucket, key,
             {'CompressionType': 'GZIP', 'JSON': {'Type': 'LINES'}})
 
         try:
@@ -211,7 +180,7 @@ def handler(event, context):
                     ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
 
                 run_config = json.loads(get_s3_object(
-                    s3, ESEnv.BUCKET_NAME, key,
+                    ESEnv.BUCKET_NAME, key,
                     {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
 
                 preprocessing_configs[problem_type].append(
@@ -222,11 +191,16 @@ def handler(event, context):
 
         # Fill metadata with predictions
         for problem_type in endpoint_names:
-            for endpoint_name, model_type, run_name, preprocessing_config in zip(
-                    endpoint_names[problem_type],
-                    model_types[problem_type],
-                    run_names[problem_type],
-                    preprocessing_configs[problem_type]
+            for (
+                endpoint_name,
+                model_type,
+                run_name,
+                preprocessing_config
+            ) in zip(
+                endpoint_names[problem_type],
+                model_types[problem_type],
+                run_names[problem_type],
+                preprocessing_configs[problem_type]
             ):
                 batch_size = get_batch_size(model_type)
 
@@ -261,8 +235,12 @@ def handler(event, context):
         logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
 
         # Load to Elasticsearch
-        index_name = \
-            ESEnv.INDEX_PREFIX + slug
+        # index_name = \
+        #     ESEnv.INDEX_PREFIX + slug
+        indices = json.loads(get_s3_object(
+            ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
+            {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+        index_name = indices[slug][-1]
 
         loads = 0
         errors = 0
