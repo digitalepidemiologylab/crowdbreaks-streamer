@@ -8,91 +8,91 @@ import subprocess
 import sys
 import os
 
-import boto3
-
-from .env import KFEnv, LEnv, ESEnv
+from .env import LEnv, ESEnv
+from .session import s3, iam, aws_lambda
 from .firehose import get_bucket_arn
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-iam = boto3.client(
-    'iam',
-    region_name=LEnv.REGION,
-    aws_access_key_id=LEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=LEnv.SECRET_ACCESS_KEY)
 
-aws_lambda = boto3.client(
-    'lambda',
-    region_name=LEnv.REGION,
-    aws_access_key_id=LEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=LEnv.SECRET_ACCESS_KEY)
-
-s3 = boto3.client(
-    's3',
-    region_name=LEnv.REGION,
-    aws_access_key_id=LEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=LEnv.SECRET_ACCESS_KEY)
-
-
-def zip_lambda_func():
+def zip_lambda_func(lambda_dir):
+    base_name = os.path.join(lambda_dir, 'lambda')
+    root_dir = os.path.join(lambda_dir, 'function')
     shutil.make_archive(
-        LEnv.PATH_TO_FUNC, LEnv.EXTENSION, LEnv.PATH_TO_FUNC_DIR)
+        base_name, LEnv.EXTENSION, root_dir)
+    return '.'.join([base_name, LEnv.EXTENSION])
 
 
-def zip_lambda_layer():
+def zip_lambda_layer(lambda_dir):
+    base_name = os.path.join(lambda_dir, 'layer')
+    root_dir = os.path.join(lambda_dir, 'layer')
     # Install requirements.txt to python
     # https://stackoverflow.com/a/50255019/4949133
     subprocess.check_call([
         sys.executable, '-m',
         'pip', 'install',
-        '-r', os.path.join(LEnv.PATH_TO_LAYER_DIR, 'requirements.txt'),
-        '-t', os.path.join(LEnv.PATH_TO_LAYER_DIR, 'python')])
+        '-r', os.path.join(base_name, 'requirements.txt'),
+        '-t', os.path.join(base_name, 'python')])
     # https://stackoverflow.com/a/25650295/4949133
     # https://docs.python.org/3/library/shutil.html#archiving-example-with-base-dir
     shutil.make_archive(
-        LEnv.PATH_TO_LAYER, LEnv.EXTENSION,
-        root_dir=LEnv.PATH_TO_LAYER_DIR,
+        base_name, LEnv.EXTENSION,
+        root_dir=root_dir,
         base_dir='python')
+    return '.'.join([base_name, LEnv.EXTENSION])
 
 
-def get_function_name_arn():
-    function_name = '{}-lambda-bucket-{}-es-{}'.format(
-        LEnv.APP_NAME.lower(),
-        LEnv.BUCKET_NAME, ESEnv.DOMAIN)
+def get_function_name_arn(lambda_name):
+    function_name = f'{LEnv.APP_NAME.lower()}-lambda-{lambda_name}'
     function_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
                    f'function:{function_name}'
     return function_name, function_arn
 
 
-def get_layer_name_arn():
-    layer_name = f'{LEnv.APP_NAME.lower()}-lambda-layer'
+def get_layer_name_arn(lambda_name):
+    layer_name = f'{LEnv.APP_NAME.lower()}-lambda-layer-{lambda_name}'
     layer_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
                 f'layer:{layer_name}'
     return layer_name, layer_arn
 
 
-def get_role_name_arn():
-    role_name = '{}LambdaBucket-{}'.format(
-        LEnv.APP_NAME.capitalize(),
-        LEnv.BUCKET_NAME)
+def lambda_to_iam_name(lambda_name):
+    return ''.join([s.capitalize() for s in lambda_name.split('-')])
+
+
+def get_role_name_arn(lambda_name):
+    role_name = lambda_to_iam_name(lambda_name)
+    role_name = f'{LEnv.APP_NAME.capitalize()}Lambda{role_name}'
     role_arn = f'arn:aws:iam::{LEnv.ACCOUNT_NUM}:role/{role_name}'
     return role_name, role_arn
 
 
-def get_policy_name_arn():
-    policy_name = '{}LambdaBucket-{}'.format(
-        LEnv.APP_NAME.capitalize(),
-        LEnv.BUCKET_NAME)
+def get_policy_name_arn(lambda_name):
+    policy_name = lambda_to_iam_name(lambda_name)
+    policy_name = f'{LEnv.APP_NAME.capitalize()}Lambda{policy_name}'
     policy_arn = f'arn:aws:iam::{LEnv.ACCOUNT_NUM}:policy/{policy_name}'
     return policy_name, policy_arn
 
 
-def create_lambda_role():
-    role_name, _ = get_role_name_arn()
-    policy_name, policy_arn = get_policy_name_arn()
-    function_name, _ = get_function_name_arn()
+def prepare_policy(policy_path, function_name):
+    with open(policy_path, 'r') as f:
+        policy = f.read()
+        policy = policy.replace('ACCOUNT_NUM', LEnv.ACCOUNT_NUM)
+        policy = policy.replace('BUCKET_NAME', LEnv.BUCKET_NAME)
+        policy = policy.replace('REGION', LEnv.REGION)
+        policy = policy.replace('DOMAIN', ESEnv.DOMAIN)
+        policy = policy.replace('FUNCTION_NAME', function_name)
+        policy = policy.replace('MODEL_NAME', LEnv.APP_NAME + '-*')
+    return policy
 
+
+def create_lambda_role(lambda_name, policy_path):
+    role_name, _ = get_role_name_arn(lambda_name)
+    policy_name, policy_arn = get_policy_name_arn(lambda_name)
+    function_name, _ = get_function_name_arn(lambda_name)
+
+    # Prepare the role trust relationship (fill in missing info)
     with open(LEnv.ROLE_TRUST_RELATIONSHIP_PATH, 'r') as f:
         role_trust_relationship = f.read()
         role_trust_relationship = role_trust_relationship.replace(
@@ -101,6 +101,7 @@ def create_lambda_role():
             'Role trust relationship:\n\n%s\n',
             role_trust_relationship)
 
+    # Create a role
     try:
         response = iam.create_role(
             RoleName=role_name,
@@ -115,42 +116,17 @@ def create_lambda_role():
                 },
             ]
         )
-
-        # response = iam.create_service_linked_role(
-        #     AWSServiceName='lambda.amazonaws.com',
-        #     Description=f'Role automatically created for Lambda '
-        #                 f'by {LEnv.APP_NAME}.'
-        # )
-
-        # role_name = response['Role']['RoleName']
-        # role_arn = response['Role']['Arn']
-
         logger.debug('Response:\n\n%s\n', response)
         logger.info(
             'Created role %s with ID %s for Lambda.',
             response['Role']['RoleName'], response['Role']['RoleId'])
-
-        # response = iam.tag_role(
-        #     RoleName=role_name,
-        #     Tags=[
-        #         {
-        #             'Key': 'project',
-        #             'Value': LEnv.APP_NAME
-        #         },
-        #     ]
-        # )
     except iam.exceptions.EntityAlreadyExistsException:
         pass
 
-    with open(LEnv.POLICY_PATH, 'r') as f:
-        policy = f.read()
-        policy = policy.replace('ACCOUNT_NUM', LEnv.ACCOUNT_NUM)
-        policy = policy.replace('BUCKET_NAME', LEnv.BUCKET_NAME)
-        policy = policy.replace('REGION', LEnv.REGION)
-        policy = policy.replace('DOMAIN', ESEnv.DOMAIN)
-        policy = policy.replace('FUNCTION_NAME', function_name)
-        policy = policy.replace('MODEL_NAME', LEnv.APP_NAME + '-*')
+    # Prepare the policy (fill in missing info)
+    policy = prepare_policy(policy_path, function_name)
 
+    # Create a policy
     try:
         response = iam.create_policy(
             PolicyName=policy_name,
@@ -166,6 +142,7 @@ def create_lambda_role():
     except iam.exceptions.EntityAlreadyExistsException:
         pass
 
+    # Attach the policy to the role
     response = iam.attach_role_policy(
         PolicyArn=policy_arn,
         RoleName=role_name
@@ -188,9 +165,8 @@ def check_s3_diff(bucket, key, local_path=None):
         )
         s3_obj = response['Body'].read()
     except s3.exceptions.NoSuchKey:
-        pass
+        return None, None
 
-    # print(type(s3_obj), s3_obj, sys.getsizeof(s3_obj))
     s3_obj_hash = hashlib.sha256(s3_obj).digest()
 
     if local_path:
@@ -202,16 +178,21 @@ def check_s3_diff(bucket, key, local_path=None):
     return diff, s3_obj_hash
 
 
-def create_lambda_layer(push_layer=False, create_layer=False):
-    layer_name, _ = get_layer_name_arn()
-    layer_key = LEnv.PATH_TO_LAYER + '.' + LEnv.EXTENSION
+def create_lambda_layer(
+    lambda_name,
+    layer_local_zip_path,
+    push_to_s3=False
+):
+    layer_name, _ = get_layer_name_arn(lambda_name)
+    layer_key = os.path.join(
+        LEnv.BUCKET_FOLDER, f'{layer_name}.{LEnv.EXTENSION}')
 
-    if push_layer:
+    if push_to_s3:
         s3_diff, _ = check_s3_diff(
-            LEnv.BUCKET_NAME, layer_key, layer_key)
+            LEnv.BUCKET_NAME, layer_key, layer_local_zip_path)
         if not s3_diff:
             s3.upload_file(
-                layer_key, LEnv.BUCKET_NAME, layer_key)
+                layer_local_zip_path, LEnv.BUCKET_NAME, layer_key)
             logger.info('Layer %s pushed to S3.', layer_name)
         else:
             logger.info(
@@ -219,7 +200,7 @@ def create_lambda_layer(push_layer=False, create_layer=False):
                 'local zip is the same as on S3.',
                 layer_name)
 
-        if (push_layer and not s3_diff) or create_layer:
+        if push_to_s3 and not s3_diff:
             response = aws_lambda.publish_layer_version(
                 LayerName=layer_name,
                 Description='Layer created automatically for Lambda '
@@ -237,21 +218,26 @@ def create_lambda_layer(push_layer=False, create_layer=False):
                 logger.info('Layer %s created.', layer_name)
 
 
-def create_s3_to_es_lambda(push_func=False):
-    _, role_arn = get_role_name_arn()
-    function_name, function_arn = get_function_name_arn()
-    layer_name, layer_arn = get_layer_name_arn()
-    lambda_key = LEnv.PATH_TO_FUNC + '.' + LEnv.EXTENSION
-    _, s3_lambda_hash = check_s3_diff(
-        LEnv.BUCKET_NAME, lambda_key)
+def create_s3_to_es_lambda(
+    lambda_name,
+    lambda_local_zip_path,
+    policy_path,
+    push_to_s3=False,
+    s3_trigger=False
+):
+    _, role_arn = get_role_name_arn(lambda_name)
+    function_name, function_arn = get_function_name_arn(lambda_name)
+    layer_name, layer_arn = get_layer_name_arn(lambda_name)
+    lambda_key = os.path.join(
+        LEnv.BUCKET_FOLDER, f'{lambda_name}.{LEnv.EXTENSION}')
 
-    # If push_func is True and the code has been changed
-    if push_func:
+    # If push_to_s3 is True and the code has been changed
+    if push_to_s3:
         hash_match, _ = check_s3_diff(
-            LEnv.BUCKET_NAME, lambda_key, lambda_key)
+            LEnv.BUCKET_NAME, lambda_key, lambda_local_zip_path)
         if not hash_match:
             s3.upload_file(
-                lambda_key, LEnv.BUCKET_NAME, lambda_key)
+                lambda_local_zip_path, LEnv.BUCKET_NAME, lambda_key)
             logger.info('Function %s pushed to S3.', function_name)
         else:
             logger.info(
@@ -260,7 +246,7 @@ def create_s3_to_es_lambda(push_func=False):
                 function_name)
 
     # Create lambda role
-    create_lambda_role()
+    create_lambda_role(lambda_name, policy_path)
 
     time.sleep(10)
 
@@ -277,7 +263,7 @@ def create_s3_to_es_lambda(push_func=False):
     except aws_lambda.exceptions.ResourceNotFoundException as exc:
         raise Exception(
             f'Layer {layer_name} does not exist. '
-            "Use 'push_layer=True' or 'create_layer=True' "
+            "Use 'push_to_s3=True' or 'create_layer=True' "
             'if layer has already been pushed to S3.'
         ) from exc
 
@@ -324,14 +310,6 @@ def create_s3_to_es_lambda(push_func=False):
                 count += 1
                 time.sleep(60)
 
-        response = aws_lambda.add_permission(
-            FunctionName=function_name,
-            StatementId='1',
-            Action='lambda:InvokeFunction',
-            Principal='s3.amazonaws.com',
-            SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
-        )
-
         # Wait until lambda is active
         response = aws_lambda.get_function(FunctionName=function_name)
         status = response['Configuration']['State']
@@ -362,38 +340,46 @@ def create_s3_to_es_lambda(push_func=False):
                 f'lambda {function_name}.'
             )
 
-        # Add S3 event trigger to the lambda
-        response = s3.put_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME,
-            NotificationConfiguration={
-                'LambdaFunctionConfigurations': [{
-                    'LambdaFunctionArn': function_arn,
-                    'Events': ['s3:ObjectCreated:*'],
-                    'Filter': {
-                        'Key': {
-                            'FilterRules': [
-                                {
-                                    'Name': 'prefix',
-                                    'Value': f'{KFEnv.BUCKET_FOLDER}'
-                                             f'{KFEnv.BUCKET_PREFIX}'
-                                },
-                            ]
+        if s3_trigger:
+            # Add permission to invoke from S3
+            response = aws_lambda.add_permission(
+                FunctionName=function_name,
+                StatementId='1',
+                Action='lambda:InvokeFunction',
+                Principal='s3.amazonaws.com',
+                SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
+            )
+
+            # Add S3 event trigger to the lambda
+            response = s3.put_bucket_notification_configuration(
+                Bucket=LEnv.BUCKET_NAME,
+                NotificationConfiguration={
+                    'LambdaFunctionConfigurations': [{
+                        'LambdaFunctionArn': function_arn,
+                        'Events': ['s3:ObjectCreated:*'],
+                        'Filter': {
+                            'Key': {
+                                'FilterRules': [
+                                    {
+                                        'Name': 'prefix',
+                                        'Value':
+                                            f'{LEnv.STORAGE_BUCKET_FOLDER}'
+                                            f'{LEnv.STORAGE_BUCKET_PREFIX}'
+                                    },
+                                ]
+                            }
                         }
-                    }
-                }]
-            },
-        )
-        logger.info('An S3 trigger is set for lambda %s.', function_name)
+                    }]
+                },
+            )
+            logger.info('An S3 trigger is set for lambda %s.', function_name)
 
-        print(response)
-
-    aws_lambda_hash = response['Configuration']['CodeSha256']
+    # Update function code
+    _, s3_lambda_hash = check_s3_diff(LEnv.BUCKET_NAME, lambda_key)
     # To produce the same hash as AWS's CodeSha256
     # https://stackoverflow.com/questions/32038881/python-get-base64-encoded-md5-hash-of-an-image-object
     s3_lambda_hash_b64 = b64encode(s3_lambda_hash).strip().decode()
-
-    aws_layer_version_num = \
-        int(response['Configuration']['Layers'][0]['Arn'].split(':')[-1])
+    aws_lambda_hash = response['Configuration']['CodeSha256']
 
     if aws_lambda_hash != s3_lambda_hash_b64:
         # Publish a new version if the code on S3 got updated
@@ -409,6 +395,10 @@ def create_s3_to_es_lambda(push_func=False):
             function_name)
     else:
         logger.info('Lambda %s already exists.', function_name)
+
+    # Update layer version
+    aws_layer_version_num = \
+        int(response['Configuration']['Layers'][0]['Arn'].split(':')[-1])
 
     if aws_layer_version_num < latest_version:
         response = aws_lambda.update_function_configuration(

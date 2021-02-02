@@ -5,38 +5,13 @@ import io
 from pathlib import Path
 from datetime import datetime
 
-import boto3
-from elasticsearch import Elasticsearch, RequestsHttpConnection
-from requests_aws4auth import AWS4Auth
-
-from .env import ESEnv, AWSEnv
+from .env import ESEnv
+from .session import s3, es
 from .s3 import get_s3_object
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-credentials = boto3.Session().get_credentials()
-awsauth = AWS4Auth(
-    ESEnv.ACCESS_KEY_ID, ESEnv.SECRET_ACCESS_KEY,
-    ESEnv.REGION, "es",
-    session_token=credentials.token
-)
-
-s3 = boto3.client(
-    's3',
-    region_name=ESEnv.REGION,
-    aws_access_key_id=credentials.access_key,
-    aws_secret_access_key=credentials.secret_key,
-    aws_session_token=credentials.token
-)
-
-es = Elasticsearch(
-    hosts=[{'host': ESEnv.HOST, 'port': ESEnv.PORT}],
-    http_auth=awsauth,
-    use_ssl=True,
-    verify_certs=True,
-    connection_class=RequestsHttpConnection
-)
 
 # https://developer.twitter.com/en/docs/twitter-for-websites/supported-languages
 twi_langs = {
@@ -104,7 +79,7 @@ def create_index(slug, lang):
     index_name = ESEnv.INDEX_PREFIX + slug + '_' + str(now.date())
 
     indices = json.loads(get_s3_object(
-        s3, AWSEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
+        ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
         {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
     try:
         indices[slug].append(index_name)
@@ -112,7 +87,7 @@ def create_index(slug, lang):
         indices[slug] = [index_name]
 
     indices = io.StringIO(json.dumps(indices))
-    s3.upload_fileobj(indices, AWSEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY)
+    s3.upload_fileobj(indices, ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY)
     logger.info('Indices JSON updated.')
 
     if es.indices.exists(index_name):

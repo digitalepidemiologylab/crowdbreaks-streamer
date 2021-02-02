@@ -9,7 +9,7 @@ setuptools.setup(
     url="https://github.com/crowdbreaks/streamer",
     packages=setuptools.find_packages(),
     install_requires=[
-        'python-dotenv', 'aenum',
+        'python-dotenv', 'aenum', 'dacite',
         'boto3', 'elasticsearch', 'requests_aws4auth'],
     package_data={'awstools': ['awstools.env', 'config/*']},
     classifiers=[

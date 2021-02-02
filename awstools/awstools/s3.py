@@ -1,16 +1,8 @@
 import logging
-import sys
 
-import boto3
 from botocore.exceptions import ClientError
 
-from .env import AWSEnv
-
-s3 = boto3.client(
-    's3',
-    region_name=AWSEnv.REGION,
-    aws_access_key_id=AWSEnv.ACCESS_KEY_ID,
-    aws_secret_access_key=AWSEnv.SECRET_ACCESS_KEY)
+from .session import s3
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
