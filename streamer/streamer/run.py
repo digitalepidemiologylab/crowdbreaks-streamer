@@ -6,15 +6,12 @@ import time
 from tweepy import OAuthHandler
 
 from awstools.env import KFEnv
+from awstools.config import config_manager
 from awstools.firehose import create_delivery_stream
-from awstools.llambda import (create_s3_to_es_lambda,
-                              create_lambda_layer)
 from awstools.elasticsearch import create_index
 
 from .env import TwiEnv
-from .stream import StreamListener
-from .stream import StreamManager
-from .config import config_manager
+from .stream import StreamListener, StreamManager
 from .setup_logging import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -95,5 +92,5 @@ def main():
     # Create delivery streams and ES indices for the lsited projects
     for conf in config_manager.config:
         create_delivery_stream(conf.slug)
-        create_index(conf.slug, conf.lang[0])
+        # create_index(conf.slug, conf.lang[0])
     run()
