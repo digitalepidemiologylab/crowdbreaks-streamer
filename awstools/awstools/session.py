@@ -5,16 +5,11 @@ from requests_aws4auth import AWS4Auth
 from .env import AWSEnv, ESEnv
 
 
-if AWSEnv.ACCESS_KEY_ID and AWSEnv.SECRET_ACCESS_KEY:
-    session = boto3.Session(
-        region_name=AWSEnv.REGION,
-        aws_access_key_id=AWSEnv.ACCESS_KEY_ID,
-        aws_secret_access_key=AWSEnv.SECRET_ACCESS_KEY
-    )
-else:
-    session = boto3.Session()
-    if session.get_credentials() is None:
-        raise Exception('No credentials were found for this session.')
+session = boto3.Session(
+    region_name=AWSEnv.REGION,
+    aws_access_key_id=AWSEnv.ACCESS_KEY_ID,
+    aws_secret_access_key=AWSEnv.SECRET_ACCESS_KEY
+)
 
 s3 = session.client('s3')
 aws_lambda = session.client('lambda')
