@@ -26,7 +26,8 @@ jobs:
         ES_PORT: ${{ secrets.ES_PORT }}
         AWS_REGION: eu-central-1
       run: |
-          output=$(python lambda-*/run.py)
+# https://stackoverflow.com/questions/5015316/run-all-python-files-in-a-directory
+          output=$(for f in lambda-*/run.py; do python "$f"; done)
           output="${output//'%'/'%25'}"
           output="${output//$'\n'/'%0A'}"
           output="${output//$'\r'/'%0D'}" 
