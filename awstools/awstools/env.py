@@ -84,7 +84,7 @@ class ESEnv(AWSEnv):
     HOST = os.environ.get('ES_HOST')
     PORT = os.environ.get('ES_PORT')
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
-    DOMAIN = os.environ.get('ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV + '-es')
+    DOMAIN = os.environ.get('ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV)
     CONFIG_S3_KEY = os.environ.get(
         'ES_CONFIG_S3_KEY', 'configs/stream/elasticsearch.json')
 

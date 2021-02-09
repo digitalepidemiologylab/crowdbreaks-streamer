@@ -6,4 +6,5 @@
 *__pycache__
 logs
 sagemaker
-tweet_schemas
+tweet-schemas
+es-snapshot
