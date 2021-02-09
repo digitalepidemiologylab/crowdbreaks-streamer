@@ -76,7 +76,7 @@ def create_index(slug, lang):
 
     # For rotating indices, maybe later
     now = datetime.now()
-    index_name = ESEnv.INDEX_PREFIX + slug + '_' + now.strftime('%Y-%m-%d_%H:%M:%S')
+    index_name = ESEnv.INDEX_PREFIX + slug + '_' + now.strftime('%Y-%m-%d_%H-%M-%S')
 
     indices = json.loads(get_s3_object(
         ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
