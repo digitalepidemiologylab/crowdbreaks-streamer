@@ -31,7 +31,7 @@ def zip_lambda_layer(lambda_dir):
     # https://stackoverflow.com/a/50255019/4949133
     subprocess.check_call([
         sys.executable, '-m',
-        'pip3', 'install',
+        'pip', 'install',
         '-r', os.path.join(base_name, 'requirements.txt'),
         '-t', os.path.join(base_name, 'python')])
     # https://stackoverflow.com/a/25650295/4949133
