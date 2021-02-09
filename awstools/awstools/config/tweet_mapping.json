@@ -1,98 +1,96 @@
 {
     "mappings": {
-        "tweet": {
-            "dynamic": false,
-            "properties": {
-                "endpoint": {
-                    "type": "keyword"
-                },
-                "created_at": {
-                    "type": "date",
-                    "format": "EEE MMM dd HH:mm:ss Z yyyy"
-                },
-                "text": {
-                    "type": "text",
-                    "analyzer": "english"
-                },
-                "in_reply_to_user_id": {
-                    "type": "keyword"
-                },
-                "retweeted_user_id": {
-                    "type": "keyword"
-                },
-                "quoted_user_id": {
-                    "type": "keyword"
-                },
-                "user": {
-                    "properties": {
-                        "id": {
-                            "type": "keyword"
-                        },
-                        "name": {
-                            "type": "keyword"
-                        },
-                        "screen_name": {
-                            "type": "keyword"
-                        },
-                        "location": {
-                            "type": "keyword"
-                        },
-                        "description": {
-                            "type": "text",
-                            "analyzer": "english"
-                        }
+        "dynamic": false,
+        "properties": {
+            "endpoint": {
+                "type": "keyword"
+            },
+            "created_at": {
+                "type": "date",
+                "format": "EEE MMM dd HH:mm:ss Z yyyy"
+            },
+            "text": {
+                "type": "text",
+                "analyzer": "english"
+            },
+            "in_reply_to_user_id": {
+                "type": "keyword"
+            },
+            "retweeted_user_id": {
+                "type": "keyword"
+            },
+            "quoted_user_id": {
+                "type": "keyword"
+            },
+            "user": {
+                "properties": {
+                    "id": {
+                        "type": "keyword"
+                    },
+                    "name": {
+                        "type": "keyword"
+                    },
+                    "screen_name": {
+                        "type": "keyword"
+                    },
+                    "location": {
+                        "type": "keyword"
+                    },
+                    "description": {
+                        "type": "text",
+                        "analyzer": "english"
                     }
-                },
-                "geo_info": {
-                    "properties": {
-                        "geo_type": {
-                            "type": "keyword"
-                        },
-                        "coordinates": {
-                            "type": "geo_point"
-                        },
-                        "country_code": {
-                            "type": "keyword"
-                        },
-                        "location_type": {
-                            "type": "keyword"
-                        }
+                }
+            },
+            "geo_info": {
+                "properties": {
+                    "geo_type": {
+                        "type": "keyword"
+                    },
+                    "coordinates": {
+                        "type": "geo_point"
+                    },
+                    "country_code": {
+                        "type": "keyword"
+                    },
+                    "location_type": {
+                        "type": "keyword"
                     }
-                },
-                "hashtags": {
-                    "properties": {
-                        "text": {
-                            "type": "text",
-                            "fields": {
-                                "keyword": {
-                                    "type": "keyword"
-                                }
+                }
+            },
+            "hashtags": {
+                "properties": {
+                    "text": {
+                        "type": "text",
+                        "fields": {
+                            "keyword": {
+                                "type": "keyword"
                             }
                         }
                     }
-                },
-                "predictions": {
-                    "type": "object",
-                    "dynamic": true
-                },
-                "has_quote": {
-                    "type": "boolean"
-                },
-                "is_retweet": {
-                    "type": "boolean"
-                },
-                "retweet_count": {
-                    "type": "integer"
-                },
-                "lang": {
-                    "type": "keyword"
-                },
-                "project": {
-                    "type": "keyword"
-                },
-                "matching_keywords": {
-                    "type": "keyword"
                 }
+            },
+            "predictions": {
+                "type": "object",
+                "dynamic": true
+            },
+            "has_quote": {
+                "type": "boolean"
+            },
+            "is_retweet": {
+                "type": "boolean"
+            },
+            "retweet_count": {
+                "type": "integer"
+            },
+            "lang": {
+                "type": "keyword"
+            },
+            "project": {
+                "type": "keyword"
+            },
+            "matching_keywords": {
+                "type": "keyword"
             }
         }
     }
