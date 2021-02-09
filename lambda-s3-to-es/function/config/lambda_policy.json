@@ -19,6 +19,7 @@
             "Action": [
                 "s3:GetObject",
                 "es:ESHttpPut",
+                "s3:ListBucket",
                 "sagemaker:InvokeEndpoint"
             ],
             "Resource": [
