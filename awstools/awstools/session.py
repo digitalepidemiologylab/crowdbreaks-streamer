@@ -15,10 +15,10 @@ if AWSEnv.SESSION_TOKEN == -1:
 else:
     # Launched from a lambda, a session token is in the env
     session = boto3.Session(
-        region_name=AWSEnv.REGION,
-        aws_access_key_id=AWSEnv.ACCESS_KEY_ID,
-        aws_secret_access_key=AWSEnv.SECRET_ACCESS_KEY,
-        aws_session_token=AWSEnv.SESSION_TOKEN
+        # region_name=AWSEnv.REGION,
+        # aws_access_key_id=AWSEnv.ACCESS_KEY_ID,
+        # aws_secret_access_key=AWSEnv.SECRET_ACCESS_KEY,
+        # aws_session_token=AWSEnv.SESSION_TOKEN
     )
 
 s3 = session.client('s3')
