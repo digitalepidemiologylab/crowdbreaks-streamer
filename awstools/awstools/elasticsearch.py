@@ -86,7 +86,7 @@ def create_index(slug, lang):
     except KeyError:
         indices[slug] = [index_name]
 
-    indices = json.dumps(indices)
+    indices = io.BytesIO(bytes(json.dumps(indices), encoding='utf-8'))
     s3.upload_fileobj(indices, ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY)
     logger.info('Indices JSON updated.')
 
