@@ -6,7 +6,7 @@ from typing import List, Dict, Set, Optional
 from dataclasses import dataclass, asdict, field
 
 import dacite
-from .s3 import get_s3_object
+from .s3 import get_s3_object, s3
 from .env import AWSEnv
 
 logger = logging.getLogger(__name__)
@@ -50,8 +50,8 @@ class FilterConf:
 
 class ConfigManager():
     """Read, write and validate project configs."""
-    def __init__(self):
-        self.config = self._load()
+    def __init__(self, s3_client=s3):
+        self.config = self._load(s3_client)
         self.filter_config = self._pool_config()
 
     def get_conf_by_slug(self, slug):
@@ -72,10 +72,11 @@ class ConfigManager():
         with open(path, 'w') as f:
             json.dump([asdict(conf) for conf in self.config], f, indent=4)
 
-    def _load(self):
+    def _load(self, s3_client):
         raw = json.loads(get_s3_object(
             AWSEnv.BUCKET_NAME, AWSEnv.STREAM_CONFIG_S3_KEY,
-            {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+            {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}},
+            s3_client))
         latest_version = max([int(key.replace('_', '')) for key in raw])
         raw = raw['_' + str(latest_version)]
         config = []
