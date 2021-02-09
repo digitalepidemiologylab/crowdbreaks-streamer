@@ -59,14 +59,10 @@
                 }
             },
             "hashtags": {
-                "properties": {
-                    "text": {
-                        "type": "text",
-                        "fields": {
-                            "keyword": {
-                                "type": "keyword"
-                            }
-                        }
+                "type": "text",
+                "fields": {
+                    "keyword": {
+                        "type": "keyword"
                     }
                 }
             },
