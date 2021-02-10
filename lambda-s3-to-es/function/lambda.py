@@ -240,6 +240,7 @@ def handler(event, context):
         indices = json.loads(get_s3_object(
             ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+        logger.debug(indices)
         index_name = indices[slug][-1]
 
         loads = 0
@@ -250,15 +251,15 @@ def handler(event, context):
             try:
                 es.create(
                     index=index_name, id=status_id,
-                    body=status_es, doc_type='tweet')
-                logger.debug('Loaded rec %d, id %s.', i, status_es['id'])
+                    body=status_es, doc_type='_doc')
+                logger.debug('Loaded rec %d, id %s.', i, status_id)
                 loads += 1
             except ConflictError as exc:
                 # Happens when a document with the same ID
                 # already exists.
                 errors += 1
                 logger.warning(
-                    'Rec %d, id %s already exists.', i, status_es['id'])
+                    'Rec %d, id %s already exists.', i, status_id)
                 # logger.error('%s: %s', type(exc).__name__, str(exc))
 
         logger.info(
