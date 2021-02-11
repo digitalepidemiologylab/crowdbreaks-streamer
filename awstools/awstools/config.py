@@ -50,8 +50,8 @@ class FilterConf:
 
 class ConfigManager():
     """Read, write and validate project configs."""
-    def __init__(self, s3_client=s3):
-        self.config = self._load(s3_client)
+    def __init__(self, s3_client=s3, version_id=None):
+        self.config = self._load(s3_client, version_id)
         self.filter_config = self._pool_config()
 
     def get_conf_by_slug(self, slug):
@@ -72,11 +72,10 @@ class ConfigManager():
         with open(path, 'w') as f:
             json.dump([asdict(conf) for conf in self.config], f, indent=4)
 
-    def _load(self, s3_client):
+    def _load(self, s3_client, version_id):
         raw = json.loads(get_s3_object(
             AWSEnv.BUCKET_NAME, AWSEnv.STREAM_CONFIG_S3_KEY,
-            {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}},
-            s3_client))
+            s3_client, version_id))
         latest_version = max([int(key.replace('_', '')) for key in raw])
         raw = raw['_' + str(latest_version)]
         config = []

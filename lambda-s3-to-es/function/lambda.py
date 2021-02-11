@@ -13,7 +13,7 @@ from twiprocess.processtweet import ProcessTweet
 from awstools.env import ESEnv, SMEnv
 from awstools.config import config_manager
 from awstools.session import session, es
-from awstools.s3 import get_s3_object
+from awstools.s3 import get_long_s3_object
 
 
 logger = logging.getLogger(__name__)
@@ -143,7 +143,7 @@ def handler(event, context):
         model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
 
         # Get S3 object
-        records = get_s3_object(
+        records = get_long_s3_object(
             bucket, key,
             {'CompressionType': 'GZIP', 'JSON': {'Type': 'LINES'}})
 
@@ -179,7 +179,7 @@ def handler(event, context):
                 key = os.path.join(
                     ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
 
-                run_config = json.loads(get_s3_object(
+                run_config = json.loads(get_long_s3_object(
                     ESEnv.BUCKET_NAME, key,
                     {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
 
@@ -237,7 +237,7 @@ def handler(event, context):
         # Load to Elasticsearch
         # index_name = \
         #     ESEnv.INDEX_PREFIX + slug
-        indices = json.loads(get_s3_object(
+        indices = json.loads(get_long_s3_object(
             ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
         logger.debug(indices)

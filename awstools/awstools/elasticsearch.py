@@ -7,7 +7,7 @@ from datetime import datetime
 
 from .env import ESEnv
 from .session import s3, es
-from .s3 import get_s3_object
+from .s3 import get_long_s3_object
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -79,7 +79,7 @@ def create_index(slug, lang):
     index_name = ESEnv.INDEX_PREFIX + \
         slug + '_' + now.strftime('%Y-%m-%d_%H-%M-%S')
 
-    indices = json.loads(get_s3_object(
+    indices = json.loads(get_long_s3_object(
         ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
         {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
     try:

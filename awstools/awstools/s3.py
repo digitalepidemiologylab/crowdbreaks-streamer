@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def get_s3_object(bucket, key, input_serialization, s3_client=s3):
+def get_long_s3_object(bucket, key, input_serialization, s3_client=s3):
     # Get S3 object
     records = b''
     repeat = True
@@ -41,3 +41,12 @@ def get_s3_object(bucket, key, input_serialization, s3_client=s3):
                 records += event['Records']['Payload']
 
     return records.decode('utf-8')
+
+
+def get_s3_object(bucket, key, s3_client=s3, version_id=None):
+    params = {'Bucket': bucket, 'Key': key}
+    if version_id:
+        params['VersionId'] = version_id
+    response = s3_client.get_object(**params)
+
+    return response['Body'].decode('utf-8')

@@ -89,6 +89,11 @@ class ESEnv(AWSEnv):
         'ES_CONFIG_S3_KEY', 'configs/stream/elasticsearch.json')
 
 
+class ECSEnv(AWSEnv):
+    CLUSTER = os.environ.get('ECS_CLUSTER')
+    SERVICE = os.environ.get('ECS_SERVICE')
+
+
 class SMEnv(AWSEnv):
     BATCH_SIZE_DEFAULT = int(os.environ.get('BATCH_SIZE_DEFAULT', '1'))
     BATCH_SIZE_FASTTEXT = int(os.environ.get('BATCH_SIZE_FASTTEXT', '100'))
