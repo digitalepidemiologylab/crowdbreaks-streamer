@@ -37,6 +37,7 @@ class Conf:
     lang: List[str]
     locales: List[str]
     slug: str
+    active: bool
     storage_mode: StorageMode
     image_storage_mode: ImageStorageMode
     model_endpoints: Optional[Dict]
@@ -51,7 +52,7 @@ class FilterConf:
 class ConfigManager():
     """Read, write and validate project configs."""
     def __init__(self, s3_client=s3, version_id=None):
-        self.config = self._load(s3_client, version_id)
+        self.dict, self.config = self._load(s3_client, version_id)
         self.filter_config = self._pool_config()
 
     def get_conf_by_slug(self, slug):
@@ -68,14 +69,15 @@ class ConfigManager():
                     for key in ['lang', 'keywords', 'slug']}
                 return info
 
-    def write(self, path):
-        with open(path, 'w') as f:
-            json.dump([asdict(conf) for conf in self.config], f, indent=4)
+    def write(self):
+        return json.dumps([asdict(conf) for conf in self.config], indent=4)
 
     def _load(self, s3_client, version_id):
         raw = json.loads(get_s3_object(
             AWSEnv.BUCKET_NAME, AWSEnv.STREAM_CONFIG_S3_KEY,
             s3_client, version_id))
+        # Sort raw by slug
+        raw = sorted(raw, key=lambda conf: conf['slug'])
         # What is this even???
         # latest_version = max([int(key.replace('_', '')) for key in raw])
         # raw = raw['_' + str(latest_version)]
@@ -84,14 +86,15 @@ class ConfigManager():
             config.append(dacite.from_dict(
                 data_class=Conf, data=conf,
                 config=dacite.Config(type_hooks=converter)))
-        return config
+        return raw, config
 
     def _pool_config(self):
         """Pools all filtering configs to run everything in a single stream."""
         filter_conf = FilterConf()
         for conf in self.config:
-            filter_conf.keywords.update(conf.keywords)
-            filter_conf.lang.update(conf.lang)
+            if conf.active:
+                filter_conf.keywords.update(conf.keywords)
+                filter_conf.lang.update(conf.lang)
         return filter_conf
 
 

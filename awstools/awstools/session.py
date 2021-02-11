@@ -25,6 +25,7 @@ s3 = session.client('s3')
 aws_lambda = session.client('lambda')
 iam = session.client('iam')
 firehose = session.client('firehose')
+ecs = boto3.client('ecs')
 
 credentials = session.get_credentials()
 awsauth = AWS4Auth(
