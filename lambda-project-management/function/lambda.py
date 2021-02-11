@@ -1,9 +1,12 @@
-import json
 import time
+import logging
 
 from awstools.session import s3, ecs
 from awstools.env import ECSEnv
 from awstools.config import ConfigManager
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def check_desired_count(cluster, service, count, time_step=30, time_limit=300):
@@ -29,6 +32,10 @@ def check_desired_count(cluster, service, count, time_step=30, time_limit=300):
             else:
                 raise Exception('No inquired service name in the response.')
 
+    logger.info(
+        'ECS service %s on cluster %s has been updated, desired count = %d',
+        service, cluster, count)
+
 
 def handler(event, context):
     response = s3.list_object_versions(
@@ -42,7 +49,10 @@ def handler(event, context):
     #     - Stop streaming
     #     - Restart streaming
 
-    versions = sorted(response['Versions'], key=lambda k: k['LastModified'])
+    versions = sorted(
+        response['Versions'], key=lambda k: k['LastModified'], reverse=True)
+    for version in versions:
+        print(version)
     version_ids = [response['VersionId'] for response in versions]
 
     # Get 2 last versions
@@ -61,6 +71,7 @@ def handler(event, context):
     print(same_slugs)
 
     if config_manager_old.write() != config_manager_new.write():
+        logger.info('Config changed. Going to restart the streamer.')
 
         # To stop streaming, set desired count to 0 and wait until tasks are stopped
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
