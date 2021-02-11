@@ -70,7 +70,7 @@ class ConfigManager():
                 return info
 
     def write(self):
-        return json.dumps([asdict(conf) for conf in self.config], indent=4)
+        return json.dumps([conf for conf in self.dict], indent=4)
 
     def _load(self, s3_client, version_id):
         raw = json.loads(get_s3_object(
