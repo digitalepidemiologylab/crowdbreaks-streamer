@@ -21,7 +21,8 @@
                 "s3:PutObject",
                 "s3:ListBucket",
                 "s3:ListBucketVersions",
-                "es:ESHttpPut"
+                "es:ESHttpPut",
+                "s3:GetObjectVersion"
             ],
             "Resource": [
                 "arn:aws:s3:::BUCKET_NAME",
