@@ -49,4 +49,4 @@ def get_s3_object(bucket, key, s3_client=s3, version_id=None):
         params['VersionId'] = version_id
     response = s3_client.get_object(**params)
 
-    return response['Body'].decode('utf-8')
+    return response['Body'].read().decode('utf-8')
