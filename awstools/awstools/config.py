@@ -76,8 +76,9 @@ class ConfigManager():
         raw = json.loads(get_s3_object(
             AWSEnv.BUCKET_NAME, AWSEnv.STREAM_CONFIG_S3_KEY,
             s3_client, version_id))
-        latest_version = max([int(key.replace('_', '')) for key in raw])
-        raw = raw['_' + str(latest_version)]
+        # What is this even???
+        # latest_version = max([int(key.replace('_', '')) for key in raw])
+        # raw = raw['_' + str(latest_version)]
         config = []
         for conf in raw:
             config.append(dacite.from_dict(
