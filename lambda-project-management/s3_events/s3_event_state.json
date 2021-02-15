@@ -1,0 +1,39 @@
+{
+    "Records": [
+        {
+            "eventVersion": "2.1",
+            "eventSource": "aws:s3",
+            "awsRegion": "eu-central-1",
+            "eventTime": "2021-02-15T06:57:42.176Z",
+            "eventName": "ObjectCreated:Put",
+            "userIdentity": {
+                "principalId": "AWS:AIDA4XNVFOJVG2EQFES53"
+            },
+            "requestParameters": {
+                "sourceIPAddress": "31.10.168.4"
+            },
+            "responseElements": {
+                "x-amz-request-id": "F660ED17B538BE28",
+                "x-amz-id-2": "2adtCsSM+zu1UOARzgRCUwRSJnfzjt6UgJrJKqMwyQdsqK6brX434LLZpg7/Fum/9/T1GXA8prMX22tWGAP/9K7J8T2kk9K7"
+            },
+            "s3": {
+                "s3SchemaVersion": "1.0",
+                "configurationId": "fc4d5575-740f-4d91-934e-35ce9966790f",
+                "bucket": {
+                    "name": "crowdbreaks-stg",
+                    "ownerIdentity": {
+                        "principalId": "A3Q8AY8RFTGCV1"
+                    },
+                    "arn": "arn:aws:s3:::crowdbreaks-stg"
+                },
+                "object": {
+                    "key": "configs/stream/state.json",
+                    "size": 5,
+                    "eTag": "68934a3e9455fa72420237eb05902327",
+                    "versionId": "B0kkSBPDfHEnrvEifIhV6g0eU.yhawH2",
+                    "sequencer": "00602A1B6D1B7491EA"
+                }
+            }
+        }
+    ]
+}

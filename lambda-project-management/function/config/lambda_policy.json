@@ -17,21 +17,26 @@
         {
             "Effect": "Allow",
             "Action": [
-                "s3:GetObject",
-                "s3:GetObjectVersion",
-                "s3:PutObject",
                 "s3:ListBucket",
                 "s3:ListBucketVersions",
-                "es:ESHttpPut",
-                "ecs:DescribeServices",
-                "ecs:UpdateService"
+                "s3:PutObject",
+                "s3:GetObject",
+                "s3:GetObjectVersion",
+                "es:ESHttpPut"
             ],
             "Resource": [
                 "arn:aws:s3:::BUCKET_NAME",
                 "arn:aws:s3:::BUCKET_NAME/*",
-                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*",
-                "arn:aws:ecs:eu-central-1:874942657130:service/streamer*"
+                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*"
             ]
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ecs:UpdateService",
+                "ecs:DescribeServices"
+            ],
+            "Resource": "*"
         }
     ]
 }
