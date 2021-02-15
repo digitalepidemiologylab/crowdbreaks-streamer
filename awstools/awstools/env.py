@@ -48,6 +48,8 @@ class AWSEnv(Env):
 
     STREAM_CONFIG_S3_KEY = os.environ.get(
         'AWS_STREAM_CONFIG_S3_KEY', 'configs/stream/stream.json')
+    STREAM_STATE_S3_KEY = os.environ.get(
+        'AWS_STREAM_STATE_S3_KEY', 'configs/stream/state.json')
     ENDPOINTS_PREFIX = os.environ.get(
         'ENDPOINTS_PREFIX', 'configs/models/')
 
