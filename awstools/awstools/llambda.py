@@ -356,6 +356,7 @@ def create_s3_to_es_lambda(
             pass
 
         # Add S3 event trigger to the lambda
+        print(s3_prefix)
         _ = s3.put_bucket_notification_configuration(
             Bucket=LEnv.BUCKET_NAME,
             NotificationConfiguration={
