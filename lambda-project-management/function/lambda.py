@@ -47,6 +47,8 @@ def check_desired_count(cluster_name, service_name, count, status='running', tim
 
 
 def handle_stream_config():
+    state = json.loads(get_s3_object(
+        ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY))
     response = s3.list_object_versions(
         Prefix=ECSEnv.STREAM_CONFIG_S3_KEY, Bucket=ECSEnv.BUCKET_NAME)
 
@@ -75,7 +77,8 @@ def handle_stream_config():
     # print(removed_slugs)
     # print(same_slugs)
 
-    if config_manager_old.write() != config_manager_new.write():
+    if config_manager_old.write() != config_manager_new.write() and \
+            state is True:
         logger.info('Config changed. Going to restart the streamer.')
 
         # To stop streaming, set desired count to 0 and wait until tasks are stopped
@@ -149,6 +152,7 @@ def handle_stream_state():
 
 
 def handler(event, context):
+    logger.debug(event)
     key = event['Records'][-1]['s3']['object']['key']
     if key == ECSEnv.STREAM_CONFIG_S3_KEY:
         handle_stream_config()
