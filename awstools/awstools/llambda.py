@@ -342,42 +342,6 @@ def create_s3_to_es_lambda(
                 f'lambda {function_name}.'
             )
 
-    if s3_trigger:
-        # Add permission to invoke from S3
-        try:
-            _ = aws_lambda.add_permission(
-                FunctionName=function_name,
-                StatementId='1',
-                Action='lambda:InvokeFunction',
-                Principal='s3.amazonaws.com',
-                SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
-            )
-        except aws_lambda.exceptions.ResourceConflictException:
-            pass
-
-        # Add S3 event trigger to the lambda
-        print(s3_prefix)
-        _ = s3.put_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME,
-            NotificationConfiguration={
-                'LambdaFunctionConfigurations': [{
-                    'LambdaFunctionArn': function_arn,
-                    'Events': ['s3:ObjectCreated:*'],
-                    'Filter': {
-                        'Key': {
-                            'FilterRules': [
-                                {
-                                    'Name': 'prefix',
-                                    'Value': s3_prefix
-                                },
-                            ]
-                        }
-                    }
-                }]
-            },
-        )
-        logger.info('An S3 trigger is set for lambda %s.', function_name)
-
     # Update function code
     _, s3_lambda_hash = check_s3_diff(LEnv.BUCKET_NAME, lambda_key)
     # To produce the same hash as AWS's CodeSha256
@@ -418,3 +382,39 @@ def create_s3_to_es_lambda(
         logger.info(
             'The layer for lambda %s is already at the latest version.',
             function_name)
+
+    if s3_trigger:
+        # Add permission to invoke from S3
+        try:
+            _ = aws_lambda.add_permission(
+                FunctionName=function_name,
+                StatementId='1',
+                Action='lambda:InvokeFunction',
+                Principal='s3.amazonaws.com',
+                SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
+            )
+        except aws_lambda.exceptions.ResourceConflictException:
+            pass
+
+        # Add S3 event trigger to the lambda
+        print(s3_prefix)
+        _ = s3.put_bucket_notification_configuration(
+            Bucket=LEnv.BUCKET_NAME,
+            NotificationConfiguration={
+                'LambdaFunctionConfigurations': [{
+                    'LambdaFunctionArn': function_arn,
+                    'Events': ['s3:ObjectCreated:*'],
+                    'Filter': {
+                        'Key': {
+                            'FilterRules': [
+                                {
+                                    'Name': 'prefix',
+                                    'Value': s3_prefix
+                                },
+                            ]
+                        }
+                    }
+                }]
+            },
+        )
+        logger.info('An S3 trigger is set for lambda %s.', function_name)

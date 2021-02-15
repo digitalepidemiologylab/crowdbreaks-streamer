@@ -11,7 +11,7 @@ logger.setLevel(logging.INFO)
 
 
 def main():
-    lambda_name = 'project-management'
+    lambda_name = 'streamer-management'
     lambda_dir = os.path.dirname(os.path.realpath(__file__))
 
     policy_path = os.path.join(
