@@ -342,16 +342,17 @@ def create_s3_to_es_lambda(
                 f'lambda {function_name}.'
             )
 
-    if s3_trigger:
-        # Add permission to invoke from S3
-        _ = aws_lambda.add_permission(
-            FunctionName=function_name,
-            StatementId='1',
-            Action='lambda:InvokeFunction',
-            Principal='s3.amazonaws.com',
-            SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
-        )
+        if s3_trigger:
+            # Add permission to invoke from S3
+            _ = aws_lambda.add_permission(
+                FunctionName=function_name,
+                StatementId='1',
+                Action='lambda:InvokeFunction',
+                Principal='s3.amazonaws.com',
+                SourceArn=get_bucket_arn(LEnv.BUCKET_NAME)
+            )
 
+    if s3_trigger:
         # Add S3 event trigger to the lambda
         _ = s3.put_bucket_notification_configuration(
             Bucket=LEnv.BUCKET_NAME,
