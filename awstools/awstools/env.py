@@ -41,10 +41,8 @@ class AWSEnv(Env):
 
     BUCKET_NAME = os.environ.get(
         'AWS_BUCKET_NAME', Env.APP_NAME + '-' + Env.ENV)
-    STORAGE_BUCKET_FOLDER = os.environ.get(
-        'AWS_STORAGE_BUCKET_FOLDER', 'tweets/')
     STORAGE_BUCKET_PREFIX = os.environ.get(
-        'AWS_STORAGE_BUCKET_PREFIX', 'project_')
+        'AWS_STORAGE_BUCKET_PREFIX', 'tweets/project_')
 
     STREAM_CONFIG_S3_KEY = os.environ.get(
         'AWS_STREAM_CONFIG_S3_KEY', 'configs/stream/stream.json')

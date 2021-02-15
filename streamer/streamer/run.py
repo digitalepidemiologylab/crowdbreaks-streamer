@@ -88,9 +88,10 @@ def main():
     # Create a delivery stream for unmanched tweets
     create_delivery_stream(
         KFEnv.UNMATCHED_STREAM_NAME,
-        key_name=f'{KFEnv.UNMATCHED_STREAM_NAME}')
+        f'{KFEnv.UNMATCHED_STREAM_NAME}/')
     # Create delivery streams and ES indices for the lsited projects
     for conf in config_manager.config:
-        create_delivery_stream(conf.slug)
+        create_delivery_stream(
+            conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
         # create_index(conf.slug, conf.lang[0])
     run()

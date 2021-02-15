@@ -5,6 +5,7 @@ from awstools.llambda import (create_s3_to_es_lambda,
                               create_lambda_layer,
                               zip_lambda_func,
                               zip_lambda_layer)
+from awstools.env import AWSEnv
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -30,7 +31,8 @@ def main():
         lambda_local_zip_path,
         policy_path,
         push_to_s3=True,
-        s3_trigger=True
+        s3_trigger=True,
+        s3_prefix=AWSEnv.STORAGE_BUCKET_PREFIX
     )
 
 
