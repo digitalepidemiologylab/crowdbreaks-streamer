@@ -223,7 +223,8 @@ def create_s3_to_es_lambda(
     lambda_local_zip_path,
     policy_path,
     push_to_s3=False,
-    s3_trigger=False
+    s3_trigger=False,
+    s3_prefix=None
 ):
     _, role_arn = get_role_name_arn(lambda_name)
     function_name, function_arn = get_function_name_arn(lambda_name)
@@ -363,9 +364,7 @@ def create_s3_to_es_lambda(
                                 'FilterRules': [
                                     {
                                         'Name': 'prefix',
-                                        'Value':
-                                            f'{LEnv.STORAGE_BUCKET_FOLDER}'
-                                            f'{LEnv.STORAGE_BUCKET_PREFIX}'
+                                        'Value': s3_prefix
                                     },
                                 ]
                             }

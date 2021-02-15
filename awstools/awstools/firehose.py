@@ -105,7 +105,7 @@ def create_firehose_role(slug):
     return
 
 
-def create_delivery_stream(slug, key_name=None):
+def create_delivery_stream(slug, prefix):
     create_firehose_role(slug)
 
     _, role_arn = get_role_name_arn(slug)
@@ -114,8 +114,6 @@ def create_delivery_stream(slug, key_name=None):
     time.sleep(10)
 
     stream_name = f'{KFEnv.APP_NAME}-{slug}'
-    if key_name is None:
-        key_name = f'{KFEnv.STORAGE_BUCKET_PREFIX}{slug}'
 
     try:
         response = firehose.create_delivery_stream(
@@ -124,7 +122,7 @@ def create_delivery_stream(slug, key_name=None):
             S3DestinationConfiguration={
                 'RoleARN': role_arn,
                 'BucketARN': get_bucket_arn(KFEnv.BUCKET_NAME),
-                'Prefix': f'{KFEnv.STORAGE_BUCKET_FOLDER}{key_name}/',
+                'Prefix': prefix,
                 'ErrorOutputPrefix': f'{slug}/failed/',
                 'BufferingHints': {
                     'SizeInMBs': KFEnv.BUFFER_SIZE,

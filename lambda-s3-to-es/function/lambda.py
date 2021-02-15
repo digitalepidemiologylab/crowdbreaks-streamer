@@ -132,7 +132,7 @@ def handler(event, context):
         # Get slug
         slug = [
             name for name in key.split('/')
-            if name.startswith(ESEnv.STORAGE_BUCKET_PREFIX)
+            if name.startswith(ESEnv.STORAGE_BUCKET_PREFIX.split('/')[-1])
         ]
         if len(slug) != 1:
             logger.error('Slug len != 1.\nKey: %s.\nSlug: %s.', key, slug)
