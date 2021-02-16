@@ -410,6 +410,13 @@ def create_s3_to_es_lambda(
                 'LambdaFunctionConfigurations'
             ]
         }
+        for conf in [
+            'TopicConfigurations',
+            'QueueConfigurations',
+            'LambdaFunctionConfigurations'
+        ]:
+            if conf not in notification_config.keys():
+                notification_config[conf] = []
 
         # print(f'Current config:\n{notification_config}\n\n')
 
