@@ -123,9 +123,8 @@ def handle_stream_state():
         ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY,
         version_id=version_ids[0]))
 
-    if state_old is False and state_new is True:
-        logger.info(
-            'Streamer state changed to active. Going to start the streamer.')
+    if state_new is True:
+        logger.info('Streamer state is currently active.')
 
         # To start streaming, set desired count to 1 and wait until tasks are pending
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
@@ -137,9 +136,8 @@ def handle_stream_state():
         check_desired_count(
             ECSEnv.CLUSTER, ECSEnv.SERVICE, 1, status='pending')
 
-    elif state_old is True and state_new is False:
-        logger.info(
-            'Streamer state changed to inactive. Going to stop the streamer.')
+    elif state_new is False:
+        logger.info('Streamer state is currently inactive.')
 
         # To stop streaming, set desired count to 0 and wait until tasks are stopped
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
