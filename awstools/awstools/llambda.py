@@ -383,6 +383,8 @@ def create_s3_to_es_lambda(
             'The layer for lambda %s is already at the latest version.',
             function_name)
 
+    time.sleep(10)
+
     if s3_trigger:
         # Add permission to invoke from S3
         try:
@@ -396,26 +398,37 @@ def create_s3_to_es_lambda(
         except aws_lambda.exceptions.ResourceConflictException:
             pass
 
-        # Add S3 event trigger to the lambda
-        print(s3_prefix)
-        _ = s3.put_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME,
-            NotificationConfiguration={
-                'LambdaFunctionConfigurations': [{
-                    'LambdaFunctionArn': function_arn,
-                    'Events': ['s3:ObjectCreated:*'],
-                    'Filter': {
-                        'Key': {
-                            'FilterRules': [
-                                {
-                                    'Name': 'prefix',
-                                    'Value': s3_prefix
-                                },
-                            ]
-                        }
-                    }
-                }]
-            },
+        response = s3.get_bucket_notification_configuration(
+            Bucket=LEnv.BUCKET_NAME
         )
-        print(_)
-        logger.info('An S3 trigger is set for lambda %s.', function_name)
+        while response['LambdaFunctionConfigurations'] == []:
+            # Add S3 event trigger to the lambda
+            print(s3_prefix)
+            _ = s3.put_bucket_notification_configuration(
+                Bucket=LEnv.BUCKET_NAME,
+                NotificationConfiguration={
+                    'LambdaFunctionConfigurations': [{
+                        'LambdaFunctionArn': function_arn,
+                        'Events': ['s3:ObjectCreated:*'],
+                        'Filter': {
+                            'Key': {
+                                'FilterRules': [
+                                    {
+                                        'Name': 'prefix',
+                                        'Value': s3_prefix
+                                    },
+                                ]
+                            }
+                        }
+                    }]
+                },
+            )
+            print(_)
+
+            time.sleep(10)
+
+            response = s3.get_bucket_notification_configuration(
+                Bucket=LEnv.BUCKET_NAME
+            )
+            print(response)
+            logger.info('An S3 trigger is set for lambda %s.', function_name)
