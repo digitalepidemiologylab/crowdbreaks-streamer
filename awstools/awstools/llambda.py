@@ -417,5 +417,5 @@ def create_s3_to_es_lambda(
                 }]
             },
         )
-        print(response)
+        print(_)
         logger.info('An S3 trigger is set for lambda %s.', function_name)
