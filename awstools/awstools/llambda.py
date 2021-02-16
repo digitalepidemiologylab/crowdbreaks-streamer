@@ -383,8 +383,6 @@ def create_s3_to_es_lambda(
             'The layer for lambda %s is already at the latest version.',
             function_name)
 
-    time.sleep(10)
-
     if s3_trigger:
         # Add permission to invoke from S3
         try:
@@ -398,37 +396,76 @@ def create_s3_to_es_lambda(
         except aws_lambda.exceptions.ResourceConflictException:
             pass
 
-        response = s3.get_bucket_notification_configuration(
+        # Get the current notification config
+        notification_config = s3.get_bucket_notification_configuration(
             Bucket=LEnv.BUCKET_NAME
         )
-        while response['LambdaFunctionConfigurations'] == []:
+
+        notification_config = {
+            k: v for k, v in notification_config.items()
+            if k in [
+                'TopicConfigurations',
+                'QueueConfigurations',
+                'LambdaFunctionConfigurations'
+            ]
+        }
+
+        # print(f'Current config:\n{notification_config}\n\n')
+
+        this_lambda_s3_config = list(filter(
+            lambda lambda_config: function_name in
+            lambda_config['LambdaFunctionArn'],
+            notification_config['LambdaFunctionConfigurations']))
+        other_lambda_s3_configs = list(filter(
+            lambda lambda_config: function_name not in
+            lambda_config['LambdaFunctionArn'],
+            notification_config['LambdaFunctionConfigurations']))
+
+        # print(f'This lambda config:\n{this_lambda_s3_config}\n')
+        # print(f'Other lambda configs:\n{other_lambda_s3_configs}\n')
+
+        if this_lambda_s3_config == []:
             # Add S3 event trigger to the lambda
-            print(s3_prefix)
+            this_lambda_s3_config = [{
+                'LambdaFunctionArn': function_arn,
+                'Events': ['s3:ObjectCreated:*'],
+                'Filter': {
+                    'Key': {
+                        'FilterRules': [
+                            {
+                                'Name': 'prefix',
+                                'Value': s3_prefix
+                            },
+                        ]
+                    }
+                }
+            }]
+            notification_config['LambdaFunctionConfigurations'] = [
+                *this_lambda_s3_config,
+                *other_lambda_s3_configs
+            ]
+
+            # print('New lambda config')
+            # print(notification_config['LambdaFunctionConfigurations'])
+
             _ = s3.put_bucket_notification_configuration(
                 Bucket=LEnv.BUCKET_NAME,
-                NotificationConfiguration={
-                    'LambdaFunctionConfigurations': [{
-                        'LambdaFunctionArn': function_arn,
-                        'Events': ['s3:ObjectCreated:*'],
-                        'Filter': {
-                            'Key': {
-                                'FilterRules': [
-                                    {
-                                        'Name': 'prefix',
-                                        'Value': s3_prefix
-                                    },
-                                ]
-                            }
-                        }
-                    }]
-                },
+                NotificationConfiguration=notification_config
             )
-            print(_)
 
-            time.sleep(10)
-
-            response = s3.get_bucket_notification_configuration(
+            notification_config = s3.get_bucket_notification_configuration(
                 Bucket=LEnv.BUCKET_NAME
             )
-            print(response)
+
+            notification_config = {
+                k: v for k, v in notification_config.items()
+                if k in [
+                    'TopicConfigurations',
+                    'QueueConfigurations',
+                    'LambdaFunctionConfigurations'
+                ]
+            }
+
+            # print(f'New config:\n{notification_config}\n\n')
+
             logger.info('An S3 trigger is set for lambda %s.', function_name)
