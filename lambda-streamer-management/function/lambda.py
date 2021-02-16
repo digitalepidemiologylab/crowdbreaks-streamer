@@ -11,7 +11,10 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def check_desired_count(cluster_name, service_name, count, status='running', time_step=30, time_limit=160):
+def check_desired_count(
+    cluster_name, service_name, count, status='running',
+    time_step=30, time_limit=160
+):
     assert status in ['running', 'pending']
     updated = False
     time_slept = 0
@@ -52,36 +55,22 @@ def handle_stream_config():
     response = s3.list_object_versions(
         Prefix=ECSEnv.STREAM_CONFIG_S3_KEY, Bucket=ECSEnv.BUCKET_NAME)
 
-    # 1. Order by last modified
-    # 2. Take two latest versions
-    # 3. Create config_manager objects off of them
-    # 4. Compare
-    # 5. Restart streaming if configs are different
-
+    # Order versions by last modified
     versions = sorted(
         response['Versions'], key=lambda k: k['LastModified'], reverse=True)
     version_ids = [response['VersionId'] for response in versions]
 
-    # Get 2 last versions
+    # Take 2 last versions
     config_manager_old = ConfigManager(version_id=version_ids[1])
     config_manager_new = ConfigManager(version_id=version_ids[0])
 
-    # older_slugs = {conf.slug for conf in config_manager_old.config}
-    # newer_slugs = {conf.slug for conf in config_manager_new.config}
-
-    # new_slugs = newer_slugs.difference(older_slugs)
-    # removed_slugs = older_slugs.difference(newer_slugs)
-    # same_slugs = older_slugs.intersection(newer_slugs)
-
-    # print(new_slugs)
-    # print(removed_slugs)
-    # print(same_slugs)
-
+    # Restart streaming if configs are different
     if config_manager_old.write() != config_manager_new.write() and \
             state is True:
         logger.info('Config changed. Going to restart the streamer.')
 
-        # To stop streaming, set desired count to 0 and wait until tasks are stopped
+        # To stop streaming, set desired count to 0 and wait
+        # until tasks are stopped
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
         response = ecs.update_service(
             cluster=ECSEnv.CLUSTER,
@@ -90,7 +79,8 @@ def handle_stream_config():
 
         check_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 0)
 
-        # To restart, set desired count to zero and wait until a task is running
+        # To restart, set desired count to zero and wait
+        # until a task is running
         response = ecs.update_service(
             cluster=ECSEnv.CLUSTER,
             service=ECSEnv.SERVICE,
@@ -101,34 +91,22 @@ def handle_stream_config():
 
 
 def handle_stream_state():
-    response = s3.list_object_versions(
-        Prefix=ECSEnv.STREAM_STATE_S3_KEY, Bucket=ECSEnv.BUCKET_NAME)
+    state = json.loads(get_s3_object(
+        ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY))
 
-    # 1. Order by last modified
-    # 2. Take two latest versions
-    # 3. Create config_manager objects off of them
-    # 4. Compare
-    #     - inactive -> active => start streamer
-    #     - active -> inactive => stop streamer
-    #     - active -> active, inactive -> inactive => do nothing
+    # - active => start streamer
+    # - inactive => stop streamer
 
-    versions = sorted(
-        response['Versions'], key=lambda k: k['LastModified'], reverse=True)
-    version_ids = [response['VersionId'] for response in versions]
+    state = json.loads(get_s3_object(
+        ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY))
 
-    state_old = json.loads(get_s3_object(
-        ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY,
-        version_id=version_ids[1]))
-    state_new = json.loads(get_s3_object(
-        ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY,
-        version_id=version_ids[0]))
-
-    if state_new is True:
+    if state is True:
         logger.info('Streamer state is currently active.')
 
-        # To start streaming, set desired count to 1 and wait until tasks are pending
+        # To start streaming, set desired count to 1 and wait
+        # until tasks are pending
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
-        response = ecs.update_service(
+        _ = ecs.update_service(
             cluster=ECSEnv.CLUSTER,
             service=ECSEnv.SERVICE,
             desiredCount=1)
@@ -136,12 +114,13 @@ def handle_stream_state():
         check_desired_count(
             ECSEnv.CLUSTER, ECSEnv.SERVICE, 1, status='pending')
 
-    elif state_new is False:
+    elif state is False:
         logger.info('Streamer state is currently inactive.')
 
-        # To stop streaming, set desired count to 0 and wait until tasks are stopped
+        # To stop streaming, set desired count to 0 and wait
+        # until tasks are stopped
         # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
-        response = ecs.update_service(
+        _ = ecs.update_service(
             cluster=ECSEnv.CLUSTER,
             service=ECSEnv.SERVICE,
             desiredCount=0)

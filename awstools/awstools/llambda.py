@@ -44,14 +44,14 @@ def zip_lambda_layer(lambda_dir):
 
 
 def get_function_name_arn(lambda_name):
-    function_name = f'{LEnv.APP_NAME.lower()}-lambda-{lambda_name}'
+    function_name = f'{LEnv.APP_NAME.lower()}-{lambda_name}'
     function_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
                    f'function:{function_name}'
     return function_name, function_arn
 
 
 def get_layer_name_arn(lambda_name):
-    layer_name = f'{LEnv.APP_NAME.lower()}-lambda-layer-{lambda_name}'
+    layer_name = f'{LEnv.APP_NAME.lower()}-layer-{lambda_name}'
     layer_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
                 f'layer:{layer_name}'
     return layer_name, layer_arn
@@ -203,8 +203,7 @@ def create_lambda_layer(
         if push_to_s3 and not s3_diff:
             response = aws_lambda.publish_layer_version(
                 LayerName=layer_name,
-                Description='Layer created automatically for Lambda '
-                            f'by {LEnv.APP_NAME}.',
+                Description=f'Automatically created for {LEnv.APP_NAME}',
                 Content={
                     'S3Bucket': LEnv.BUCKET_NAME,
                     'S3Key': layer_key
@@ -224,7 +223,9 @@ def create_s3_to_es_lambda(
     policy_path,
     push_to_s3=False,
     s3_trigger=False,
-    s3_prefix=None
+    s3_prefix=None,
+    timeout=LEnv.TIMEOUT,
+    memory_size=LEnv.MEMORY_SIZE
 ):
     _, role_arn = get_role_name_arn(lambda_name)
     function_name, function_arn = get_function_name_arn(lambda_name)
@@ -287,9 +288,9 @@ def create_s3_to_es_lambda(
                         'S3Bucket': LEnv.BUCKET_NAME,
                         'S3Key': lambda_key
                     },
-                    Description=LEnv.DESCRIPTION,
-                    Timeout=LEnv.TIMEOUT,
-                    MemorySize=LEnv.MEMORY_SIZE,
+                    Description=f'Automatically created for {LEnv.APP_NAME}',
+                    Timeout=timeout,
+                    MemorySize=memory_size,
                     Publish=True,
                     Environment={
                         'Variables': {

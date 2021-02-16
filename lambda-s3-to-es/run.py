@@ -32,7 +32,8 @@ def main():
         policy_path,
         push_to_s3=True,
         s3_trigger=True,
-        s3_prefix=AWSEnv.STORAGE_BUCKET_PREFIX
+        s3_prefix=AWSEnv.STORAGE_BUCKET_PREFIX,
+        memory_size=512
     )
 
 

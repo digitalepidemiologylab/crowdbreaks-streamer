@@ -71,9 +71,6 @@ class LEnv(AWSEnv):
         os.environ.get('AWS_L_ROLE_TRUST_RELATIONSHIP_FILENAME'))
     HANDLER = os.environ.get(
         'AWS_L_HANDLER', 'lambda.handler')
-    DESCRIPTION = os.environ.get(
-        'AWS_L_DESCRIPTION',
-        f'Automatically created for {Env.APP_NAME.capitalize()}.')
     TIMEOUT = int(os.environ.get('AWS_L_TIMEOUT', '300'))
     MEMORY_SIZE = int(os.environ.get('AWS_L_MEMORY_SIZE', '128'))
     BUCKET_FOLDER = os.environ.get('AWS_L_BUCKET_FOLDER', 'lambda/')
