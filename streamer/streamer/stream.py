@@ -2,9 +2,13 @@ import logging
 import time
 import json
 
+from queue import Queue
+from threading import Thread
+
 import tweepy
 
 from awstools.config import config_manager
+from awstools.env import Env
 
 from .utils.errors import ERROR_CODES
 from .tasks import handle_tweet
@@ -36,19 +40,32 @@ class StreamManager():
 
 class StreamListener(tweepy.StreamListener):
     """Handles data received from the stream."""
-    def __init__(self):
-        super(StreamListener, self).__init__()
+    def __init__(self, q=Queue()):
+        # Threads and queues are to avoid IncompleteRead error:
+        # https://stackoverflow.com/a/48046123/4949133
+        super().__init__()
         self.rate_error_count = 0
+        self.q = q
+        for _ in range(Env.NUM_WORKERS):
+            thread = Thread(target=self.handle_status)
+            thread.daemon = True
+            thread.start()
 
     def on_status(self, status):
-        try:
-            handle_tweet(status._json, config_manager)
-        except KeyError as exc:
-            logger.error(
-                '%s: %s\n%s',
-                type(exc).__name__, str(exc), json.dumps(status._json))
-            raise exc
-        return True
+        # Put to the queue
+        self.q.put(status)
+
+    def handle_status(self):
+        while True:
+            status = self.q.get()
+            try:
+                handle_tweet(status._json, config_manager)
+            except KeyError as exc:
+                logger.error(
+                    '%s: %s\n%s',
+                    type(exc).__name__, str(exc), json.dumps(status._json))
+                raise exc
+            self.q.task_done()
 
     def on_error(self, status_code):
         if status_code in ERROR_CODES:

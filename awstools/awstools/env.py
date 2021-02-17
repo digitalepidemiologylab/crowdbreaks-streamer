@@ -28,6 +28,7 @@ class Env(Constant):
     CONFIG_PATH = os.path.abspath(os.path.join(APP_DIR, 'config'))
 
     # Other
+    NUM_WORKERS = os.environ.get('NUM_WORKERS', 4)
     TIMEZONE = os.environ.get('TIMEZONE', 'Europe/Zurich')
 
 
