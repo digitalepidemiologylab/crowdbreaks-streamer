@@ -60,7 +60,7 @@ es_langs = [
     'swedish', 'turkish', 'thai']
 
 
-def create_index(slug, lang):
+def create_index(slug, lang, only_new=False):
     mapping_path = os.path.join(
         Path(__file__).parent.absolute(),
         'config/tweet_mapping.json')
@@ -74,7 +74,6 @@ def create_index(slug, lang):
     mapping_str = mapping_str.replace('english', es_lang)
     mapping = json.loads(mapping_str)
 
-    # For rotating indices, maybe later
     now = datetime.now()
     index_name = ESEnv.INDEX_PREFIX + \
         slug + '_' + now.strftime('%Y-%m-%d_%H-%M-%S')
@@ -82,10 +81,18 @@ def create_index(slug, lang):
     indices = json.loads(get_long_s3_object(
         ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
         {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
-    try:
-        indices[slug].append(index_name)
-    except KeyError:
-        indices[slug] = [index_name]
+    if only_new:
+        # When a new project is created, we want to create an index for it
+        # and not touch the rest
+        if indices.get(slug) is None:
+            indices[slug] = [index_name]
+        else:
+            index_name = indices[slug][-1]
+    else:
+        try:
+            indices[slug].append(index_name)
+        except KeyError:
+            indices[slug] = [index_name]
 
     indices = io.BytesIO(bytes(json.dumps(indices), encoding='utf-8'))
     s3.upload_fileobj(indices, ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY)
