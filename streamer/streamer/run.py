@@ -37,19 +37,19 @@ def run():
             stream.start()
         except KeyboardInterrupt:
             sys.exit()
-        # except Exception as exc:
-        #     logger.error(
-        #         'Stream starting exception %s: %s',
-        #         type(exc).__name__, str(exc))
-        #     try:
-        #         stream.stop()
-        #     except Exception as exc:
-        #         logger.error(
-        #             'Stream stopping exception %s: %s',
-        #             type(exc).__name__, str(exc))
-        #     n_errors_last_hour = update_error_count(
-        #         n_errors_last_hour, last_error_time)
-        #     last_error_time = time.time()
+        except Exception as exc:
+            logger.error(
+                'Stream starting exception %s: %s',
+                type(exc).__name__, str(exc))
+            try:
+                stream.stop()
+            except Exception as exc:
+                logger.error(
+                    'Stream stopping exception %s: %s',
+                    type(exc).__name__, str(exc))
+            n_errors_last_hour = update_error_count(
+                n_errors_last_hour, last_error_time)
+            last_error_time = time.time()
         wait_some_time(n_errors_last_hour)
     logger.info('Shutting down...')
 
