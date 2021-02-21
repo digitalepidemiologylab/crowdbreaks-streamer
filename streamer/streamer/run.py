@@ -28,29 +28,45 @@ def run():
     # Wait for a bit before connecting, in case container will be paused
     logger.debug('Streaming container is ready, waiting 10 s.')
     time.sleep(10)
-    last_error_time = 0
-    n_errors_last_hour = 0
-    while True:
-        logger.debug('Trying to connect to Twitter API.')
-        stream = StreamManager(auth, listener)
+    # last_error_time = 0
+    # n_errors_last_hour = 0
+    # while True:
+    #     logger.debug('Trying to connect to Twitter API.')
+    #     stream = StreamManager(auth, listener)
+    #     try:
+    #         stream.start()
+    #     except KeyboardInterrupt:
+    #         sys.exit()
+    #     except Exception as exc:
+    #         logger.error(
+    #             'Stream starting exception %s: %s',
+    #             type(exc).__name__, str(exc))
+    #         try:
+    #             stream.stop()
+    #         except Exception as exc:
+    #             logger.error(
+    #                 'Stream stopping exception %s: %s',
+    #                 type(exc).__name__, str(exc))
+    #         n_errors_last_hour = update_error_count(
+    #             n_errors_last_hour, last_error_time)
+    #         last_error_time = time.time()
+    #     wait_some_time(n_errors_last_hour)
+    logger.debug('Trying to connect to Twitter API.')
+    stream = StreamManager(auth, listener)
+    try:
+        stream.start()
+    except KeyboardInterrupt:
+        sys.exit()
+    except Exception as exc:
+        logger.error(
+            'Stream starting exception %s: %s',
+            type(exc).__name__, str(exc))
         try:
-            stream.start()
-        except KeyboardInterrupt:
-            sys.exit()
+            stream.stop()
         except Exception as exc:
             logger.error(
-                'Stream starting exception %s: %s',
+                'Stream stopping exception %s: %s',
                 type(exc).__name__, str(exc))
-            try:
-                stream.stop()
-            except Exception as exc:
-                logger.error(
-                    'Stream stopping exception %s: %s',
-                    type(exc).__name__, str(exc))
-            n_errors_last_hour = update_error_count(
-                n_errors_last_hour, last_error_time)
-            last_error_time = time.time()
-        wait_some_time(n_errors_last_hour)
     logger.info('Shutting down...')
 
 
