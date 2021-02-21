@@ -31,7 +31,7 @@ class StreamManager():
             config.keywords, config.lang)
         self.stream.filter(
             track=config.keywords, languages=config.lang,
-            encoding='utf-8', stall_warnings=True, is_async=True)
+            encoding='utf-8', stall_warnings=True)
 
     def stop(self):
         logger.info('Stopping stream.')
