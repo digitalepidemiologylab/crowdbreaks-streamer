@@ -193,7 +193,7 @@ def handler(event, context):
         # }
 
         # Fill metadata with predictions
-        metas = [[]] * len(texts)
+        metas = [[] for _ in range(len(texts))]
         for endpoint in model_endpoints['endpoints']:
             if endpoint['active']:
                 batch_size = get_batch_size(endpoint['model_type'])
