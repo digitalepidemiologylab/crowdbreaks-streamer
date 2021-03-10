@@ -7,7 +7,7 @@
             },
             "created_at": {
                 "type": "date",
-                "format": "EEE MMM dd HH:mm:ss Z yyyy"
+                "format": "strict_date_optional_time"
             },
             "text": {
                 "type": "text",
@@ -75,9 +75,6 @@
             },
             "is_retweet": {
                 "type": "boolean"
-            },
-            "retweet_count": {
-                "type": "integer"
             },
             "lang": {
                 "type": "keyword"

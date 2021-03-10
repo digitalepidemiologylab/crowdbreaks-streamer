@@ -102,16 +102,15 @@ def predict(endpoint_name, preprocessing_config, texts, batch_size):
             )
         except sagemaker.exceptions.ModelError as exc:
             logger.error('%s: %s', type(exc).__name__, str(exc))
-            return None
-
-        predictions = json.loads(
-            response['Body'].read().decode('utf-8')
-        )['predictions']
-
-        outputs.extend([{
-            'labels': pred['labels'],
-            'probabilities': pred['probabilities']
-        } for pred in predictions])
+            outputs.extend([None] * batch_size)
+        finally:
+            predictions = json.loads(
+                response['Body'].read().decode('utf-8')
+            )['predictions']
+            outputs.extend([{
+                'labels': pred['labels'],
+                'probabilities': pred['probabilities']
+            } for pred in predictions])
 
     label_valss = [labels_to_int(output['labels']) for output in outputs]
     if all(label_valss):
@@ -158,66 +157,77 @@ def handler(event, context):
 
         texts = [status['text'] for status in statuses]
 
-        # Read off stream config and prepare a template for metadata
-        meta = {}
-        endpoint_names = {}
-        run_names = {}
-        model_types = {}
-        preprocessing_configs = {}
-        for problem_type in model_endpoints:
-            endpoint_names[problem_type] = []
-            run_names[problem_type] = []
-            model_types[problem_type] = []
-            meta[problem_type] = {'endpoints': {}}
-            preprocessing_configs[problem_type] = []
-            for endpoint_name, info in \
-                    model_endpoints[problem_type]['active'].items():
-                endpoint_names[problem_type].append(endpoint_name)
-                run_names[problem_type].append(info['run_name'])
-                model_types[problem_type].append(info['model_type'])
+        # Stream config model_endpoints schema I wanna have
+        # "model_endpoints": {
+        #     "endpoints": [
+        #         {
+        #             "problem_type": "sentiment",
+        #             "name": "crowdbreaks-6512709bc4",
+        #             "run_name": "fasttext_v2",
+        #             "model_type": "fasttext",
+        #             "active": true
+        #         }
+        #     ],
+        #     "primary": "crowdbreaks-6512709bc4"
+        # }
 
+        # Predictions schema I wanna have
+        # "predictions": {
+        #     "endpoints": [
+        #         {
+        #             "problem_type": "sentiment",
+        #             "name": "crowdbreaks-6512709bc4",
+        #             "run_name": "fasttext_v2",
+        #             "probability": 0.886259913444519,
+        #             "label": "neutral",
+        #             "label_val": 0
+        #         },
+        #         {
+        #             "problem_type": "sentiment",
+        #             "name": "crowdbreaks-someother",
+        #             "run_name": "fasttext_v1",
+        #             "failed": true
+        #         }
+        #     ],
+        #     "primary": 0.886259913444519
+        # }
+
+        # Fill metadata with predictions
+        metas = [[]] * len(texts)
+        for endpoint in model_endpoints['endpoints']:
+            if endpoint['active']:
+                batch_size = get_batch_size(endpoint['model_type'])
                 key = os.path.join(
-                    ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
-
+                        ESEnv.ENDPOINTS_PREFIX, endpoint['name'] + '.json')
                 run_config = json.loads(get_long_s3_object(
                     ESEnv.BUCKET_NAME, key,
                     {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
 
-                preprocessing_configs[problem_type].append(
-                    run_config['preprocess'])
-
-        metas = [deepcopy(meta)] * len(texts)
-        logger.info('Endpoint names:\n%s.', endpoint_names)
-
-        # Fill metadata with predictions
-        for problem_type in endpoint_names:
-            for (
-                endpoint_name,
-                model_type,
-                run_name,
-                preprocessing_config
-            ) in zip(
-                endpoint_names[problem_type],
-                model_types[problem_type],
-                run_names[problem_type],
-                preprocessing_configs[problem_type]
-            ):
-                batch_size = get_batch_size(model_type)
-
                 outputs = predict(
-                    endpoint_name, preprocessing_config, texts, batch_size)
-
-                if outputs is None:
-                    continue
+                    endpoint['name'], run_config['preprocess'], texts, batch_size)
 
                 for i, output in enumerate(outputs):
-                    max_prob = max(output['probabilities'])
-                    ind_max_prob = output['probabilities'].index(max_prob)
-                    metas[i][problem_type]['endpoints'][run_name] = {
-                        'probability': max_prob,
-                        'label': output['labels'][ind_max_prob],
-                        'label_val': output['label_vals'][ind_max_prob]
-                    }
+                    try:
+                        max_prob = max(output['probabilities'])
+                        ind_max_prob = output['probabilities'].index(max_prob)
+                        label = output['labels'][ind_max_prob]
+                        label_val = output['label_vals'][ind_max_prob]
+                    except KeyError:  # output == None
+                        metas[i].append({
+                            'problem_type': endpoint['model_type'],
+                            'name': endpoint['name'],
+                            'run_name': endpoint['run_name'],
+                            'failed': True
+                        })
+                    finally:
+                        metas[i].append({
+                            'problem_type': endpoint['model_type'],
+                            'name': endpoint['name'],
+                            'run_name': endpoint['run_name'],
+                            'probability': max_prob,
+                            'label': label,
+                            'label_val': label_val
+                        })
 
         # Process tweets for ES
         statuses_es = []
@@ -226,11 +236,18 @@ def handler(event, context):
                 status, standardize_func='standardize', geo_code=geo_code
             ).extract_es(extract_geo=True))
 
-        # Add 'meta' field to statuses
+        # Add 'predictions' field to statuses
+        def get_primary_probability(metas):
+            for meta in metas:
+                if meta['name'] == model_endpoints['primary']:
+                    return meta['probability']
+            return None
+
         for i in range(len(statuses)):
-            # This way, if prediction fails, we at least store the tweet
-            statuses_es[i]['predictions'] = metas[i] \
-                if metas[i] != meta else []
+            statuses_es[i]['predictions'] = {
+                "endpoints": metas[i],
+                "primary": get_primary_probability(metas[i])
+            }
 
         logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
 
