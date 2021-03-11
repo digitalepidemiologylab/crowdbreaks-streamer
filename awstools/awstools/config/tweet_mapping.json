@@ -70,6 +70,17 @@
                 "type": "object",
                 "dynamic": true
             },
+            "annotations": {
+                "type": "object",
+                "properties": {
+                    "author": {
+                        "type": "keyword"
+                    },
+                    "label": {
+                        "type": "keyword"
+                    }
+                }
+            },
             "has_quote": {
                 "type": "boolean"
             },

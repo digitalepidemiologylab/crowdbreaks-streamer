@@ -2,7 +2,8 @@ import logging
 import json
 # import re
 import os
-from copy import deepcopy
+import random
+import string
 
 from elasticsearch import ConflictError
 # from elasticsearch.helpers import bulk
@@ -248,6 +249,16 @@ def handler(event, context):
                 "endpoints": metas[i],
                 "primary": get_primary_probability(metas[i])
             }
+            # Dummy annotation data to test the ES query
+            if random.random() > 0.95:
+                logger.info('Annotations for %s', i)
+                statuses_es[i]['annotations'] = [
+                    {
+                        'author': ''.join(random.choices(string.ascii_lowercase, k=5)),
+                        'label': 1 if random.random() > 0.5 else 0
+                    }    
+                ]
+                logger.info(statuses_es[i]['annotations'])
 
         logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
 
