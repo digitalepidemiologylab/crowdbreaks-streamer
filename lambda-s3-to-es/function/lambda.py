@@ -268,8 +268,8 @@ def handler(event, context):
         indices = json.loads(get_long_s3_object(
             ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY,
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
-        logger.debug(indices)
         index_name = indices[slug][-1]
+        logger.debug(index_name)
 
         loads = 0
         errors = 0

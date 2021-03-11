@@ -72,14 +72,7 @@
             },
             "annotations": {
                 "type": "object",
-                "properties": {
-                    "author": {
-                        "type": "keyword"
-                    },
-                    "label": {
-                        "type": "keyword"
-                    }
-                }
+                "dynamic": true
             },
             "has_quote": {
                 "type": "boolean"
