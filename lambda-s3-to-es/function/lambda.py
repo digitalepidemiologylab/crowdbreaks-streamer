@@ -5,7 +5,7 @@ import os
 import random
 import string
 
-from elasticsearch import ConflictError
+from elasticsearch import ConflictError, ElasticsearchException, RequestError
 # from elasticsearch.helpers import bulk
 from geocode.geocode import Geocode
 
@@ -270,16 +270,12 @@ def handler(event, context):
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
         index_name = indices[slug][-1]
         logger.debug(index_name)
-
-        loads = 0
-        errors = 0
-        for i, status_es in enumerate(statuses_es):
-            logger.debug(status_es)
-            status_id = status_es.pop('id')
+        
+        def create_doc(status_id, status_es, loads, errors, request_errors):
             try:
                 es.create(
                     index=index_name, id=status_id,
-                    body=status_es, doc_type='_doc')
+                    body=json.dumps(status_es), doc_type='_doc')
                 logger.debug('Loaded rec %d, id %s.', i, status_id)
                 loads += 1
             except ConflictError as exc:
@@ -289,6 +285,31 @@ def handler(event, context):
                 logger.warning(
                     'Rec %d, id %s already exists.', i, status_id)
                 # logger.error('%s: %s', type(exc).__name__, str(exc))
+            except RequestError as exc:
+                errors += 1
+                request_errors += 1
+                if request_errors < 5:
+                    logger.error(json.dumps(status_es))
+                    logger.error(
+                        '%s: %s. Retrying...', type(exc).__name__, str(exc))
+                    _ = create_doc(
+                        status_id, status_es, loads, errors, request_errors)
+                else:
+                    request_errors = 0
+            except ElasticsearchException as exc:
+                errors += 1
+                logger.error('%s: %s', type(exc).__name__, str(exc))
+            return loads, errors
+        
+        loads = 0
+        errors = 0
+        request_errors = 0
+        
+        for i, status_es in enumerate(statuses_es):
+            logger.debug(status_es)
+            status_id = status_es.pop('id')
+            loads, errors = create_doc(
+                status_id, status_es, loads, errors, request_errors)
 
         logger.info(
             'Loaded %d/%d to Elasticsearch, already exist %d/%d.',
