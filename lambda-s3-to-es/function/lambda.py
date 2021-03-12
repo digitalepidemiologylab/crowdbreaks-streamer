@@ -290,6 +290,7 @@ def handler(event, context):
                 request_errors += 1
                 if request_errors < 5:
                     logger.error(json.dumps(status_es))
+                    logger.error(type(status_es['geo_info']['country_code']))
                     logger.error(
                         '%s: %s. Retrying...', type(exc).__name__, str(exc))
                     _ = create_doc(
