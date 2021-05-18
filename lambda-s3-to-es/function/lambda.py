@@ -246,18 +246,14 @@ def handler(event, context):
 
         for i in range(len(statuses)):
             statuses_es[i]['predictions'] = {
-                "endpoints": metas[i],
-                "primary": get_primary_probability(metas[i])
+                'endpoints': metas[i],
+                'primary': get_primary_probability(metas[i])
             }
             # Dummy annotation data to test the ES query
             if random.random() > 0.95:
                 logger.info('Annotations for %s', i)
                 statuses_es[i]['annotations'] = [
-                    {
-                        'author': ''.join(random.choices(string.ascii_lowercase, k=5)),
-                        'label': 1 if random.random() > 0.5 else 0
-                    }    
-                ]
+                    {'user_id': random.randint(10000, 99999)}]
                 logger.info(statuses_es[i]['annotations'])
 
         logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
@@ -270,7 +266,7 @@ def handler(event, context):
             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
         index_name = indices[slug][-1]
         logger.debug(index_name)
-        
+
         def create_doc(status_id, status_es, loads, errors, request_errors):
             try:
                 es.create(
