@@ -11,11 +11,32 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def check_desired_count(
-    cluster_name, service_name, count, status='running',
-    time_step=30, time_limit=160
+def check_if_currently_active(cluster_name, service_name):
+    response = ecs.describe_services(
+        cluster=cluster_name,
+        services=[service_name]
+    )
+    active = True
+    name_in_response = False
+    for service in response['services']:
+        if service['serviceName'] == service_name:
+            name_in_response = True
+            service_count = service[f'runningCount']
+            service_count += service[f'pendingCount']
+            if service_count == 0:
+                active = False
+    if name_in_response is False:
+        raise Exception('No inquired service name '
+                        f'({service_name}) in the response.')
+    if service_count > 1:
+        raise logger.warning('Extra instances were found. Check the ECS.')
+
+    return active
+
+
+def wait_for_desired_count(
+    cluster_name, service_name, count, time_step=30, time_limit=160
 ):
-    assert status in ['running', 'pending']
     updated = False
     time_slept = 0
     logger.info('%s %s', cluster_name, service_name)
@@ -25,15 +46,16 @@ def check_desired_count(
             cluster=cluster_name,
             services=[service_name]
         )
-
+        name_in_response = False
         for service in response['services']:
             if service['serviceName'] == service_name:
-                service_count = service[f'{status}Count']
+                name_in_response = True
+                service_count = service['runningCount']
+                service_count += service['pendingCount']
                 if time_slept < time_limit:
                     if service_count != count:
                         logger.info(
-                            '%s count: %d, desired: %d.',
-                            status.capitalize(),
+                            'Running/pending count: %d, desired: %d.',
                             service_count, count)
                         time_slept += time_step
                         time.sleep(time_step)
@@ -41,8 +63,8 @@ def check_desired_count(
                         updated = True
                 else:
                     raise Exception('Waiting more than %d s.', time_limit)
-            else:
-                raise Exception('No inquired service name in the response.')
+        if name_in_response is False:
+            raise Exception('No inquired service name in the response.')
 
     logger.info(
         'ECS service %s on cluster %s has been updated, desired count = %d.',
@@ -64,58 +86,72 @@ def handle_stream_config():
     config_manager_old = ConfigManager(version_id=version_ids[1])
     config_manager_new = ConfigManager(version_id=version_ids[0])
 
+    # Check if the streamer is currently active
+    streamer_currently_active = check_if_currently_active(
+        ECSEnv.CLUSTER, ECSEnv.SERVICE)
+
     # Restart streaming if configs are different
-    if config_manager_old.write() != config_manager_new.write() and \
-            state is True:
-        logger.info('Config changed. Going to restart the streamer.')
+    if config_manager_old.write() != config_manager_new.write():
+        if state is True:
+            logger.info('Config changed. Going to restart the streamer.')
+            # To stop streaming, set the desired count to 0 and wait
+            # until tasks are stopped
+            # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
+            response = ecs.update_service(
+                cluster=ECSEnv.CLUSTER,
+                service=ECSEnv.SERVICE,
+                desiredCount=0)
+            wait_for_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 0)
 
-        # To stop streaming, set desired count to 0 and wait
-        # until tasks are stopped
-        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
-        response = ecs.update_service(
-            cluster=ECSEnv.CLUSTER,
-            service=ECSEnv.SERVICE,
-            desiredCount=0)
-
-        check_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 0)
-
-        # To restart, set desired count to zero and wait
-        # until a task is running
-        response = ecs.update_service(
-            cluster=ECSEnv.CLUSTER,
-            service=ECSEnv.SERVICE,
-            desiredCount=1)
-
-        check_desired_count(
-            ECSEnv.CLUSTER, ECSEnv.SERVICE, 1, status='pending')
+            # To restart, set the disired count and wait
+            # until a task is pending/running
+            response = ecs.update_service(
+                cluster=ECSEnv.CLUSTER,
+                service=ECSEnv.SERVICE,
+                desiredCount=1)
+            wait_for_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 1)
+        elif state is False and streamer_currently_active:
+            logger.info('Config changed, the streamer is running '
+                        'but the current state is False. '
+                        'Going to stop the streamer.')
+            # To stop streaming, set the desired count to 0 and wait
+            # until tasks are stopped
+            # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
+            response = ecs.update_service(
+                cluster=ECSEnv.CLUSTER,
+                service=ECSEnv.SERVICE,
+                desiredCount=0)
+            wait_for_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 0)
 
 
 def handle_stream_state():
     state = json.loads(get_s3_object(
         ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY))
 
+    streamer_currently_active = check_if_currently_active(
+        ECSEnv.CLUSTER, ECSEnv.SERVICE)
+
     # - active => start streamer
     # - inactive => stop streamer
 
-    state = json.loads(get_s3_object(
-        ECSEnv.BUCKET_NAME, ECSEnv.STREAM_STATE_S3_KEY))
-
     if state is True:
-        logger.info('Streamer state is currently active.')
+        logger.info('The new state is True. Starting the streamer.')
+        if streamer_currently_active is False:
+            # To start streaming, set desired count to 1 and wait
+            # until tasks are pending
+            # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
+            _ = ecs.update_service(
+                cluster=ECSEnv.CLUSTER,
+                service=ECSEnv.SERVICE,
+                desiredCount=1)
 
-        # To start streaming, set desired count to 1 and wait
-        # until tasks are pending
-        # https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/ecs.html#ECS.Client.update_service
-        _ = ecs.update_service(
-            cluster=ECSEnv.CLUSTER,
-            service=ECSEnv.SERVICE,
-            desiredCount=1)
-
-        check_desired_count(
-            ECSEnv.CLUSTER, ECSEnv.SERVICE, 1, status='pending')
+            wait_for_desired_count(
+                ECSEnv.CLUSTER, ECSEnv.SERVICE, 1)
+        elif streamer_currently_active is True:
+            logger.info('Streamer is already active.')
 
     elif state is False:
-        logger.info('Streamer state is currently inactive.')
+        logger.info('The new state is False. Stopping the streamer.')
 
         # To stop streaming, set desired count to 0 and wait
         # until tasks are stopped
@@ -125,7 +161,7 @@ def handle_stream_state():
             service=ECSEnv.SERVICE,
             desiredCount=0)
 
-        check_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 0)
+        wait_for_desired_count(ECSEnv.CLUSTER, ECSEnv.SERVICE, 0)
 
 
 def handler(event, context):
