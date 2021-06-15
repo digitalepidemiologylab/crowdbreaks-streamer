@@ -3,9 +3,10 @@ import json
 import logging
 
 from awstools.session import s3, ecs
-from awstools.env import ECSEnv
-from awstools.config import ConfigManager
+from awstools.env import ECSEnv, AWSEnv
+from awstools.config import ConfigManager, StorageMode
 from awstools.s3 import get_s3_object
+from awstools.llambda import get_function_name_arn
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -123,6 +124,31 @@ def handle_stream_config():
             logger.info('The config changed, the current state is False. '
                         'Going to stop the streamer.')
             stop_streamer()
+
+        # Bucket Lambda event notifications
+        notif_config = s3.get_bucket_notification_configuration(
+            Bucket=ECSEnv.BUCKET_NAME
+        )
+        rules = []
+        for conf in config_manager_new.config:
+            if conf.storage_mode not in [StorageMode.S3,
+                                         StorageMode.S3_NO_RETWEETS]:
+                rules.append({
+                    'Name': 'prefix',
+                    'Value': AWSEnv.S3_LAMBDA_NOTIF_PREFIX + conf.slug})
+
+        notif_config['LambdaFunctionConfigurations'] = [{
+            'Id': 'streamer',
+            'LambdaFunctionArn':
+                get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME),
+            'Events': ['s3:ObjectCreated:*'],
+            'Filter': {'Key': {'FilterRules': rules}}
+        }]
+
+        _ = s3.put_bucket_notification_configuration(
+            Bucket=ECSEnv.BUCKET_NAME,
+            NotificationConfiguration=notif_config
+        )
 
 
 def handle_stream_state():

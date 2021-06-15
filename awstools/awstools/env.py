@@ -52,6 +52,11 @@ class AWSEnv(Env):
     ENDPOINTS_PREFIX = os.environ.get(
         'ENDPOINTS_PREFIX', 'configs/models/')
 
+    LAMBDA_S3_ES_NAME = os.environ.get(
+        'LAMBDA_S3_ES_NAME', 's3-to-es')
+    S3_LAMBDA_NOTIF_PREFIX = os.environ.get(
+        'S3_LAMBDA_NOTIF_PREFIX', 'tweets/project_')
+
 
 class KFEnv(AWSEnv):
     ROLE_TRUST_RELATIONSHIP_PATH = os.path.join(

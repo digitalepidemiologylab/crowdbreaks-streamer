@@ -14,10 +14,11 @@ logger.setLevel(logging.DEBUG)
 
 
 class StorageMode(Enum):
-    TEST_MODE = 1
+    S3 = 1
     S3_ES = 2
-    S3_ES_NO_UNMATCHED = 3
+    S3_NO_RETWEETS = 3
     S3_ES_NO_RETWEETS = 4
+    TEST_MODE = 5
 
 
 class ImageStorageMode(Enum):
@@ -26,8 +27,8 @@ class ImageStorageMode(Enum):
 
 
 converter = {
-    StorageMode: lambda x: StorageMode[x],
-    ImageStorageMode: lambda x: ImageStorageMode[x],
+    StorageMode: lambda x: StorageMode[x.upper().replace('-', '_')],
+    ImageStorageMode: lambda x: ImageStorageMode[x.upper().replace('-', '_')],
 }
 
 

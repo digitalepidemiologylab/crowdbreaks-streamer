@@ -68,11 +68,14 @@ def handle_tweet(
         status['project'] = slug
         status['matching_keywords'] = matching_keywords.get(slug)
 
-        if conf.storage_mode in \
-                [StorageMode.S3_ES, StorageMode.S3_ES_NO_RETWEETS]:
-            if tweet.is_retweet and \
-                    conf.storage_mode == StorageMode.S3_ES_NO_RETWEETS:
-                # Do not store retweets on ES
+        if conf.storage_mode in [StorageMode.S3, StorageMode.S3_ES,
+                                 StorageMode.S3_NO_RETWEETS,
+                                 StorageMode.S3_ES_NO_RETWEETS]:
+            if tweet.is_retweet and conf.storage_mode in [
+                StorageMode.S3_NO_RETWEETS,
+                StorageMode.S3_ES_NO_RETWEETS
+            ]:
+                # Do not store retweets
                 return
             # Send to the corresponding delivery stream
             stream_name = f'{KFEnv.APP_NAME}-{slug}'
