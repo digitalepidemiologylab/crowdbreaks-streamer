@@ -38,7 +38,6 @@ class Conf:
     lang: List[str]
     locales: List[str]
     slug: str
-    active: bool
     storage_mode: StorageMode
     image_storage_mode: ImageStorageMode
     model_endpoints: Optional[Dict]
@@ -93,9 +92,8 @@ class ConfigManager():
         """Pools all filtering configs to run everything in a single stream."""
         filter_conf = FilterConf()
         for conf in self.config:
-            if conf.active:
-                filter_conf.keywords.update(conf.keywords)
-                filter_conf.lang.update(conf.lang)
+            filter_conf.keywords.update(conf.keywords)
+            filter_conf.lang.update(conf.lang)
         return filter_conf
 
 

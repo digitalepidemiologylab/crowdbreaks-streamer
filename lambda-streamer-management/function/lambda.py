@@ -135,7 +135,7 @@ def handle_stream_config():
                                          StorageMode.S3_NO_RETWEETS]:
                 rules.append({
                     'Name': 'prefix',
-                    'Value': AWSEnv.S3_LAMBDA_NOTIF_PREFIX + conf.slug})
+                    'Value': AWSEnv.STORAGE_BUCKET_PREFIX + conf.slug})
 
         notif_config['LambdaFunctionConfigurations'] = [{
             'Id': 'streamer',
