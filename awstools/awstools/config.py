@@ -38,6 +38,7 @@ class Conf:
     lang: List[str]
     locales: List[str]
     slug: str
+    es_index_name: str
     storage_mode: StorageMode
     image_storage_mode: ImageStorageMode
     model_endpoints: Optional[Dict]
