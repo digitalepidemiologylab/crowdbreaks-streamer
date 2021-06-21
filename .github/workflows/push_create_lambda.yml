@@ -1,5 +1,10 @@
-on: [push]
+on:
+  push:
+    branches:
+      - master
+
 name: Push code for & create a new version of the Crowdbreaks Lambda
+
 jobs:
   push_create_lambda:
     name: Push & create
