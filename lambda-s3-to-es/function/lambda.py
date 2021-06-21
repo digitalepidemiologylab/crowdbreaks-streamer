@@ -18,7 +18,7 @@ from awstools.s3 import get_long_s3_object
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
 
 geo_code = Geocode()
 geo_code.load()
