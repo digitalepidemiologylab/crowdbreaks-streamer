@@ -18,7 +18,7 @@ from awstools.s3 import get_long_s3_object
 
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
+logger.setLevel(logging.DEBUG)
 
 geo_code = Geocode()
 geo_code.load()
@@ -129,18 +129,20 @@ def handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
 
+        logger.debug(key)
+
         # Get slug
         slug = [
             name for name in key.split('/')
-            if name.startswith(ESEnv.STORAGE_BUCKET_PREFIX.split('/')[-1])
+            if name.startswith(ESEnv.INDEX_PREFIX)
         ]
         if len(slug) != 1:
             logger.error('Slug len != 1.\nKey: %s.\nSlug: %s.', key, slug)
-        slug = slug[0].split('_')[1]
+        slug = slug[0][len(ESEnv.INDEX_PREFIX):]
         logger.debug('Slug: %s.', slug)
 
         # Get model endpoints from config
-        model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
+        # model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
 
         # Get S3 object
         records = get_long_s3_object(
@@ -194,41 +196,41 @@ def handler(event, context):
         # }
 
         # Fill metadata with predictions
-        metas = [[] for _ in range(len(texts))]
-        for endpoint in model_endpoints['endpoints']:
-            if endpoint['active']:
-                batch_size = get_batch_size(endpoint['model_type'])
-                key = os.path.join(
-                        ESEnv.ENDPOINTS_PREFIX, endpoint['name'] + '.json')
-                run_config = json.loads(get_long_s3_object(
-                    ESEnv.BUCKET_NAME, key,
-                    {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+        # metas = [[] for _ in range(len(texts))]
+        # for endpoint in model_endpoints['endpoints']:
+        #     if endpoint['active']:
+        #         batch_size = get_batch_size(endpoint['model_type'])
+        #         key = os.path.join(
+        #                 ESEnv.ENDPOINTS_PREFIX, endpoint['name'] + '.json')
+        #         run_config = json.loads(get_long_s3_object(
+        #             ESEnv.BUCKET_NAME, key,
+        #             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
 
-                outputs = predict(
-                    endpoint['name'], run_config['preprocess'], texts, batch_size)
+        #         outputs = predict(
+        #             endpoint['name'], run_config['preprocess'], texts, batch_size)
 
-                for i, output in enumerate(outputs):
-                    try:
-                        max_prob = max(output['probabilities'])
-                        ind_max_prob = output['probabilities'].index(max_prob)
-                        label = output['labels'][ind_max_prob]
-                        label_val = output['label_vals'][ind_max_prob]
-                    except KeyError:  # output == None
-                        metas[i].append({
-                            'problem_type': endpoint['model_type'],
-                            'name': endpoint['name'],
-                            'run_name': endpoint['run_name'],
-                            'failed': True
-                        })
-                    finally:
-                        metas[i].append({
-                            'problem_type': endpoint['model_type'],
-                            'name': endpoint['name'],
-                            'run_name': endpoint['run_name'],
-                            'probability': max_prob,
-                            'label': label,
-                            'label_val': label_val
-                        })
+        #         for i, output in enumerate(outputs):
+        #             try:
+        #                 max_prob = max(output['probabilities'])
+        #                 ind_max_prob = output['probabilities'].index(max_prob)
+        #                 label = output['labels'][ind_max_prob]
+        #                 label_val = output['label_vals'][ind_max_prob]
+        #             except KeyError:  # output == None
+        #                 metas[i].append({
+        #                     'problem_type': endpoint['model_type'],
+        #                     'name': endpoint['name'],
+        #                     'run_name': endpoint['run_name'],
+        #                     'failed': True
+        #                 })
+        #             finally:
+        #                 metas[i].append({
+        #                     'problem_type': endpoint['model_type'],
+        #                     'name': endpoint['name'],
+        #                     'run_name': endpoint['run_name'],
+        #                     'probability': max_prob,
+        #                     'label': label,
+        #                     'label_val': label_val
+        #                 })
 
         # Process tweets for ES
         statuses_es = []
@@ -238,25 +240,25 @@ def handler(event, context):
             ).extract_es(extract_geo=True))
 
         # Add 'predictions' field to statuses
-        def get_primary_probability(metas):
-            for meta in metas:
-                if meta['name'] == model_endpoints['primary']:
-                    return meta['probability']
-            return None
+        # def get_primary_probability(metas):
+        #     for meta in metas:
+        #         if meta['name'] == model_endpoints['primary']:
+        #             return meta['probability']
+        #     return None
 
-        for i in range(len(statuses)):
-            statuses_es[i]['predictions'] = {
-                'endpoints': metas[i],
-                'primary': get_primary_probability(metas[i])
-            }
-            # Dummy annotation data to test the ES query
-            if random.random() > 0.95:
-                logger.info('Annotations for %s', i)
-                statuses_es[i]['annotations'] = [
-                    {'user_id': random.randint(10000, 99999)}]
-                logger.info(statuses_es[i]['annotations'])
+        # for i in range(len(statuses)):
+        #     statuses_es[i]['predictions'] = {
+        #         'endpoints': metas[i],
+        #         'primary': get_primary_probability(metas[i])
+        #     }
+        #     # Dummy annotation data to test the ES query
+        #     if random.random() > 0.95:
+        #         logger.info('Annotations for %s', i)
+        #         statuses_es[i]['annotations'] = [
+        #             {'user_id': random.randint(10000, 99999)}]
+        #         logger.info(statuses_es[i]['annotations'])
 
-        logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
+        # logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
 
         # Load to Elasticsearch
         # index_name = \
@@ -297,11 +299,11 @@ def handler(event, context):
                 errors += 1
                 logger.error('%s: %s', type(exc).__name__, str(exc))
             return loads, errors
-        
+
         loads = 0
         errors = 0
         request_errors = 0
-        
+
         for i, status_es in enumerate(statuses_es):
             logger.debug(status_es)
             status_id = status_es.pop('id')
