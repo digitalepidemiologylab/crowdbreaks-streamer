@@ -39,5 +39,6 @@ es = Elasticsearch(
     http_auth=awsauth,
     use_ssl=True,
     verify_certs=True,
-    connection_class=RequestsHttpConnection
+    connection_class=RequestsHttpConnection,
+    request_timeout=120
 )
