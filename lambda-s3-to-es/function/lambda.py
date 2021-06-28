@@ -2,8 +2,7 @@ import logging
 import json
 # import re
 import os
-import random
-import string
+from copy import deepcopy
 
 from elasticsearch import ConflictError, ElasticsearchException, RequestError
 # from elasticsearch.helpers import bulk
@@ -129,8 +128,6 @@ def handler(event, context):
         bucket = record['s3']['bucket']['name']
         key = record['s3']['object']['key']
 
-        logger.debug(key)
-
         # Get slug
         slug = [
             name for name in key.split('/')
@@ -142,7 +139,7 @@ def handler(event, context):
         logger.debug('Slug: %s.', slug)
 
         # Get model endpoints from config
-        # model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
+        model_endpoints = config_manager.get_conf_by_slug(slug).model_endpoints
 
         # Get S3 object
         records = get_long_s3_object(
@@ -160,77 +157,66 @@ def handler(event, context):
 
         texts = [status['text'] for status in statuses]
 
-        # Stream config model_endpoints schema I wanna have
-        # "model_endpoints": {
-        #     "endpoints": [
-        #         {
-        #             "problem_type": "sentiment",
-        #             "name": "crowdbreaks-6512709bc4",
-        #             "run_name": "fasttext_v2",
-        #             "model_type": "fasttext",
-        #             "active": true
-        #         }
-        #     ],
-        #     "primary": "crowdbreaks-6512709bc4"
-        # }
+        # Read off stream config and prepare a template for metadata
+        prediction = {}
+        endpoint_names = {}
+        run_names = {}
+        model_types = {}
+        preprocessing_configs = {}
+        for question_tag in model_endpoints:
+            endpoint_names[question_tag] = []
+            run_names[question_tag] = []
+            model_types[question_tag] = []
+            prediction[question_tag] = {'endpoints': {}}
+            preprocessing_configs[question_tag] = []
+            for endpoint_name, info in \
+                    model_endpoints[question_tag]['active'].items():
+                endpoint_names[question_tag].append(endpoint_name)
+                run_names[question_tag].append(info['run_name'])
+                model_types[question_tag].append(info['model_type'])
 
-        # Predictions schema I wanna have
-        # "predictions": {
-        #     "endpoints": [
-        #         {
-        #             "problem_type": "sentiment",
-        #             "name": "crowdbreaks-6512709bc4",
-        #             "run_name": "fasttext_v2",
-        #             "probability": 0.886259913444519,
-        #             "label": "neutral",
-        #             "label_val": 0
-        #         },
-        #         {
-        #             "problem_type": "sentiment",
-        #             "name": "crowdbreaks-someother",
-        #             "run_name": "fasttext_v1",
-        #             "failed": true
-        #         }
-        #     ],
-        #     "primary": 0.886259913444519
-        # }
+                key = os.path.join(
+                    ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
+
+                run_config = json.loads(get_long_s3_object(
+                    ESEnv.BUCKET_NAME, key,
+                    {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+
+                preprocessing_configs[question_tag].append(
+                    run_config['preprocess'])
+
+        predictions = [deepcopy(prediction)] * len(texts)
+        logger.info('Endpoint names:\n%s.', endpoint_names)
 
         # Fill metadata with predictions
-        # metas = [[] for _ in range(len(texts))]
-        # for endpoint in model_endpoints['endpoints']:
-        #     if endpoint['active']:
-        #         batch_size = get_batch_size(endpoint['model_type'])
-        #         key = os.path.join(
-        #                 ESEnv.ENDPOINTS_PREFIX, endpoint['name'] + '.json')
-        #         run_config = json.loads(get_long_s3_object(
-        #             ESEnv.BUCKET_NAME, key,
-        #             {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+        for question_tag in endpoint_names:
+            for (
+                endpoint_name,
+                model_type,
+                run_name,
+                preprocessing_config
+            ) in zip(
+                endpoint_names[question_tag],
+                model_types[question_tag],
+                run_names[question_tag],
+                preprocessing_configs[question_tag]
+            ):
+                batch_size = get_batch_size(model_type)
 
-        #         outputs = predict(
-        #             endpoint['name'], run_config['preprocess'], texts, batch_size)
+                outputs = predict(
+                    endpoint_name, preprocessing_config, texts, batch_size)
 
-        #         for i, output in enumerate(outputs):
-        #             try:
-        #                 max_prob = max(output['probabilities'])
-        #                 ind_max_prob = output['probabilities'].index(max_prob)
-        #                 label = output['labels'][ind_max_prob]
-        #                 label_val = output['label_vals'][ind_max_prob]
-        #             except KeyError:  # output == None
-        #                 metas[i].append({
-        #                     'problem_type': endpoint['model_type'],
-        #                     'name': endpoint['name'],
-        #                     'run_name': endpoint['run_name'],
-        #                     'failed': True
-        #                 })
-        #             finally:
-        #                 metas[i].append({
-        #                     'problem_type': endpoint['model_type'],
-        #                     'name': endpoint['name'],
-        #                     'run_name': endpoint['run_name'],
-        #                     'probability': max_prob,
-        #                     'label': label,
-        #                     'label_val': label_val
-        #                 })
+                if outputs is None:
+                    continue
+
+                for i, output in enumerate(outputs):
+                    max_prob = max(output['probabilities'])
+                    ind_max_prob = output['probabilities'].index(max_prob)
+                    predictions[i][question_tag]['endpoints'][run_name] = {
+                        'probability': max_prob,
+                        'label': output['labels'][ind_max_prob],
+                        'label_val': output['label_vals'][ind_max_prob]
+                    }
 
         # Process tweets for ES
         statuses_es = []
@@ -240,25 +226,13 @@ def handler(event, context):
             ).extract_es(extract_geo=True))
 
         # Add 'predictions' field to statuses
-        # def get_primary_probability(metas):
-        #     for meta in metas:
-        #         if meta['name'] == model_endpoints['primary']:
-        #             return meta['probability']
-        #     return None
+        for i in range(len(statuses)):
+            # This way, if prediction fails, we at least store the tweet
+            if predictions[i] != prediction:
+                # Keep the failed predictions empty
+                statuses_es[i]['predictions'] = predictions[i]
 
-        # for i in range(len(statuses)):
-        #     statuses_es[i]['predictions'] = {
-        #         'endpoints': metas[i],
-        #         'primary': get_primary_probability(metas[i])
-        #     }
-        #     # Dummy annotation data to test the ES query
-        #     if random.random() > 0.95:
-        #         logger.info('Annotations for %s', i)
-        #         statuses_es[i]['annotations'] = [
-        #             {'user_id': random.randint(10000, 99999)}]
-        #         logger.info(statuses_es[i]['annotations'])
-
-        # logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
+        logger.debug('\n\n'.join([json.dumps(status) for status in statuses]))
 
         # Load to Elasticsearch
         # index_name = \
