@@ -188,8 +188,19 @@ def handler(event, context):
         predictions = [deepcopy(prediction)] * len(texts)
         logger.info('Endpoint names:\n%s.', endpoint_names)
 
+        def predictions_from_output(output, primary=False):
+            max_prob = max(output['probabilities'])
+            ind_max_prob = output['probabilities'].index(max_prob)
+            prefix = 'primary_' if primary else ''
+            return {
+                f'{prefix}probability': max_prob,
+                f'{prefix}label': output['labels'][ind_max_prob],
+                f'{prefix}label_val': output['label_vals'][ind_max_prob]
+            }
+
         # Fill metadata with predictions
         for question_tag in endpoint_names:
+            primary_endpoint_name = model_endpoints[question_tag]['primary']
             for (
                 endpoint_name,
                 model_type,
@@ -209,14 +220,14 @@ def handler(event, context):
                 if outputs is None:
                     continue
 
+                if endpoint_name == primary_endpoint_name:
+                    for i, output in enumerate(outputs):
+                        predictions[i][question_tag]['endpoints'] = \
+                            predictions_from_output(output, primary=True)
+
                 for i, output in enumerate(outputs):
-                    max_prob = max(output['probabilities'])
-                    ind_max_prob = output['probabilities'].index(max_prob)
-                    predictions[i][question_tag]['endpoints'][run_name] = {
-                        'probability': max_prob,
-                        'label': output['labels'][ind_max_prob],
-                        'label_val': output['label_vals'][ind_max_prob]
-                    }
+                    predictions[i][question_tag]['endpoints'][run_name] = \
+                        predictions_from_output(output)
 
         # Process tweets for ES
         statuses_es = []
