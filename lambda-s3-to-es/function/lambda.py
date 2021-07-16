@@ -12,9 +12,10 @@ import twiprocess as twp
 from twiprocess.processtweet import ProcessTweet
 from awstools.env import ESEnv, SMEnv
 from awstools.config import config_manager
-from awstools.session import session, es
+from awstools.session import session, es, s3
 from awstools.s3 import get_long_s3_object
 
+DEFAULT_STANDARDIZE_FUNC_NAME = 'standardize_anonymize'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -69,7 +70,7 @@ def preprocess(preprocessing_config, texts):
         standardize_func_name = preprocessing_config['standardize_func_name']
         del preprocessing_config['standardize_func_name']
     except KeyError:
-        standardize_func_name = None
+        standardize_func_name = DEFAULT_STANDARDIZE_FUNC_NAME
     if standardize_func_name is not None:
         logger.debug('Standardizing data...')
         standardize_func = getattr(
@@ -77,7 +78,6 @@ def preprocess(preprocessing_config, texts):
                 'twiprocess.standardize',
                 fromlist=[standardize_func_name]),
             standardize_func_name)
-        logger.info(standardize_func)
         texts = [standardize_func(text) for text in texts]
     if preprocessing_config != {}:
         logger.debug('Preprocessing data...')
@@ -177,10 +177,17 @@ def handler(event, context):
 
                 key = os.path.join(
                     ESEnv.ENDPOINTS_PREFIX, endpoint_name + '.json')
+                logger.debug(f'Key: {key}')
 
-                run_config = json.loads(get_long_s3_object(
-                    ESEnv.BUCKET_NAME, key,
-                    {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
+                try:
+                    logger.debug('Trying to load from S3')
+                    run_config = json.loads(get_long_s3_object(
+                        ESEnv.BUCKET_NAME, key,
+                        {'CompressionType': 'NONE', 'JSON':
+                            {'Type': 'DOCUMENT'}}))
+                except Exception:
+                    logger.debug('Some error, addind an empty config')
+                    run_config = {'preprocess': {}}
 
                 preprocessing_configs[question_tag].append(
                     run_config['preprocess'])
