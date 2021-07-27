@@ -11,8 +11,8 @@ load_dotenv(dotenv_path=env_path)
 class Env(Constant):
     """Base configuration."""
     # Environment
-    ENV = os.environ.get('ENV', None)  # Lower case recommended
-    APP_NAME = os.environ.get('APP_NAME', None)  # Lower case recommended
+    ENV = os.environ.get('ENV', '')  # Lower case recommended
+    APP_NAME = os.environ.get('APP_NAME', '')  # Lower case recommended
     DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
     # Unmatched tweets
@@ -34,10 +34,10 @@ class Env(Constant):
 class AWSEnv(Env):
     """AWS config (for storing in S3, accessing Elasticsearch)."""
     REGION = os.environ.get('AWS_REGION', 'eu-central-1')
-    ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', None)
-    SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', None)
-    SESSION_TOKEN = os.environ.get('AWS_SESSION_TOKEN', None)
-    ACCOUNT_NUM = os.environ.get('AWS_ACCOUNT_NUM', None)
+    ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID', '')
+    SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY', '')
+    SESSION_TOKEN = os.environ.get('AWS_SESSION_TOKEN', '')
+    ACCOUNT_NUM = os.environ.get('AWS_ACCOUNT_NUM', '')
 
     BUCKET_NAME = os.environ.get(
         'AWS_BUCKET_NAME', Env.APP_NAME + '-' + Env.ENV)
@@ -85,8 +85,8 @@ class LEnv(AWSEnv):
 
 
 class ESEnv(AWSEnv):
-    HOST = os.environ.get('ES_HOST', None)
-    PORT = os.environ.get('ES_PORT', None)
+    HOST = os.environ.get('ES_HOST', '')
+    PORT = os.environ.get('ES_PORT', '')
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
     DOMAIN = os.environ.get('ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV)
     CONFIG_S3_KEY = os.environ.get(
@@ -94,8 +94,8 @@ class ESEnv(AWSEnv):
 
 
 class ECSEnv(AWSEnv):
-    CLUSTER = os.environ.get('ECS_CLUSTER', None)
-    SERVICE = os.environ.get('ECS_SERVICE', None)
+    CLUSTER = os.environ.get('ECS_CLUSTER', '')
+    SERVICE = os.environ.get('ECS_SERVICE', '')
 
 
 class SMEnv(AWSEnv):
