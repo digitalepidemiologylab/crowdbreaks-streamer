@@ -5,7 +5,7 @@ from requests_aws4auth import AWS4Auth
 from .env import AWSEnv, ESEnv
 
 # https://forums.aws.amazon.com/thread.jspa?threadID=197439
-if AWSEnv.SESSION_TOKEN == -1:
+if AWSEnv.SESSION_TOKEN is None:
     # Launched from a server, no need for a session token
     session = boto3.Session(
         region_name=AWSEnv.REGION,
