@@ -33,39 +33,71 @@
             "workingDirectory": null,
             "secrets": [
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksESHostPort-qcZleE:ES_HOST::",
+                    "value": "prd",
+                    "name": "ENV"
+                },
+                {
+                    "value": "crowdbreaks",
+                    "name": "APP_NAME"
+                },
+                {
+                    "value": "False",
+                    "name": "DEBUG"
+                },
+                {
+                    "value": "False",
+                    "name": "UNMATCHED_STORE_S3"
+                },
+                {
+                    "value": "crowdbreaks-streamer",
+                    "name": "ECS_CLUSTER"
+                },
+                {
+                    "value": "streamer-prd-service",
+                    "name": "ECS_SERVICE"
+                },
+                {
+                    "value": "crowdbreaks-prd",
+                    "name": "ES_DOMAIN"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:ES_HOST::",
                     "name": "ES_HOST"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksESHostPort-qcZleE:ES_PORT::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:ES_PORT::",
                     "name": "ES_PORT"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_CONSUMER_KEY::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_KEY::",
                     "name": "TWI_CONSUMER_KEY"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_CONSUMER_SECRET::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_SECRET::",
                     "name": "TWI_CONSUMER_SECRET"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_OAUTH_TOKEN::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN::",
                     "name": "TWI_OAUTH_TOKEN"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_OAUTH_TOKEN_SECRET::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN_SECRET::",
                     "name": "TWI_OAUTH_TOKEN_SECRET"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis:AWS_ACCOUNT_NUM::",
+                    "value": "eu-central-1",
+                    "name": "AWS_REGION"
+                },
+                {
+                    "value": "874942657130",
                     "name": "AWS_ACCOUNT_NUM"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis:AWS_ACCESS_KEY_ID::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:AWS_ACCESS_KEY_ID::",
                     "name": "AWS_ACCESS_KEY_ID"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis:AWS_SECRET_ACCESS_KEY::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:AWS_SECRET_ACCESS_KEY::",
                     "name": "AWS_SECRET_ACCESS_KEY"
                 }
             ],

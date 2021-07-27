@@ -84,9 +84,10 @@ def main():
     logger.info(os.getcwd())
 
     # Create a delivery stream for unmanched tweets
-    create_delivery_stream(
-        KFEnv.UNMATCHED_STREAM_NAME,
-        f'{KFEnv.UNMATCHED_STREAM_NAME}/')
+    if KFEnv.UNMATCHED_STORE_S3 is True:
+        create_delivery_stream(
+            KFEnv.UNMATCHED_STREAM_NAME,
+            f'{KFEnv.UNMATCHED_STREAM_NAME}/')
     # Create delivery streams and ES indices for the lsited projects
     for conf in config_manager.config:
         create_delivery_stream(

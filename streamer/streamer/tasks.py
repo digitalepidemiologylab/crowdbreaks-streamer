@@ -36,7 +36,7 @@ def handle_tweet(
                     LogDirs.UNMATCHED.value, f"{status_id}.json"
             ), 'w') as f:
                 json.dump(status, f)
-        if Env.UNMATCHED_STORE_S3 == 1:
+        if Env.UNMATCHED_STORE_S3 is True:
             _ = firehose.put_record(
                 DeliveryStreamName=f'{KFEnv.APP_NAME}-'
                                    f'{KFEnv.UNMATCHED_STREAM_NAME}',

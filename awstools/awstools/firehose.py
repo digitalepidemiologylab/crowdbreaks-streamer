@@ -5,7 +5,11 @@ from .env import KFEnv
 from .session import iam, firehose
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+if KFEnv.DEBUG is True:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
 
 
 def get_bucket_arn(bucket_name):

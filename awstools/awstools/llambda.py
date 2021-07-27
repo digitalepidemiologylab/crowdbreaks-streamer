@@ -13,7 +13,11 @@ from .session import s3, iam, aws_lambda
 from .firehose import get_bucket_arn
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+if LEnv.DEBUG is True:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
 
 
 def zip_lambda_func(lambda_dir):

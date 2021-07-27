@@ -3,9 +3,14 @@ import logging
 from botocore.exceptions import ClientError
 
 from .session import s3
+from .env import Env
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+if Env.DEBUG is True:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
 
 
 def get_long_s3_object(bucket, key, input_serialization, s3_client=s3):

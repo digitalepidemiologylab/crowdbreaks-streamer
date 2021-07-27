@@ -10,7 +10,11 @@ from .session import s3, es
 from .s3 import get_long_s3_object
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+if ESEnv.DEBUG is True:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
 
 
 # https://developer.twitter.com/en/docs/twitter-for-websites/supported-languages

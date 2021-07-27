@@ -13,14 +13,14 @@ class Env(Constant):
     # Environment
     ENV = os.environ.get('ENV', 'stg').lower()
     APP_NAME = os.environ.get('APP_NAME').lower()
-    DEBUG = int(os.environ.get('DEBUG', 'False') == 'True')
+    DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
     # Unmatched tweets
-    UNMATCHED_STORE_LOCALLY = int(os.environ.get(
-        'UNMATCHED_STORE_LOCALLY', 'False') == 'True')
+    UNMATCHED_STORE_LOCALLY = os.environ.get(
+        'UNMATCHED_STORE_LOCALLY', 'False') == 'True'
 
-    UNMATCHED_STORE_S3 = int(os.environ.get(
-        'UNMATCHED_STORE_S3', 'False') == 'True')
+    UNMATCHED_STORE_S3 = os.environ.get(
+        'UNMATCHED_STORE_S3', 'False') == 'True'
 
     # Paths
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory
@@ -29,7 +29,6 @@ class Env(Constant):
 
     # Other
     NUM_WORKERS = os.environ.get('NUM_WORKERS', 4)
-    TIMEZONE = os.environ.get('TIMEZONE', 'Europe/Zurich')
 
 
 class AWSEnv(Env):

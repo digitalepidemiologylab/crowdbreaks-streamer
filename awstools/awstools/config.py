@@ -10,7 +10,11 @@ from .s3 import get_s3_object, s3
 from .env import AWSEnv
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+
+if AWSEnv.DEBUG is True:
+    logger.setLevel(logging.DEBUG)
+else:
+    logger.setLevel(logging.INFO)
 
 
 class StorageMode(Enum):
