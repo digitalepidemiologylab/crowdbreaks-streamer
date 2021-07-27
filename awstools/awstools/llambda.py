@@ -48,14 +48,14 @@ def zip_lambda_layer(lambda_dir):
 
 
 def get_function_name_arn(lambda_name):
-    function_name = f'{LEnv.APP_NAME.lower()}-{lambda_name}'
+    function_name = f'{LEnv.APP_NAME.lower()}-{lambda_name}-{LEnv.ENV}'
     function_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
                    f'function:{function_name}'
     return function_name, function_arn
 
 
 def get_layer_name_arn(lambda_name):
-    layer_name = f'{LEnv.APP_NAME.lower()}-layer-{lambda_name}'
+    layer_name = f'{LEnv.APP_NAME.lower()}-layer-{lambda_name}-{LEnv.ENV}'
     layer_arn = f'arn:aws:lambda:{LEnv.REGION}:{LEnv.ACCOUNT_NUM}:' \
                 f'layer:{layer_name}'
     return layer_name, layer_arn
@@ -66,15 +66,15 @@ def lambda_to_iam_name(lambda_name):
 
 
 def get_role_name_arn(lambda_name):
-    role_name = lambda_to_iam_name(lambda_name)
-    role_name = f'{LEnv.APP_NAME.capitalize()}Lambda{role_name}'
+    role_name = lambda_to_iam_name(get_function_name_arn(lambda_name)[0])
+    role_name = f'{role_name}Lambda'
     role_arn = f'arn:aws:iam::{LEnv.ACCOUNT_NUM}:role/{role_name}'
     return role_name, role_arn
 
 
 def get_policy_name_arn(lambda_name):
-    policy_name = lambda_to_iam_name(lambda_name)
-    policy_name = f'{LEnv.APP_NAME.capitalize()}Lambda{policy_name}'
+    policy_name = lambda_to_iam_name(get_function_name_arn(lambda_name)[0])
+    policy_name = f'{policy_name}Lambda'
     policy_arn = f'arn:aws:iam::{LEnv.ACCOUNT_NUM}:policy/{policy_name}'
     return policy_name, policy_arn
 

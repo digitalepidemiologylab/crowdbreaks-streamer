@@ -3,7 +3,7 @@ on:
     branches:
       - master
 
-name: Push code for & create a new version of the Crowdbreaks Lambda
+name: Push code for & create a new version of the Crowdbreaks Lambda (Staging)
 
 jobs:
   push_create_lambda:
@@ -27,9 +27,9 @@ jobs:
         AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_ACCOUNT_NUM: ${{ secrets.AWS_ACCOUNT_NUM }}
-        ES_HOST: ${{ secrets.ES_HOST }}
-        ES_PORT: ${{ secrets.ES_PORT }}
         AWS_REGION: eu-central-1
+        ENV: stg
+        APP_NAME: crowdbreaks
       run: |
           # https://stackoverflow.com/questions/5015316/run-all-python-files-in-a-directory
           output=$(for f in lambda-*/run.py; do python "$f"; done)

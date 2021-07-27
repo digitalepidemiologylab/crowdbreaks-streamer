@@ -17,23 +17,23 @@ def get_bucket_arn(bucket_name):
 
 
 def get_role_name_arn(slug):
-    role_name = '{}{}FirehoseBucket-{}'.format(
-        KFEnv.APP_NAME.capitalize(), slug.capitalize(),
+    role_name = '{}{}{}FirehoseBucket-{}'.format(
+        KFEnv.APP_NAME.capitalize(), slug.capitalize(), KFEnv.ENV.capitalize(),
         KFEnv.BUCKET_NAME)
     role_arn = f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:role/{role_name}'
     return role_name, role_arn
 
 
 def get_policy_name_arn(slug):
-    policy_name = '{}{}FirehoseBucket-{}'.format(
-        KFEnv.APP_NAME.capitalize(), slug.capitalize(),
+    policy_name = '{}{}{}FirehoseBucket-{}'.format(
+        KFEnv.APP_NAME.capitalize(), slug.capitalize(), KFEnv.ENV.capitalize(),
         KFEnv.BUCKET_NAME)
     policy_arn = f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:policy/{policy_name}'
     return policy_name, policy_arn
 
 
 def get_stream_name_arn(slug):
-    stream_name = f'{KFEnv.APP_NAME}-{slug}'
+    stream_name = f'{KFEnv.APP_NAME}-{slug}-{KFEnv.ENV}'
     stream_arn = \
         f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:deliverystream/{stream_name}'
     return stream_name, stream_arn
