@@ -11,8 +11,8 @@ load_dotenv(dotenv_path=env_path)
 class Env(Constant):
     """Base configuration."""
     # Environment
-    ENV = os.environ.get('ENV', 'stg').lower()
-    APP_NAME = os.environ.get('APP_NAME').lower()
+    ENV = os.environ.get('ENV', 'stg')  # Lower case recommended
+    APP_NAME = os.environ.get('APP_NAME')  # Lower case recommended
     DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 
     # Unmatched tweets
