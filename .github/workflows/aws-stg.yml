@@ -32,7 +32,7 @@ on:
     branches:
       - master
 
-name: Deploy to Amazon ECS
+name: Deploy to Amazon ECS (Staging)
 
 jobs:
   deploy:

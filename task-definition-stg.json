@@ -33,31 +33,31 @@
             "workingDirectory": null,
             "secrets": [
                 {
-                    "value": "stg",
+                    "valueFrom": "stg",
                     "name": "ENV"
                 },
                 {
-                    "value": "crowdbreaks",
+                    "valueFrom": "crowdbreaks",
                     "name": "APP_NAME"
                 },
                 {
-                    "value": "True",
+                    "valueFrom": "True",
                     "name": "DEBUG"
                 },
                 {
-                    "value": "False",
+                    "valueFrom": "False",
                     "name": "UNMATCHED_STORE_S3"
                 },
                 {
-                    "value": "crowdbreaks-streamer",
+                    "valueFrom": "crowdbreaks-streamer",
                     "name": "ECS_CLUSTER"
                 },
                 {
-                    "value": "streamer-stg-service",
+                    "valueFrom": "streamer-stg-service",
                     "name": "ECS_SERVICE"
                 },
                 {
-                    "value": "crowdbreaks-stg",
+                    "valueFrom": "crowdbreaks-stg",
                     "name": "ES_DOMAIN"
                 },
                 {
@@ -85,11 +85,11 @@
                     "name": "TWI_OAUTH_TOKEN_SECRET"
                 },
                 {
-                    "value": "eu-central-1",
+                    "valueFrom": "eu-central-1",
                     "name": "AWS_REGION"
                 },
                 {
-                    "value": "874942657130",
+                    "valueFrom": "874942657130",
                     "name": "AWS_ACCOUNT_NUM"
                 },
                 {
