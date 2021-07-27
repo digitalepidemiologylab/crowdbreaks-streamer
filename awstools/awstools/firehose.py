@@ -6,7 +6,7 @@ from .session import iam, firehose
 
 logger = logging.getLogger(__name__)
 
-if KFEnv.DEBUG is True:
+if KFEnv.DEBUG == 1:
     logger.setLevel(logging.DEBUG)
 else:
     logger.setLevel(logging.INFO)

@@ -13,14 +13,14 @@ class Env(Constant):
     # Environment
     ENV = os.environ.get('ENV', '')  # Lower case recommended
     APP_NAME = os.environ.get('APP_NAME', '')  # Lower case recommended
-    DEBUG = os.environ.get('DEBUG', 'False') == 'True'
+    DEBUG = int(os.environ.get('DEBUG', 'False') == 'True')
 
     # Unmatched tweets
-    UNMATCHED_STORE_LOCALLY = os.environ.get(
-        'UNMATCHED_STORE_LOCALLY', 'False') == 'True'
+    UNMATCHED_STORE_LOCALLY = int(os.environ.get(
+        'UNMATCHED_STORE_LOCALLY', 'False') == 'True')
 
-    UNMATCHED_STORE_S3 = os.environ.get(
-        'UNMATCHED_STORE_S3', 'False') == 'True'
+    UNMATCHED_STORE_S3 = int(os.environ.get(
+        'UNMATCHED_STORE_S3', 'False') == 'True')
 
     # Paths
     APP_DIR = os.path.abspath(os.path.dirname(__file__))  # This directory

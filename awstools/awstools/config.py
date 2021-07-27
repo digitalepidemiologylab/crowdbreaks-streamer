@@ -11,7 +11,7 @@ from .env import AWSEnv
 
 logger = logging.getLogger(__name__)
 
-if AWSEnv.DEBUG is True:
+if AWSEnv.DEBUG == 1:
     logger.setLevel(logging.DEBUG)
 else:
     logger.setLevel(logging.INFO)

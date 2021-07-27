@@ -11,7 +11,7 @@ from .s3 import get_long_s3_object
 
 logger = logging.getLogger(__name__)
 
-if ESEnv.DEBUG is True:
+if ESEnv.DEBUG == 1:
     logger.setLevel(logging.DEBUG)
 else:
     logger.setLevel(logging.INFO)

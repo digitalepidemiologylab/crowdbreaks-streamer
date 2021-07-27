@@ -84,7 +84,7 @@ def main():
     logger.info(os.getcwd())
 
     # Create a delivery stream for unmanched tweets
-    if KFEnv.UNMATCHED_STORE_S3 is True:
+    if KFEnv.UNMATCHED_STORE_S3 == 1:
         create_delivery_stream(
             KFEnv.UNMATCHED_STREAM_NAME,
             f'{KFEnv.UNMATCHED_STREAM_NAME}/')

@@ -7,7 +7,7 @@ from .env import Env
 
 logger = logging.getLogger(__name__)
 
-if Env.DEBUG is True:
+if Env.DEBUG == 1:
     logger.setLevel(logging.DEBUG)
 else:
     logger.setLevel(logging.INFO)

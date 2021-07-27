@@ -14,7 +14,7 @@ from .firehose import get_bucket_arn
 
 logger = logging.getLogger(__name__)
 
-if LEnv.DEBUG is True:
+if LEnv.DEBUG == 1:
     logger.setLevel(logging.DEBUG)
 else:
     logger.setLevel(logging.INFO)
