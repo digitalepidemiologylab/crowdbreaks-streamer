@@ -75,7 +75,7 @@ class StreamListener(tweepy.StreamListener):
                 ERROR_CODES[status_code]['text'],
                 ERROR_CODES[status_code]['description'])
             if status_code == 420:
-                logger.info('Error 420. Waiting.')
+                logger.error('Error 420. Waiting.')
                 self.rate_error_count += 1
                 # wait at least 15min
                 time.sleep(self.rate_error_count * 15 * 60)
@@ -83,13 +83,6 @@ class StreamListener(tweepy.StreamListener):
             logger.error('Unknown %d Error.', status_code)
         return True  # To continue listening
 
-    def on_timeout(self):
-        logger.error('Stream listener has timed out.')
-        return True  # To continue listening
-
     def on_connect(self):
         self.rate_error_count = 0  # Reset error count
         logger.info('Successfully connected to Twitter Streaming API.')
-
-    def on_warning(self, notice):
-        logger.warning(notice)

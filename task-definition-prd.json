@@ -1,0 +1,166 @@
+{
+    "ipcMode": null,
+    "executionRoleArn": "arn:aws:iam::874942657130:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "dnsSearchDomains": null,
+            "environmentFiles": null,
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "secretOptions": null,
+                "options": {
+                    "awslogs-group": "/ecs/streamer-prd",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "entryPoint": null,
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ],
+            "command": null,
+            "linuxParameters": null,
+            "cpu": 0,
+            "environment": [],
+            "resourceRequirements": null,
+            "ulimits": null,
+            "dnsServers": null,
+            "mountPoints": [],
+            "workingDirectory": null,
+            "secrets": [
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksESHostPort-qcZleE:ES_HOST::",
+                    "name": "ES_HOST"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksESHostPort-qcZleE:ES_PORT::",
+                    "name": "ES_PORT"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_CONSUMER_KEY::",
+                    "name": "TWI_CONSUMER_KEY"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_CONSUMER_SECRET::",
+                    "name": "TWI_CONSUMER_SECRET"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_OAUTH_TOKEN::",
+                    "name": "TWI_OAUTH_TOKEN"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksTwitterOAuth-7aS7P8:TWI_OAUTH_TOKEN_SECRET::",
+                    "name": "TWI_OAUTH_TOKEN_SECRET"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis:AWS_ACCOUNT_NUM::",
+                    "name": "AWS_ACCOUNT_NUM"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis:AWS_ACCESS_KEY_ID::",
+                    "name": "AWS_ACCESS_KEY_ID"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksAWSKeys-iMZqis:AWS_SECRET_ACCESS_KEY::",
+                    "name": "AWS_SECRET_ACCESS_KEY"
+                }
+            ],
+            "dockerSecurityOptions": null,
+            "memory": null,
+            "memoryReservation": null,
+            "volumesFrom": [],
+            "stopTimeout": null,
+            "image": "874942657130.dkr.ecr.eu-central-1.amazonaws.com/streamer",
+            "startTimeout": null,
+            "firelensConfiguration": null,
+            "dependsOn": null,
+            "disableNetworking": null,
+            "interactive": null,
+            "healthCheck": null,
+            "essential": true,
+            "links": null,
+            "hostname": null,
+            "extraHosts": null,
+            "pseudoTerminal": null,
+            "user": null,
+            "readonlyRootFilesystem": null,
+            "dockerLabels": null,
+            "systemControls": null,
+            "privileged": null,
+            "name": "streamer-app"
+        }
+    ],
+    "placementConstraints": [],
+    "memory": "2048",
+    "taskRoleArn": null,
+    "compatibilities": [
+        "EC2",
+        "FARGATE"
+    ],
+    "taskDefinitionArn": "arn:aws:ecs:eu-central-1:874942657130:task-definition/streamer-prd",
+    "family": "streamer-prd",
+    "requiresAttributes": [
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "ecs.capability.execution-role-awslogs"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "com.amazonaws.ecs.capability.ecr-auth"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "ecs.capability.secrets.asm.environment-variables"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "ecs.capability.execution-role-ecr-pull"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
+        },
+        {
+            "targetId": null,
+            "targetType": null,
+            "value": null,
+            "name": "ecs.capability.task-eni"
+        }
+    ],
+    "pidMode": null,
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "512",
+    "status": "ACTIVE",
+    "inferenceAccelerators": null,
+    "proxyConfiguration": null,
+    "volumes": []
+}

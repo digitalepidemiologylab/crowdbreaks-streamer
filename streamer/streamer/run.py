@@ -36,6 +36,7 @@ def run():
         try:
             stream.start()
         except KeyboardInterrupt:
+            logger.info('Shutting down...')
             sys.exit()
         except Exception as exc:
             logger.error(
@@ -51,7 +52,6 @@ def run():
                 n_errors_last_hour, last_error_time)
             last_error_time = time.time()
         wait_some_time(n_errors_last_hour)
-    logger.info('Shutting down...')
 
 
 def update_error_count(n_errors, last_error_time):
