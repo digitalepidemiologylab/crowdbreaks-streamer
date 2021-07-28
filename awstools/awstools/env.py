@@ -94,8 +94,9 @@ class ESEnv(AWSEnv):
 
 
 class ECSEnv(AWSEnv):
-    CLUSTER = os.environ.get('ECS_CLUSTER', '')
-    SERVICE = os.environ.get('ECS_SERVICE', '')
+    CLUSTER = os.environ.get('ECS_CLUSTER', f'{Env.APP_NAME}-streamer')
+    SERVICE = os.environ.get(
+        'ECS_SERVICE', f'streamer-{Env.ENV}-service')
 
 
 class SMEnv(AWSEnv):
