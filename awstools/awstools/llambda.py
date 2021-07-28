@@ -228,6 +228,7 @@ def create_s3_to_es_lambda(
     push_to_s3=False,
     s3_trigger=False,
     s3_prefix=None,
+    env_variables=None,
     timeout=LEnv.TIMEOUT,
     memory_size=LEnv.MEMORY_SIZE
 ):
@@ -301,7 +302,9 @@ def create_s3_to_es_lambda(
                             'ES_HOST': ESEnv.HOST,
                             'ES_PORT': ESEnv.PORT,
                             'ES_INDEX_PREFIX': ESEnv.INDEX_PREFIX,
-                            'AWS_ACCOUNT_NUM': ESEnv.ACCOUNT_NUM
+                            'AWS_ACCOUNT_NUM': ESEnv.ACCOUNT_NUM,
+                            'APP_NAME': ESEnv.APP_NAME,
+                            'ENV': ESEnv.ENV
                         }
                     },
                     Tags={
