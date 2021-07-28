@@ -32,6 +32,7 @@ def main():
         policy_path,
         push_to_s3=True,
         s3_trigger=False,
+        add_s3_permission=True,
         memory_size=512
     )
 

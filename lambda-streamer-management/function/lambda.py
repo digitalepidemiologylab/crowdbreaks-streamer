@@ -129,21 +129,25 @@ def handle_stream_config():
         notif_config = s3.get_bucket_notification_configuration(
             Bucket=ECSEnv.BUCKET_NAME
         )
+        notif_config.pop('ResponseMetadata')
         rules = []
         for conf in config_manager_new.config:
             if conf.storage_mode not in [StorageMode.S3,
                                          StorageMode.S3_NO_RETWEETS]:
                 rules.append({
-                    'Name': 'prefix',
+                    'Name': 'Prefix',
                     'Value': AWSEnv.STORAGE_BUCKET_PREFIX + conf.slug})
+        filters = [{'Key': {'FilterRules': [rule]}} for rule in rules]
 
-        notif_config['LambdaFunctionConfigurations'] = [{
-            'Id': 'streamer',
-            'LambdaFunctionArn':
-                get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME),
-            'Events': ['s3:ObjectCreated:*'],
-            'Filter': {'Key': {'FilterRules': rules}}
-        }]
+        notif_config['LambdaFunctionConfigurations'].extend([
+            {
+                'LambdaFunctionArn':
+                    get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME)[1],
+                'Events': ['s3:ObjectCreated:*'],
+                'Filter': filter_
+            }
+            for filter_ in filters
+        ])
 
         _ = s3.put_bucket_notification_configuration(
             Bucket=ECSEnv.BUCKET_NAME,

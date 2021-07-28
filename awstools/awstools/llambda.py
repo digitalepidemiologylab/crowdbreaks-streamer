@@ -228,7 +228,7 @@ def create_s3_to_es_lambda(
     push_to_s3=False,
     s3_trigger=False,
     s3_prefix=None,
-    env_variables=None,
+    add_s3_permission=False,
     timeout=LEnv.TIMEOUT,
     memory_size=LEnv.MEMORY_SIZE
 ):
@@ -391,7 +391,7 @@ def create_s3_to_es_lambda(
             'The layer for lambda %s is already at the latest version.',
             function_name)
 
-    if s3_trigger:
+    if add_s3_permission or s3_trigger:
         # Add permission to invoke from S3
         try:
             _ = aws_lambda.add_permission(
@@ -404,6 +404,7 @@ def create_s3_to_es_lambda(
         except aws_lambda.exceptions.ResourceConflictException:
             pass
 
+    if s3_trigger:
         # Get the current notification config
         notification_config = s3.get_bucket_notification_configuration(
             Bucket=LEnv.BUCKET_NAME
@@ -468,18 +469,18 @@ def create_s3_to_es_lambda(
                 NotificationConfiguration=notification_config
             )
 
-            notification_config = s3.get_bucket_notification_configuration(
-                Bucket=LEnv.BUCKET_NAME
-            )
+            # notification_config = s3.get_bucket_notification_configuration(
+            #     Bucket=LEnv.BUCKET_NAME
+            # )
 
-            notification_config = {
-                k: v for k, v in notification_config.items()
-                if k in [
-                    'TopicConfigurations',
-                    'QueueConfigurations',
-                    'LambdaFunctionConfigurations'
-                ]
-            }
+            # notification_config = {
+            #     k: v for k, v in notification_config.items()
+            #     if k in [
+            #         'TopicConfigurations',
+            #         'QueueConfigurations',
+            #         'LambdaFunctionConfigurations'
+            #     ]
+            # }
 
             # print(f'New config:\n{notification_config}\n\n')
 
