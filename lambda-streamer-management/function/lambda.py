@@ -6,7 +6,10 @@ from awstools.session import s3, ecs
 from awstools.env import ECSEnv, AWSEnv
 from awstools.config import ConfigManager, StorageMode
 from awstools.s3 import get_s3_object
-from awstools.llambda import get_function_name_arn
+from awstools.llambda import (get_function_name_arn,
+                              this_and_other_lambda_s3_configs)
+
+FUNCTION_NAME = f'{AWSEnv.APP_NAME}-s3-to-es-{AWSEnv.ENV}'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -129,7 +132,12 @@ def handle_stream_config():
         notif_config = s3.get_bucket_notification_configuration(
             Bucket=ECSEnv.BUCKET_NAME
         )
+        logger.debug(notif_config)
         notif_config.pop('ResponseMetadata')
+
+        _, other_lambda_s3_configs = this_and_other_lambda_s3_configs(
+            notif_config, FUNCTION_NAME)
+
         rules = []
         for conf in config_manager_new.config:
             if conf.storage_mode not in [StorageMode.S3,
@@ -139,7 +147,7 @@ def handle_stream_config():
                     'Value': AWSEnv.STORAGE_BUCKET_PREFIX + conf.slug})
         filters = [{'Key': {'FilterRules': [rule]}} for rule in rules]
 
-        notif_config['LambdaFunctionConfigurations'].extend([
+        this_lambda_s3_config = [
             {
                 'LambdaFunctionArn':
                     get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME)[1],
@@ -147,7 +155,13 @@ def handle_stream_config():
                 'Filter': filter_
             }
             for filter_ in filters
-        ])
+        ]
+        notif_config['LambdaFunctionConfigurations'] = [
+            *this_lambda_s3_config,
+            *other_lambda_s3_configs
+        ]
+
+        logger.debug(notif_config)
 
         _ = s3.put_bucket_notification_configuration(
             Bucket=ECSEnv.BUCKET_NAME,

@@ -20,6 +20,30 @@ else:
     logger.setLevel(logging.INFO)
 
 
+def this_and_other_lambda_s3_configs(notif_config, function_name):
+    notif_config = {
+        k: v for k, v in notif_config.items()
+        if k in [
+            'TopicConfigurations',
+            'QueueConfigurations',
+            'LambdaFunctionConfigurations'
+        ]
+    }
+    if 'LambdaFunctionConfigurations' not in notif_config.keys():
+        notif_config['LambdaFunctionConfigurations'] = []
+
+    this_lambda_s3_config = list(filter(
+        lambda lambda_config: function_name in
+        lambda_config['LambdaFunctionArn'],
+        notif_config['LambdaFunctionConfigurations']))
+    other_lambda_s3_configs = list(filter(
+        lambda lambda_config: function_name not in
+        lambda_config['LambdaFunctionArn'],
+        notif_config['LambdaFunctionConfigurations']))
+
+    return this_lambda_s3_config, other_lambda_s3_configs
+
+
 def zip_lambda_func(lambda_dir):
     base_name = os.path.join(lambda_dir, 'lambda')
     root_dir = os.path.join(lambda_dir, 'function')
@@ -406,39 +430,13 @@ def create_s3_to_es_lambda(
 
     if s3_trigger:
         # Get the current notification config
-        notification_config = s3.get_bucket_notification_configuration(
+        notif_config = s3.get_bucket_notification_configuration(
             Bucket=LEnv.BUCKET_NAME
         )
+        notif_config.pop('ResponseMetadata')
 
-        notification_config = {
-            k: v for k, v in notification_config.items()
-            if k in [
-                'TopicConfigurations',
-                'QueueConfigurations',
-                'LambdaFunctionConfigurations'
-            ]
-        }
-        for conf in [
-            'TopicConfigurations',
-            'QueueConfigurations',
-            'LambdaFunctionConfigurations'
-        ]:
-            if conf not in notification_config.keys():
-                notification_config[conf] = []
-
-        # print(f'Current config:\n{notification_config}\n\n')
-
-        this_lambda_s3_config = list(filter(
-            lambda lambda_config: function_name in
-            lambda_config['LambdaFunctionArn'],
-            notification_config['LambdaFunctionConfigurations']))
-        other_lambda_s3_configs = list(filter(
-            lambda lambda_config: function_name not in
-            lambda_config['LambdaFunctionArn'],
-            notification_config['LambdaFunctionConfigurations']))
-
-        # print(f'This lambda config:\n{this_lambda_s3_config}\n')
-        # print(f'Other lambda configs:\n{other_lambda_s3_configs}\n')
+        this_lambda_s3_config, other_lambda_s3_configs = \
+            this_and_other_lambda_s3_configs(notif_config, function_name)
 
         if this_lambda_s3_config == []:
             # Add S3 event trigger to the lambda
@@ -456,32 +454,14 @@ def create_s3_to_es_lambda(
                     }
                 }
             }]
-            notification_config['LambdaFunctionConfigurations'] = [
+            notif_config['LambdaFunctionConfigurations'] = [
                 *this_lambda_s3_config,
                 *other_lambda_s3_configs
             ]
 
-            # print('New lambda config')
-            # print(notification_config['LambdaFunctionConfigurations'])
-
             _ = s3.put_bucket_notification_configuration(
                 Bucket=LEnv.BUCKET_NAME,
-                NotificationConfiguration=notification_config
+                NotificationConfiguration=notif_config
             )
-
-            # notification_config = s3.get_bucket_notification_configuration(
-            #     Bucket=LEnv.BUCKET_NAME
-            # )
-
-            # notification_config = {
-            #     k: v for k, v in notification_config.items()
-            #     if k in [
-            #         'TopicConfigurations',
-            #         'QueueConfigurations',
-            #         'LambdaFunctionConfigurations'
-            #     ]
-            # }
-
-            # print(f'New config:\n{notification_config}\n\n')
 
             logger.info('An S3 trigger is set for lambda %s.', function_name)
