@@ -25,41 +25,38 @@
             "command": null,
             "linuxParameters": null,
             "cpu": 0,
-            "environment": [],
+            "environment": [
+                {
+                  "name": "APP_NAME",
+                  "value": "crowdbreaks"
+                },
+                {
+                  "name": "AWS_ACCOUNT_NUM",
+                  "value": "874942657130"
+                },
+                {
+                  "name": "AWS_REGION",
+                  "value": "eu-central-1"
+                },
+                {
+                  "name": "DEBUG",
+                  "value": "True"
+                },
+                {
+                  "name": "ENV",
+                  "value": "stg"
+                },
+                {
+                  "name": "UNMATCHED_STORE_S3",
+                  "value": "False"
+                }
+            ],
             "resourceRequirements": null,
             "ulimits": null,
             "dnsServers": null,
             "mountPoints": [],
             "workingDirectory": null,
             "secrets": [
-                {
-                    "valueFrom": "stg",
-                    "name": "ENV"
-                },
-                {
-                    "valueFrom": "crowdbreaks",
-                    "name": "APP_NAME"
-                },
-                {
-                    "valueFrom": "True",
-                    "name": "DEBUG"
-                },
-                {
-                    "valueFrom": "False",
-                    "name": "UNMATCHED_STORE_S3"
-                },
-                {
-                    "valueFrom": "crowdbreaks-streamer",
-                    "name": "ECS_CLUSTER"
-                },
-                {
-                    "valueFrom": "streamer-stg-service",
-                    "name": "ECS_SERVICE"
-                },
-                {
-                    "valueFrom": "crowdbreaks-stg",
-                    "name": "ES_DOMAIN"
-                },
                 {
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_HOST::",
                     "name": "ES_HOST"
@@ -83,14 +80,6 @@
                 {
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:TWI_OAUTH_TOKEN_SECRET::",
                     "name": "TWI_OAUTH_TOKEN_SECRET"
-                },
-                {
-                    "valueFrom": "eu-central-1",
-                    "name": "AWS_REGION"
-                },
-                {
-                    "valueFrom": "874942657130",
-                    "name": "AWS_ACCOUNT_NUM"
                 },
                 {
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:AWS_ACCESS_KEY_ID::",
