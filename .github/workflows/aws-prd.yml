@@ -28,9 +28,10 @@
 #     types: [created]
 
 on:
-  push:
-    branches:
-      - master
+#   push:
+#     branches:
+#       - master
+  workflow_dispatch:
 
 name: Deploy to Amazon ECS (Production)
 
