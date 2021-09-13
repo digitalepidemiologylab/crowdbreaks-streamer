@@ -1,5 +1,6 @@
 import logging
 import time
+import re
 
 from .env import KFEnv
 from .session import iam, firehose
@@ -17,6 +18,7 @@ def get_bucket_arn(bucket_name):
 
 
 def get_role_name_arn(slug):
+    slug = re.sub('[^a-zA-Z0-9]+', '', slug)  # Only leave letters and numbers
     role_name = '{}{}{}FirehoseBucket-{}'.format(
         KFEnv.APP_NAME.capitalize(), slug.capitalize(), KFEnv.ENV.capitalize(),
         KFEnv.BUCKET_NAME)
@@ -25,6 +27,7 @@ def get_role_name_arn(slug):
 
 
 def get_policy_name_arn(slug):
+    slug = re.sub('[^a-zA-Z0-9]+', '', slug)  # Only leave letters and numbers
     policy_name = '{}{}{}FirehoseBucket-{}'.format(
         KFEnv.APP_NAME.capitalize(), slug.capitalize(), KFEnv.ENV.capitalize(),
         KFEnv.BUCKET_NAME)
@@ -33,6 +36,7 @@ def get_policy_name_arn(slug):
 
 
 def get_stream_name_arn(slug):
+    slug = re.sub('[^a-zA-Z0-9]+', '', slug)  # Only leave letters and numbers
     stream_name = f'{KFEnv.APP_NAME}-{slug}-{KFEnv.ENV}'
     stream_arn = \
         f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:deliverystream/{stream_name}'

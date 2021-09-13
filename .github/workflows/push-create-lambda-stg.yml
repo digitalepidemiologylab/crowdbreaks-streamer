@@ -2,6 +2,7 @@ on:
   push:
     branches:
       - master
+  workflow_dispatch
 
 name: Push code for & create a new version of the Crowdbreaks Lambda (Staging)
 

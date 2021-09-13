@@ -6,7 +6,8 @@ from typing import List, Dict, Set, Optional
 from dataclasses import dataclass, asdict, field
 
 import dacite
-from .s3 import get_s3_object, s3
+from .s3 import get_s3_object
+from .session import s3
 from .env import AWSEnv
 
 logger = logging.getLogger(__name__)
@@ -58,7 +59,15 @@ class ConfigManager():
     """Read, write and validate project configs."""
     def __init__(self, s3_client=s3, version_id=None):
         self.dict, self.config = self._load(s3_client, version_id)
-        self.filter_config = self._pool_config()
+
+    @property
+    def filter_config(self):
+        """Pools all filtering configs to run everything in a single stream."""
+        filter_conf = FilterConf()
+        for conf in self.config:
+            filter_conf.keywords.update(conf.keywords)
+            filter_conf.lang.update(conf.lang)
+        return filter_conf
 
     def get_conf_by_slug(self, slug):
         for conf in self.config:
@@ -74,8 +83,8 @@ class ConfigManager():
                     for key in ['lang', 'keywords', 'slug']}
                 return info
 
-    def write(self):
-        return json.dumps([conf for conf in self.dict], indent=4)
+    # def write(self):
+    #     return json.dumps([conf for conf in self.dict], indent=4)
 
     def _load(self, s3_client, version_id):
         raw = json.loads(get_s3_object(
@@ -83,23 +92,12 @@ class ConfigManager():
             s3_client, version_id))
         # Sort raw by slug
         raw = sorted(raw, key=lambda conf: conf['slug'])
-        # What is this even???
-        # latest_version = max([int(key.replace('_', '')) for key in raw])
-        # raw = raw['_' + str(latest_version)]
         config = []
         for conf in raw:
             config.append(dacite.from_dict(
                 data_class=Conf, data=conf,
                 config=dacite.Config(type_hooks=converter)))
         return raw, config
-
-    def _pool_config(self):
-        """Pools all filtering configs to run everything in a single stream."""
-        filter_conf = FilterConf()
-        for conf in self.config:
-            filter_conf.keywords.update(conf.keywords)
-            filter_conf.lang.update(conf.lang)
-        return filter_conf
 
 
 config_manager = ConfigManager()
