@@ -129,7 +129,7 @@ def create_delivery_stream(slug, prefix):
                 'RoleARN': role_arn,
                 'BucketARN': get_bucket_arn(KFEnv.BUCKET_NAME),
                 'Prefix': prefix,
-                'ErrorOutputPrefix': f'{slug}/failed/',
+                'ErrorOutputPrefix': f'{prefix}failed/',
                 'BufferingHints': {
                     'SizeInMBs': KFEnv.BUFFER_SIZE,
                     'IntervalInSeconds': KFEnv.BUFFER_INTERVAL
