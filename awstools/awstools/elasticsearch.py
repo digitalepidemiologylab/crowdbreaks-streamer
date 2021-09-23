@@ -4,6 +4,7 @@ import os
 import io
 from pathlib import Path
 from datetime import datetime
+from elasticsearch import RequestError
 
 from .env import ESEnv
 from .session import s3, es
@@ -87,7 +88,7 @@ def create_index(slug, lang, only_new=False):
         {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
     if only_new:
         # When a new project is created, we want to create an index for it
-        # and not touch the rest
+        # and not create new indices for the projects that are already there
         if indices.get(slug) is None:
             indices[slug] = [index_name]
         else:
@@ -98,12 +99,18 @@ def create_index(slug, lang, only_new=False):
         except KeyError:
             indices[slug] = [index_name]
 
+    # if es.indices.exists(index_name):
+    #     logger.info('Index %s already exists.', index_name)
+    # else:
+    try:
+        logger.info('Created index %s.', index_name)
+        es.indices.create(index_name, body=mapping)
+    except RequestError as exc:
+        if 'already exists' in exc.error:
+            logger.info('Index %s already exists.', index_name)
+        else:
+            raise exc
+
     indices = io.BytesIO(bytes(json.dumps(indices), encoding='utf-8'))
     s3.upload_fileobj(indices, ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY)
     logger.info('Indices JSON updated.')
-
-    if es.indices.exists(index_name):
-        logger.info('Index %s already exists.', index_name)
-    else:
-        logger.info('Created index %s.', index_name)
-        es.indices.create(index_name, body=mapping)
