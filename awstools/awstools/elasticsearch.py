@@ -106,7 +106,7 @@ def create_index(slug, lang, only_new=False):
         logger.info('Created index %s.', index_name)
         es.indices.create(index_name, body=mapping)
     except RequestError as exc:
-        if 'already exists' in exc.error:
+        if 'already_exists' in exc.error:
             logger.info('Index %s already exists.', index_name)
         else:
             raise exc
