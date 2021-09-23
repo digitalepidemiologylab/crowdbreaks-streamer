@@ -121,8 +121,6 @@ def create_delivery_stream(slug, prefix):
 
     time.sleep(10)
 
-    stream_name = f'{KFEnv.APP_NAME}-{slug}'
-
     try:
         response = firehose.create_delivery_stream(
             DeliveryStreamName=stream_name,
