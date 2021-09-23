@@ -5,7 +5,7 @@ import json
 from twiprocess.processtweet import ProcessTweet
 from awstools.env import Env, KFEnv
 from awstools.config import StorageMode
-from awstools.firehose import firehose
+from awstools.firehose import firehose, get_stream_name_arn
 
 from .setup_logging import LogDirs
 from .utils.match_keywords import match_keywords
@@ -78,7 +78,7 @@ def handle_tweet(
                 # Do not store retweets
                 return
             # Send to the corresponding delivery stream
-            stream_name = f'{KFEnv.APP_NAME}-{slug}'
+            stream_name = get_stream_name_arn(slug)
             _ = firehose.put_record(
                 DeliveryStreamName=stream_name,
                 Record={'Data': f'{json.dumps(status)}\n'.encode()})
