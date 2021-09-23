@@ -10,7 +10,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'python-dotenv', 'aenum', 'dacite',
-        'boto3==1.14.48', 'elasticsearch', 'requests_aws4auth'],
+        'boto3==1.14.48', 'elasticsearch==7.10.1', 'requests_aws4auth'],
     package_data={'awstools': ['awstools.env', 'config/*']},
     classifiers=[
         "Programming Language :: Python :: 3",
