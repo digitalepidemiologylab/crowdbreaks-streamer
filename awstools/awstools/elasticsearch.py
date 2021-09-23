@@ -103,8 +103,8 @@ def create_index(slug, lang, only_new=False):
     #     logger.info('Index %s already exists.', index_name)
     # else:
     try:
-        logger.info('Created index %s.', index_name)
         es.indices.create(index_name, body=mapping)
+        logger.info('Created index %s.', index_name)
 
         indices = io.BytesIO(bytes(json.dumps(indices), encoding='utf-8'))
         s3.upload_fileobj(indices, ESEnv.BUCKET_NAME, ESEnv.CONFIG_S3_KEY)

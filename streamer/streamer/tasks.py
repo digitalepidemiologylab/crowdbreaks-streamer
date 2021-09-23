@@ -78,7 +78,7 @@ def handle_tweet(
                 # Do not store retweets
                 return
             # Send to the corresponding delivery stream
-            stream_name = get_stream_name_arn(slug)
+            stream_name, _ = get_stream_name_arn(slug)
             _ = firehose.put_record(
                 DeliveryStreamName=stream_name,
                 Record={'Data': f'{json.dumps(status)}\n'.encode()})
