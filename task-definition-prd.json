@@ -27,28 +27,32 @@
             "cpu": 0,
             "environment": [
                 {
-                  "name": "APP_NAME",
-                  "value": "crowdbreaks"
+                    "name": "APP_NAME",
+                    "value": "crowdbreaks"
                 },
                 {
-                  "name": "AWS_ACCOUNT_NUM",
-                  "value": "874942657130"
+                    "name": "AWS_ACCOUNT_NUM",
+                    "value": "874942657130"
                 },
                 {
-                  "name": "AWS_REGION",
-                  "value": "eu-central-1"
+                    "name": "AWS_REGION",
+                    "value": "eu-central-1"
                 },
                 {
-                  "name": "DEBUG",
-                  "value": "False"
+                    "name": "DEBUG",
+                    "value": "False"
                 },
                 {
-                  "name": "ENV",
-                  "value": "prd"
+                    "name": "ENV",
+                    "value": "prd"
                 },
                 {
-                  "name": "UNMATCHED_STORE_S3",
-                  "value": "False"
+                    "name": "UNMATCHED_STORE_S3",
+                    "value": "False"
+                },
+                {
+                    "name": "AWS_KF_BUFFER_INTERVAL",
+                    "value": "600"
                 }
             ],
             "resourceRequirements": null,
