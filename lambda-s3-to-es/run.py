@@ -1,7 +1,7 @@
 import os
 import logging
 
-from awstools.llambda import (create_s3_to_es_lambda,
+from awstools.llambda import (create_lambda,
                               create_lambda_layer,
                               zip_lambda_func,
                               zip_lambda_layer)
@@ -26,7 +26,7 @@ def main():
         layer_local_zip_path,
         push_to_s3=True
     )
-    create_s3_to_es_lambda(
+    create_lambda(
         lambda_name,
         lambda_local_zip_path,
         policy_path,

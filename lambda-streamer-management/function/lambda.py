@@ -151,7 +151,7 @@ def handle_stream_config():
             {
                 'LambdaFunctionArn':
                     get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME)[1],
-                'Events': ['s3:ObjectCreated:*'],
+                'Events': ['s3:ObjectCreatedByPut:*'],
                 'Filter': filter_
             }
             for filter_ in filters

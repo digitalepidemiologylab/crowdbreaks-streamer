@@ -245,7 +245,7 @@ def create_lambda_layer(
                 logger.info('Layer %s created.', layer_name)
 
 
-def create_s3_to_es_lambda(
+def create_lambda(
     lambda_name,
     lambda_local_zip_path,
     policy_path,
@@ -442,7 +442,7 @@ def create_s3_to_es_lambda(
             # Add S3 event trigger to the lambda
             this_lambda_s3_config = [{
                 'LambdaFunctionArn': function_arn,
-                'Events': ['s3:ObjectCreated:*'],
+                'Events': ['s3:ObjectCreatedByPut:*'],
                 'Filter': {
                     'Key': {
                         'FilterRules': [
