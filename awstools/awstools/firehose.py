@@ -18,25 +18,27 @@ def get_bucket_arn(bucket_name):
 
 
 def get_role_name_arn(slug):
-    slug = re.sub('[^a-zA-Z0-9]+', '', slug)  # Only leave letters and numbers
+    slug = re.sub('[^a-zA-Z0-9_]+', '', slug)  # Only leave letters and numbers
+    name = ''.join([word.capitalize() for word in slug.split('_')])
     role_name = '{}{}{}FirehoseBucket-{}'.format(
-        KFEnv.APP_NAME.capitalize(), slug.capitalize(), KFEnv.ENV.capitalize(),
+        KFEnv.APP_NAME.capitalize(), name, KFEnv.ENV.capitalize(),
         KFEnv.BUCKET_NAME)
     role_arn = f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:role/{role_name}'
     return role_name, role_arn
 
 
 def get_policy_name_arn(slug):
-    slug = re.sub('[^a-zA-Z0-9]+', '', slug)  # Only leave letters and numbers
+    slug = re.sub('[^a-zA-Z0-9_]+', '', slug)  # Only leave letters and numbers
+    name = ''.join([word.capitalize() for word in slug.split('_')])
     policy_name = '{}{}{}FirehoseBucket-{}'.format(
-        KFEnv.APP_NAME.capitalize(), slug.capitalize(), KFEnv.ENV.capitalize(),
+        KFEnv.APP_NAME.capitalize(), name, KFEnv.ENV.capitalize(),
         KFEnv.BUCKET_NAME)
     policy_arn = f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:policy/{policy_name}'
     return policy_name, policy_arn
 
 
 def get_stream_name_arn(slug):
-    slug = re.sub('[^a-zA-Z0-9]+', '', slug)  # Only leave letters and numbers
+    slug = re.sub('[^a-zA-Z0-9_]+', '', slug)  # Only leave letters and numbers
     stream_name = f'{KFEnv.APP_NAME}-{slug}-{KFEnv.ENV}'
     stream_arn = \
         f'arn:aws:iam::{KFEnv.ACCOUNT_NUM}:deliverystream/{stream_name}'
