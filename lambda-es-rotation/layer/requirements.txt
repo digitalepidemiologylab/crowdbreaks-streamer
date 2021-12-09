@@ -1,2 +1,1 @@
-boto3==1.14.48
 git+https://github.com/crowdbreaks/streamer.git#egg=awstools&subdirectory=awstools

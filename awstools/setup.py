@@ -9,7 +9,7 @@ setuptools.setup(
     url="https://github.com/crowdbreaks/streamer",
     packages=setuptools.find_packages(),
     install_requires=[
-        'python-dotenv', 'aenum', 'dacite',
+        'python-dotenv', 'aenum', 'dacite', 'requests',
         'boto3==1.14.48', 'elasticsearch==7.16.0',
         'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git'],
     package_data={'awstools': ['awstools.env', 'config/*']},

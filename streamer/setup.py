@@ -10,7 +10,6 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'python-dotenv', 'aenum', 'dacite', 'tweepy',
-        'boto3', 'elasticsearch==7.16.0',
         'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git',
         'awstools @ git+https://github.com/crowdbreaks/streamer.git#egg=awstools&subdirectory=awstools'],
     entry_points={'console_scripts': [
