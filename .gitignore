@@ -8,3 +8,4 @@ logs
 sagemaker
 tweet-schemas
 es-snapshot
+es-migration
