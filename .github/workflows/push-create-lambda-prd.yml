@@ -29,8 +29,8 @@ jobs:
         AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
         AWS_ACCOUNT_NUM: ${{ secrets.AWS_ACCOUNT_NUM }}
         AWS_REGION: eu-central-1
-        ES_HOST: ${{ secrets.ES_HOST_PRD }}
-        ES_PORT: ${{ secrets.ES_PORT }}
+        ES_CLOUD_ID: ${{ secrets.ES_CLOUD_ID }}
+        ES_API_KEY: ${{ secrets.ES_API_KEY }}
         ENV: prd
         APP_NAME: crowdbreaks
       run: |
