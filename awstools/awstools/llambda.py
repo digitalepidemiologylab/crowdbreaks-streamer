@@ -323,8 +323,8 @@ def create_lambda(
                     Publish=True,
                     Environment={
                         'Variables': {
-                            'ES_HOST': ESEnv.HOST,
-                            'ES_PORT': ESEnv.PORT,
+                            'ES_CLOUD_ID': ESEnv.CLOUD_ID,
+                            'ES_API_KEY': ESEnv.API_KEY,
                             'ES_INDEX_PREFIX': ESEnv.INDEX_PREFIX,
                             'AWS_ACCOUNT_NUM': ESEnv.ACCOUNT_NUM,
                             'APP_NAME': ESEnv.APP_NAME,
@@ -332,8 +332,7 @@ def create_lambda(
                         }
                     },
                     Tags={
-                        'Key': 'project',
-                        'Value': LEnv.APP_NAME
+                        'project': LEnv.APP_NAME
                     },
                     Layers=[
                         layer_arn + f':{latest_version}',

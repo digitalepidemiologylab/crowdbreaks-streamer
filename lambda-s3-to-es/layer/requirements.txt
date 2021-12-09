@@ -1,8 +1,7 @@
 aenum==2.2.4
 boto3==1.14.48
 botocore==1.17.48
-requests-aws4auth==1.0
-elasticsearch==7.10.1
+elasticsearch==7.16.0
 local-geocode==0.0.1
 git+https://github.com/crowdbreaks/twiprocess.git
 git+https://github.com/crowdbreaks/streamer.git#egg=awstools&subdirectory=awstools

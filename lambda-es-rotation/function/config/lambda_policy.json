@@ -20,7 +20,9 @@
                 "s3:GetObject",
                 "s3:PutObject",
                 "s3:ListBucket",
-                "es:ESHttpPut"
+                "es:ESHttpPut",
+                "es:ESHttpHead",
+                "es:ESHttpGet"
             ],
             "Resource": [
                 "arn:aws:s3:::BUCKET_NAME",

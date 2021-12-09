@@ -1,6 +1,6 @@
 import boto3
 from elasticsearch import Elasticsearch, RequestsHttpConnection
-from requests_aws4auth import AWS4Auth
+# from requests_aws4auth import AWS4Auth
 
 from .env import AWSEnv, ESEnv
 
@@ -28,15 +28,27 @@ firehose = session.client('firehose')
 ecs = session.client('ecs')
 
 credentials = session.get_credentials()
-awsauth = AWS4Auth(
-    ESEnv.ACCESS_KEY_ID, ESEnv.SECRET_ACCESS_KEY,
-    ESEnv.REGION, "es",
-    session_token=credentials.token
-)
 
+# Login to AWS Elasticsearch, outdated
+# awsauth = AWS4Auth(
+#     ESEnv.ACCESS_KEY_ID, ESEnv.SECRET_ACCESS_KEY,
+#     ESEnv.REGION, "es",
+#     session_token=credentials.token
+# )
+
+# es = Elasticsearch(
+#     hosts=[{'host': ESEnv.HOST, 'port': ESEnv.PORT}],
+#     http_auth=awsauth,
+#     use_ssl=True,
+#     verify_certs=True,
+#     connection_class=RequestsHttpConnection,
+#     request_timeout=120
+# )
+
+# Login to Elastic CLoud Elasticsearch
 es = Elasticsearch(
-    hosts=[{'host': ESEnv.HOST, 'port': ESEnv.PORT}],
-    http_auth=awsauth,
+    cloud_id=ESEnv.CLOUD_ID,
+    api_key=ESEnv.API_KEY,
     use_ssl=True,
     verify_certs=True,
     connection_class=RequestsHttpConnection,

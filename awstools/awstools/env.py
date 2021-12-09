@@ -85,8 +85,10 @@ class LEnv(AWSEnv):
 
 
 class ESEnv(AWSEnv):
-    HOST = os.environ.get('ES_HOST', '')
-    PORT = os.environ.get('ES_PORT', '')
+    # HOST = os.environ.get('ES_HOST', '')
+    # PORT = os.environ.get('ES_PORT', '')
+    CLOUD_ID = os.environ.get('ES_CLOUD_ID', '')
+    API_KEY = os.environ.get('ES_API_KEY', '')
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
     DOMAIN = os.environ.get('ES_DOMAIN', Env.APP_NAME + '-' + Env.ENV)
     CONFIG_S3_KEY = os.environ.get(
