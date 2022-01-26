@@ -42,10 +42,10 @@ def handle_tweet(
                                    f'{KFEnv.UNMATCHED_STREAM_NAME}',
                 Record={'Data': f'{json.dumps(status)}\n'.encode()})
         return
-
-    logger.debug(
-        'SUCCESS: Found %d project(s) %s that match this status.',
-        len(matching_projects), matching_projects)
+    else:
+        logger.debug(
+            'SUCCESS: Found %d project(s) %s that match this status.',
+            len(matching_projects), matching_projects)
 
     if store_for_testing:
         # Store for testing

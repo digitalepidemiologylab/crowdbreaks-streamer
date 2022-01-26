@@ -49,10 +49,6 @@
                 {
                     "name": "UNMATCHED_STORE_S3",
                     "value": "False"
-                },
-                {
-                    "name": "AWS_KF_BUFFER_INTERVAL",
-                    "value": "600"
                 }
             ],
             "resourceRequirements": null,
