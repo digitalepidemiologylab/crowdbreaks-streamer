@@ -47,6 +47,7 @@ class Conf:
     storage_mode: StorageMode
     image_storage_mode: ImageStorageMode
     model_endpoints: Optional[Dict]
+    covid: bool
 
 
 @dataclass(frozen=True)
@@ -65,26 +66,18 @@ class ConfigManager():
         """Pools all filtering configs to run everything in a single stream."""
         filter_conf = FilterConf()
         for conf in self.config:
-            filter_conf.keywords.update(conf.keywords)
-            filter_conf.lang.update(conf.lang)
+            if not conf.covid:
+                filter_conf.keywords.update(conf.keywords)
+                filter_conf.lang.update(conf.lang)
         return filter_conf
+
+    def covid(self, covid):
+        return [conf for conf in self.config if conf.covid == covid]
 
     def get_conf_by_slug(self, slug):
         for conf in self.config:
             if conf.slug == slug:
                 return conf
-
-    def get_tracking_info(self, slug):
-        """Adds tracking info to all tweets before pushing to S3."""
-        for conf in self.config:
-            if conf.slug == slug:
-                info = {
-                    key: getattr(conf, key)
-                    for key in ['lang', 'keywords', 'slug']}
-                return info
-
-    # def write(self):
-    #     return json.dumps([conf for conf in self.dict], indent=4)
 
     def _load(self, s3_client, version_id):
         raw = json.loads(get_s3_object(
