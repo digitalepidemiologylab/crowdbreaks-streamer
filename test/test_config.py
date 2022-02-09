@@ -9,7 +9,8 @@ config = [
             "slug": "simongarfunkel",
             "storage_mode": "TEST_MODE",
             "image_storage_mode": "INACTIVE",
-            "model_endpoints": None
+            "model_endpoints": None,
+            "covid": True
         },
         {
             "keywords": ["flabbergasted"],
@@ -18,7 +19,8 @@ config = [
             "slug": "flabbergasted",
             "storage_mode": "TEST_MODE",
             "image_storage_mode": "INACTIVE",
-            "model_endpoints": None
+            "model_endpoints": None,
+            "covid": False
         },
         {
             "keywords": ["flabbergasted", "astonished"],
@@ -27,7 +29,8 @@ config = [
             "slug": "flabberstonished",
             "storage_mode": "TEST_MODE",
             "image_storage_mode": "INACTIVE",
-            "model_endpoints": None
+            "model_endpoints": None,
+            "covid": False
         },
     ]
 
@@ -43,7 +46,8 @@ def test_init():
             "slug": "simongarfunkel",
             "storage_mode": StorageMode.TEST_MODE,
             "image_storage_mode": ImageStorageMode.INACTIVE,
-            "model_endpoints": None
+            "model_endpoints": None,
+            "covid": True
         }),
         Conf(**{
             "keywords": ["flabbergasted"],
@@ -52,7 +56,8 @@ def test_init():
             "slug": "flabbergasted",
             "storage_mode": StorageMode.TEST_MODE,
             "image_storage_mode": ImageStorageMode.INACTIVE,
-            "model_endpoints": None
+            "model_endpoints": None,
+            "covid": False
         }),
         Conf(**{
             "keywords": ["flabbergasted", "astonished"],
@@ -61,7 +66,8 @@ def test_init():
             "slug": "flabberstonished",
             "storage_mode": StorageMode.TEST_MODE,
             "image_storage_mode": ImageStorageMode.INACTIVE,
-            "model_endpoints": None
+            "model_endpoints": None,
+            "covid": False
         })
     ], 'Incorrect load.'
 
@@ -71,3 +77,16 @@ def test_init():
         ),
         "lang": set(["en"])
     })
+
+    assert config_manager.covid(True) == [
+        Conf(**{
+            "keywords": ["simon and garfunkel"],
+            "lang": ["en"],
+            "locales": ["en"],
+            "slug": "simongarfunkel",
+            "storage_mode": StorageMode.TEST_MODE,
+            "image_storage_mode": ImageStorageMode.INACTIVE,
+            "model_endpoints": None,
+            "covid": True
+        })
+    ]

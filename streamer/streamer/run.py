@@ -2,16 +2,17 @@ import logging
 import sys
 import os
 import time
+import traceback
 
-from tweepy import OAuthHandler
+# from tweepy import OAuthHandler
 
-from awstools.env import KFEnv
-from awstools.config import config_manager
-from awstools.firehose import create_delivery_stream
-from awstools.elasticsearch import create_index
+# from awstools.env import KFEnv
+# from awstools.config import config_manager
+# from awstools.firehose import create_delivery_stream
+# from awstools.elasticsearch import create_index
 
 from .env import TwiEnv
-from .stream import StreamListener, StreamManager
+from .stream import StreamManagerFilter, StreamManagerCovid
 from .setup_logging import setup_logging
 
 logger = logging.getLogger(__name__)
@@ -22,9 +23,6 @@ def run():
     """Here we instantiate the stream manager, listener
     and connect to the Twitter streaming API.
     """
-    # Setting things up
-    auth = get_auth()
-    listener = StreamListener()
     # Wait for a bit before connecting, in case container will be paused
     logger.debug('Streaming container is ready, waiting 10 s.')
     time.sleep(10)
@@ -32,7 +30,7 @@ def run():
     n_errors_last_hour = 0
     while True:
         logger.debug('Trying to connect to Twitter API.')
-        stream = StreamManager(auth, listener)
+        stream = StreamManagerCovid() if TwiEnv.COVID_STREAM_NAME else StreamManagerFilter()
         try:
             stream.start()
         except KeyboardInterrupt:
@@ -40,14 +38,16 @@ def run():
             sys.exit()
         except Exception as exc:
             logger.error(
-                'Stream starting exception %s: %s',
-                type(exc).__name__, str(exc))
+                'Stream starting exception %s: %s. Traceback: %s',
+                type(exc).__name__, str(exc),
+                '; '.join(traceback.format_tb(exc.__traceback__)))
             try:
                 stream.stop()
             except Exception as exc:
                 logger.error(
-                    'Stream stopping exception %s: %s',
-                    type(exc).__name__, str(exc))
+                'Stream stopping exception%s: %s. Traceback: %s',
+                type(exc).__name__, str(exc),
+                '; '.join(traceback.format_tb(exc.__traceback__)))
             n_errors_last_hour = update_error_count(
                 n_errors_last_hour, last_error_time)
             last_error_time = time.time()
@@ -69,28 +69,19 @@ def wait_some_time(n_errors_last_hour):
         time.sleep(min(base_delay * n_errors_last_hour, 1800))
 
 
-def get_auth():
-    if TwiEnv.CONSUMER_KEY is None or TwiEnv.CONSUMER_SECRET is None or \
-            TwiEnv.OAUTH_TOKEN is None or TwiEnv.OAUTH_TOKEN_SECRET is None:
-        raise Exception('Twitter API keys needed for streaming to work.')
-    auth = OAuthHandler(TwiEnv.CONSUMER_KEY, TwiEnv.CONSUMER_SECRET)
-    auth.set_access_token(TwiEnv.OAUTH_TOKEN, TwiEnv.OAUTH_TOKEN_SECRET)
-    return auth
-
-
 def main():
     setup_logging()
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
 
-    # Create a delivery stream for unmanched tweets
-    if KFEnv.UNMATCHED_STORE_S3 == 1:
-        create_delivery_stream(
-            KFEnv.UNMATCHED_STREAM_NAME,
-            f'{KFEnv.UNMATCHED_STREAM_NAME}/')
-    # Create delivery streams and ES indices for the lsited projects
-    for conf in config_manager.config:
-        create_delivery_stream(
-            conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
-        create_index(conf.slug, conf.lang[0], only_new=True)
+    # # Create a delivery stream for unmanched tweets
+    # if KFEnv.UNMATCHED_STORE_S3 == 1:
+    #     create_delivery_stream(
+    #         KFEnv.UNMATCHED_STREAM_NAME,
+    #         f'{KFEnv.UNMATCHED_STREAM_NAME}/')
+    # # Create delivery streams and ES indices for the listed projects
+    # for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None):
+    #     create_delivery_stream(
+    #         conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
+    #     create_index(conf.slug, conf.lang[0], only_new=True)
     run()

@@ -6,12 +6,11 @@ setuptools.setup(
     author="Crowdbreaks",
     author_email="info@crowdbreaks.org",
     description="Twitter API v1.1 streamer",
-    url="https://github.com/crowdbreaks/streamer",
+    url="https://github.com/digitalepidemiologylab/crowdbreaks-streamer",
     packages=setuptools.find_packages(),
     install_requires=[
-        'python-dotenv', 'aenum', 'dacite', 'tweepy==3.10.0',
-        'twiprocess @ git+https://github.com/crowdbreaks/twiprocess.git',
-        'awstools @ git+https://github.com/crowdbreaks/streamer.git#egg=awstools&subdirectory=awstools'],
+        'python-dotenv', 'aenum', 'dacite', 'tweepy @ git+https://github.com/utanashati/tweepy.git',
+        'awstools @ git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git#egg=awstools&subdirectory=awstools'],
     entry_points={'console_scripts': [
         'run-stream=streamer.run:main']},
     package_data={'streamer': ['streamer.env']},

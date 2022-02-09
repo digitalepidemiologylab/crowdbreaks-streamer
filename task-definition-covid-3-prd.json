@@ -1,0 +1,105 @@
+{
+    "executionRoleArn": "arn:aws:iam::874942657130:role/ecsTaskExecutionRole",
+    "containerDefinitions": [
+        {
+            "logConfiguration": {
+                "logDriver": "awslogs",
+                "options": {
+                    "awslogs-group": "/ecs/streamer-covid-prd",
+                    "awslogs-region": "eu-central-1",
+                    "awslogs-stream-prefix": "ecs"
+                }
+            },
+            "portMappings": [
+                {
+                    "hostPort": 80,
+                    "protocol": "tcp",
+                    "containerPort": 80
+                }
+            ],
+            "cpu": 0,
+            "environment": [
+                {
+                    "name": "APP_NAME",
+                    "value": "crowdbreaks"
+                },
+                {
+                    "name": "AWS_ACCOUNT_NUM",
+                    "value": "874942657130"
+                },
+                {
+                    "name": "AWS_REGION",
+                    "value": "eu-central-1"
+                },
+                {
+                    "name": "DEBUG",
+                    "value": "False"
+                },
+                {
+                    "name": "ENV",
+                    "value": "prd"
+                },
+                {
+                    "name": "UNMATCHED_STORE_S3",
+                    "value": "False"
+                },
+                {
+                    "name": "COVID_STREAM_NAME",
+                    "value": "crowdbreaks-covid-stream"
+                },
+                {
+                    "name": "COVID_PARTITION",
+                    "value": "3"
+                }
+            ],
+            "mountPoints": [],
+            "secrets": [
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:ES_CLOUD_ID::",
+                    "name": "ES_CLOUD_ID"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:ES_API_KEY::",
+                    "name": "ES_API_KEY"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_KEY::",
+                    "name": "TWI_CONSUMER_KEY"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_SECRET::",
+                    "name": "TWI_CONSUMER_SECRET"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN::",
+                    "name": "TWI_OAUTH_TOKEN"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN_SECRET::",
+                    "name": "TWI_OAUTH_TOKEN_SECRET"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:AWS_ACCESS_KEY_ID::",
+                    "name": "AWS_ACCESS_KEY_ID"
+                },
+                {
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:AWS_SECRET_ACCESS_KEY::",
+                    "name": "AWS_SECRET_ACCESS_KEY"
+                }
+            ],
+            "volumesFrom": [],
+            "image": "874942657130.dkr.ecr.eu-central-1.amazonaws.com/874942657130.dkr.ecr.eu-central-1.amazonaws.com/crowdbreaks-streamer-covid-prd",
+            "essential": true,
+            "name": "streamer-covid-app"
+        }
+    ],
+    "placementConstraints": [],
+    "memory": "2048",
+    "family": "streamer-covid-3-prd",
+    "requiresCompatibilities": [
+        "FARGATE"
+    ],
+    "networkMode": "awsvpc",
+    "cpu": "1024",
+    "volumes": []
+}

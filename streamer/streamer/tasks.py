@@ -7,6 +7,7 @@ from awstools.env import Env, KFEnv
 from awstools.config import StorageMode
 from awstools.firehose import firehose, get_stream_name_arn
 
+from .env import TwiEnv
 from .setup_logging import LogDirs
 from .utils.match_keywords import match_keywords
 
@@ -18,10 +19,17 @@ def handle_tweet(
         status, config_manager,
         store_for_testing=False
 ):
+    if TwiEnv.COVID_STREAM_NAME:
+        _ = firehose.put_record(
+            DeliveryStreamName=TwiEnv.COVID_STREAM_NAME,
+            Record={'Data': f'{json.dumps(status)}\n'.encode()})
+
     tweet = ProcessTweet(status)
     status_id = tweet.id
     # Reverse match to find project
-    matching_keywords = match_keywords(tweet, config_manager.config)
+    matching_keywords = match_keywords(
+        tweet, config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None))
+
     matching_projects = list(matching_keywords.keys())
     if matching_projects == []:
         # Could not match keywords.
@@ -62,9 +70,6 @@ def handle_tweet(
             return
 
         # Add tracking info
-        # 19.01.2021: lang, slug and matching_keywords are there anyway,
-        # and there's no point to store all keywords in every tweet
-        # status['_tracking_info'] = config_manager.get_tracking_info(slug)
         status['project'] = slug
         status['matching_keywords'] = matching_keywords.get(slug)
 
