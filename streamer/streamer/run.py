@@ -4,12 +4,10 @@ import os
 import time
 import traceback
 
-# from tweepy import OAuthHandler
-
-# from awstools.env import KFEnv
-# from awstools.config import config_manager
-# from awstools.firehose import create_delivery_stream
-# from awstools.elasticsearch import create_index
+from awstools.env import KFEnv
+from awstools.config import config_manager
+from awstools.firehose import create_delivery_stream
+from awstools.elasticsearch import create_index
 
 from .env import TwiEnv
 from .stream import StreamManagerFilter, StreamManagerCovid
@@ -74,14 +72,14 @@ def main():
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
 
-    # # Create a delivery stream for unmanched tweets
-    # if KFEnv.UNMATCHED_STORE_S3 == 1:
-    #     create_delivery_stream(
-    #         KFEnv.UNMATCHED_STREAM_NAME,
-    #         f'{KFEnv.UNMATCHED_STREAM_NAME}/')
-    # # Create delivery streams and ES indices for the listed projects
-    # for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None):
-    #     create_delivery_stream(
-    #         conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
-    #     create_index(conf.slug, conf.lang[0], only_new=True)
+    # Create a delivery stream for unmanched tweets
+    if KFEnv.UNMATCHED_STORE_S3 == 1:
+        create_delivery_stream(
+            KFEnv.UNMATCHED_STREAM_NAME,
+            f'{KFEnv.UNMATCHED_STREAM_NAME}/')
+    # Create delivery streams and ES indices for the listed projects
+    for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None):
+        create_delivery_stream(
+            conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
+        create_index(conf.slug, conf.lang[0], only_new=True)
     run()
