@@ -64,19 +64,19 @@
                     "name": "ES_API_KEY"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_KEY::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_CONSUMER_KEY::",
                     "name": "TWI_CONSUMER_KEY"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_SECRET::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_CONSUMER_SECRET::",
                     "name": "TWI_CONSUMER_SECRET"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_OAUTH_TOKEN::",
                     "name": "TWI_OAUTH_TOKEN"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN_SECRET::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_OAUTH_TOKEN_SECRET::",
                     "name": "TWI_OAUTH_TOKEN_SECRET"
                 },
                 {

@@ -55,35 +55,35 @@
             "mountPoints": [],
             "secrets": [
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:ES_CLOUD_ID::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_CLOUD_ID::",
                     "name": "ES_CLOUD_ID"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:ES_API_KEY::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_API_KEY::",
                     "name": "ES_API_KEY"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_KEY::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_CONSUMER_KEY::",
                     "name": "TWI_CONSUMER_KEY"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_CONSUMER_SECRET::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_CONSUMER_SECRET::",
                     "name": "TWI_CONSUMER_SECRET"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_OAUTH_TOKEN::",
                     "name": "TWI_OAUTH_TOKEN"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:TWI_OAUTH_TOKEN_SECRET::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksCovidStreamer-iB6fR0:TWI_OAUTH_TOKEN_SECRET::",
                     "name": "TWI_OAUTH_TOKEN_SECRET"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:AWS_ACCESS_KEY_ID::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:AWS_ACCESS_KEY_ID::",
                     "name": "AWS_ACCESS_KEY_ID"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerPrdSecrets-o5ScOc:AWS_SECRET_ACCESS_KEY::",
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:AWS_SECRET_ACCESS_KEY::",
                     "name": "AWS_SECRET_ACCESS_KEY"
                 }
             ],
