@@ -58,12 +58,12 @@
             "workingDirectory": null,
             "secrets": [
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_HOST::",
-                    "name": "ES_HOST"
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_CLOUD_ID::",
+                    "name": "ES_CLOUD_ID"
                 },
                 {
-                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_PORT::",
-                    "name": "ES_PORT"
+                    "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:ES_API_KEY::",
+                    "name": "ES_API_KEY"
                 },
                 {
                     "valueFrom": "arn:aws:secretsmanager:eu-central-1:874942657130:secret:CrowdbreaksStreamerStgSecrets-O1kfkf:TWI_CONSUMER_KEY::",
