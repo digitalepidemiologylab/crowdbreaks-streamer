@@ -44,6 +44,58 @@ def this_and_other_lambda_s3_configs(notif_config, function_name):
     return this_lambda_s3_config, other_lambda_s3_configs
 
 
+def set_s3_triggers(lambda_name, s3_prefixes):
+    # Get the current notification config
+    notif_config = s3.get_bucket_notification_configuration(
+        Bucket=LEnv.BUCKET_NAME
+    )
+    notif_config.pop('ResponseMetadata')
+
+    function_name, function_arn = get_function_name_arn(lambda_name)
+    this_lambda_s3_config, other_lambda_s3_configs = \
+        this_and_other_lambda_s3_configs(notif_config, function_name)
+    # Get only the prefix entries in this lambda's notification config
+    this_lambda_s3_prefixes = [
+        conf['Filter']['Key']['FilterRules'][0]['Value']
+        for conf in this_lambda_s3_config
+        if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'prefix'
+    ]
+
+    if this_lambda_s3_config == []:
+        # Template for an S3 trigger entry
+        lambda_config_template = lambda s3_prefix: {
+            'LambdaFunctionArn': function_arn,
+            'Events': ['s3:ObjectCreatedByPut:*'],
+            'Filter': {
+                'Key': {
+                    'FilterRules': [
+                        {
+                            'Name': 'prefix',
+                            'Value': s3_prefix
+                        },
+                    ]
+                }
+            }
+        }
+        # Add new prefixes to this lambda's notification config
+        this_lambda_s3_config.extend([
+            lambda_config_template(prefix)
+            for prefix in s3_prefixes if prefix not in this_lambda_s3_prefixes
+        ])
+        # Update the bucket notification config
+        notif_config['LambdaFunctionConfigurations'] = [
+            *this_lambda_s3_config,
+            *other_lambda_s3_configs
+        ]
+
+        _ = s3.put_bucket_notification_configuration(
+            Bucket=LEnv.BUCKET_NAME,
+            NotificationConfiguration=notif_config
+        )
+
+        logger.info('S3 triggers %s are set for lambda %s.', ', '.join(s3_prefixes), function_name)
+
+
 def zip_lambda_func(lambda_dir):
     base_name = os.path.join(lambda_dir, 'lambda')
     root_dir = os.path.join(lambda_dir, 'function')
@@ -251,7 +303,7 @@ def create_lambda(
     policy_path,
     push_to_s3=False,
     s3_trigger=False,
-    s3_prefix=None,
+    s3_prefixes=None,
     add_s3_permission=False,
     timeout=LEnv.TIMEOUT,
     memory_size=LEnv.MEMORY_SIZE
@@ -428,39 +480,4 @@ def create_lambda(
             pass
 
     if s3_trigger:
-        # Get the current notification config
-        notif_config = s3.get_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME
-        )
-        notif_config.pop('ResponseMetadata')
-
-        this_lambda_s3_config, other_lambda_s3_configs = \
-            this_and_other_lambda_s3_configs(notif_config, function_name)
-
-        if this_lambda_s3_config == []:
-            # Add S3 event trigger to the lambda
-            this_lambda_s3_config = [{
-                'LambdaFunctionArn': function_arn,
-                'Events': ['s3:ObjectCreatedByPut:*'],
-                'Filter': {
-                    'Key': {
-                        'FilterRules': [
-                            {
-                                'Name': 'prefix',
-                                'Value': s3_prefix
-                            },
-                        ]
-                    }
-                }
-            }]
-            notif_config['LambdaFunctionConfigurations'] = [
-                *this_lambda_s3_config,
-                *other_lambda_s3_configs
-            ]
-
-            _ = s3.put_bucket_notification_configuration(
-                Bucket=LEnv.BUCKET_NAME,
-                NotificationConfiguration=notif_config
-            )
-
-            logger.info('An S3 trigger is set for lambda %s.', function_name)
+        set_s3_triggers(lambda_name, s3_prefixes)
