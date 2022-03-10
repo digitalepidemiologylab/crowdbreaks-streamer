@@ -41,7 +41,7 @@ class StreamManagerFilter(StreamManager):
             config.keywords, config.lang)
         self.stream.filter(
             track=config.keywords, languages=config.lang,
-            encoding='utf-8', stall_warnings=True)
+            stall_warnings=True)
 
 
 class StreamManagerCovid(StreamManager):

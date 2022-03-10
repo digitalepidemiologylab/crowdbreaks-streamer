@@ -10,7 +10,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'python-dotenv', 'aenum', 'dacite', 'tweepy @ git+https://github.com/utanashati/tweepy.git',
-        'awstools @ git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git@4-prefix-triggers#egg=awstools&subdirectory=awstools'],
+        'awstools @ git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git#egg=awstools&subdirectory=awstools'],
     entry_points={'console_scripts': [
         'run-stream=streamer.run:main']},
     package_data={'streamer': ['streamer.env']},
