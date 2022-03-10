@@ -28,7 +28,7 @@ def handle_tweet(
     status_id = tweet.id
     # Reverse match to find project
     matching_keywords = match_keywords(
-        tweet, config_manager.covid(TwiEnv.COVID_STREAM_NAME is not 'None'))
+        tweet, config_manager.covid(TwiEnv.COVID_STREAM_NAME != 'None'))
 
     matching_projects = list(matching_keywords.keys())
     if matching_projects == []:
