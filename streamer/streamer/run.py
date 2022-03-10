@@ -29,7 +29,7 @@ def run():
     n_errors_last_hour = 0
     while True:
         logger.debug('Trying to connect to Twitter API.')
-        stream = StreamManagerCovid() if TwiEnv.COVID_STREAM_NAME else StreamManagerFilter()
+        stream = StreamManagerCovid() if TwiEnv.COVID_STREAM_NAME != 'None' else StreamManagerFilter()
         try:
             stream.start()
         except KeyboardInterrupt:

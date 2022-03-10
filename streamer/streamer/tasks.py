@@ -19,7 +19,7 @@ def handle_tweet(
         status, config_manager,
         store_for_testing=False
 ):
-    if TwiEnv.COVID_STREAM_NAME:
+    if TwiEnv.COVID_STREAM_NAME != 'None':
         _ = firehose.put_record(
             DeliveryStreamName=TwiEnv.COVID_STREAM_NAME,
             Record={'Data': f'{json.dumps(status)}\n'.encode()})
