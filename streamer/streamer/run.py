@@ -79,11 +79,11 @@ def main():
             KFEnv.UNMATCHED_STREAM_NAME,
             f'{KFEnv.UNMATCHED_STREAM_NAME}/')
     # Create delivery streams and ES indices for the listed projects
-    for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None):
+    for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not 'None'):
         create_delivery_stream(
             conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
         create_index(conf.slug, conf.lang[0], only_new=True)
     # Set S3 triggers for the delivery streams if nonexistent
-    s3_prefixes = ['tweets/project_{}' for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None)]
+    s3_prefixes = ['tweets/project_{}' for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not 'None')]
     set_s3_triggers('s3-to-es', s3_prefixes)
     run()

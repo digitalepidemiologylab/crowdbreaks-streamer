@@ -15,6 +15,6 @@ class TwiEnv(Constant):
     OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN')
     OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET')
 
-    COVID_STREAM_NAME = os.environ.get('COVID_STREAM_NAME', None)
+    COVID_STREAM_NAME = os.environ.get('COVID_STREAM_NAME', 'None')
     COVID_PARTITION = os.environ.get('COVID_PARTITION', '0')
     assert COVID_PARTITION in ['0', '1', '2', '3', '4']
