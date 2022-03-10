@@ -8,6 +8,7 @@ from awstools.env import KFEnv
 from awstools.config import config_manager
 from awstools.firehose import create_delivery_stream
 from awstools.elasticsearch import create_index
+from awstools.llambda import set_s3_triggers
 
 from .env import TwiEnv
 from .stream import StreamManagerFilter, StreamManagerCovid
@@ -82,4 +83,7 @@ def main():
         create_delivery_stream(
             conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
         create_index(conf.slug, conf.lang[0], only_new=True)
+    # Set S3 triggers for the delivery streams if nonexistent
+    s3_prefixes = ['tweets/project_{}' for conf in config_manager.covid(TwiEnv.COVID_STREAM_NAME is not None)]
+    set_s3_triggers('s3-to-es', s3_prefixes)
     run()
