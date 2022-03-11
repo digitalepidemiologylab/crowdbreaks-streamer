@@ -297,6 +297,24 @@ def create_lambda_layer(
                 logger.info('Layer %s created.', layer_name)
 
 
+def update_layer_version(function_name, layer_arn, latest_version):
+    try:
+        _ = aws_lambda.update_function_configuration(
+            FunctionName=function_name,
+            Layers=[
+                layer_arn + f':{latest_version}',
+            ]
+        )
+        logger.info(
+            'The layer for lambda %s got updated to the latest version.',
+            function_name)
+    except aws_lambda.exceptions.ResourceConflictException as exc:
+        logger.error('%s: %s', type(exc).__name__, str(exc))
+        logger.error('Retrying to update the layer version.')
+        time.sleep(20)
+        update_layer_version(function_name, layer_arn, latest_version)
+
+
 def create_lambda(
     lambda_name,
     lambda_local_zip_path,
@@ -452,15 +470,7 @@ def create_lambda(
         int(response['Configuration']['Layers'][0]['Arn'].split(':')[-1])
 
     if aws_layer_version_num < latest_version:
-        _ = aws_lambda.update_function_configuration(
-            FunctionName=function_name,
-            Layers=[
-                layer_arn + f':{latest_version}',
-            ]
-        )
-        logger.info(
-            'The layer for lambda %s got updated to the latest version.',
-            function_name)
+        update_layer_version(function_name, layer_arn, latest_version)
     else:
         logger.info(
             'The layer for lambda %s is already at the latest version.',
