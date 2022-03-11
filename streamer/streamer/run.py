@@ -84,6 +84,7 @@ def main():
             conf.slug, f'{KFEnv.STORAGE_BUCKET_PREFIX}{conf.slug}/')
         create_index(conf.slug, conf.lang[0], only_new=True)
     # Set S3 triggers for the delivery streams if nonexistent
-    s3_prefixes = ['tweets/project_{}' for conf in config_manager.config]
+    s3_prefixes = [f'tweets/project_{conf}' for conf in config_manager.config]
+    logger.info('S3 prefixes: %s', ', '.join(s3_prefixes))
     set_s3_triggers('s3-to-es', s3_prefixes)
     run()
