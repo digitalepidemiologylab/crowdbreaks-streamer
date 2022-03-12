@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import os
+from botocore.exceptions import ClientError
 
 from .env import LEnv, ESEnv
 from .session import s3, iam, aws_lambda
@@ -50,7 +51,8 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         Bucket=LEnv.BUCKET_NAME
     )
     notif_config.pop('ResponseMetadata')
-    logger.error('Old notification config:\n%s', notif_config)
+    notif_config_old = notif_config
+    logger.info('Old notification config:\n%s', notif_config)
 
     function_name, function_arn = get_function_name_arn(lambda_name)
     this_lambda_s3_config, other_lambda_s3_configs = \
@@ -63,7 +65,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         for conf in this_lambda_s3_config
         if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'Prefix'
     ]
-    logger.error('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
+    logger.info('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
 
     # Template for an S3 trigger entry
     lambda_config_template = lambda s3_prefix: {
@@ -92,7 +94,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     this_lambda_s3_config.extend([
         lambda_config_template(prefix) for prefix in prefixes_to_add
     ])
-    logger.error('Updated lambda config:\n%s', this_lambda_s3_config)
+    logger.info('Updated lambda config:\n%s', this_lambda_s3_config)
 
     # Update the bucket notification config
     notif_config['LambdaFunctionConfigurations'] = [
@@ -101,9 +103,15 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     ]
     logger.info('Notification config:\n%s', notif_config)
 
-    _ = s3.put_bucket_notification_configuration(
-        Bucket=LEnv.BUCKET_NAME,
-        NotificationConfiguration=notif_config)
+    try:
+        _ = s3.put_bucket_notification_configuration(
+            Bucket=LEnv.BUCKET_NAME,
+            NotificationConfiguration=notif_config)
+    except ClientError:
+        raise Exception(
+            f'Old notification config:\n{notif_config_old}'
+            f'New notification config:\n{notif_config}'
+        )
 
     logger.info('S3 triggers %s are set for lambda %s.', ', '.join(s3_prefixes), function_name)
 
