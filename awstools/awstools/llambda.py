@@ -50,6 +50,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         Bucket=LEnv.BUCKET_NAME
     )
     notif_config.pop('ResponseMetadata')
+    logger.info('Old notification config:\n%s', notif_config)
 
     function_name, function_arn = get_function_name_arn(lambda_name)
     this_lambda_s3_config, other_lambda_s3_configs = \
@@ -60,7 +61,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     this_lambda_s3_prefixes = [
         conf['Filter']['Key']['FilterRules'][0]['Value']
         for conf in this_lambda_s3_config
-        if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'prefix'
+        if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'Prefix'
     ]
     logger.info('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
 
@@ -72,7 +73,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
             'Key': {
                 'FilterRules': [
                     {
-                        'Name': 'prefix',
+                        'Name': 'Prefix',
                         'Value': s3_prefix
                     },
                 ]
