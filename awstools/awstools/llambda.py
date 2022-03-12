@@ -56,6 +56,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         this_and_other_lambda_s3_configs(notif_config, function_name)
 
     # Get only the prefix entries in this lambda's notification config
+    # (there's also a suffix option for a filter)
     this_lambda_s3_prefixes = [
         conf['Filter']['Key']['FilterRules'][0]['Value']
         for conf in this_lambda_s3_config
@@ -80,22 +81,24 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     }
 
     # Add new prefixes to this lambda's notification config
-    # this_lambda_s3_config.extend([
-    #     lambda_config_template(prefix)
-    #     for prefix in s3_prefixes if prefix not in this_lambda_s3_prefixes
-    # ])
-    this_lambda_s3_config = [{
-        'LambdaFunctionArn': function_arn,
-        'Events': ['s3:ObjectCreatedByPut:*'],
-        'Filter': {
-            'Key': {
-                'FilterRules': [
-                    {'Name': 'prefix', 'Value': prefix}
-                    for prefix in set(s3_prefixes).union(this_lambda_s3_prefixes)
-                ]
-            }
-        }
-    }]
+    this_lambda_s3_config.extend([
+        lambda_config_template(prefix)
+        for prefix in s3_prefixes if prefix not in this_lambda_s3_prefixes
+    ])
+
+    # this_lambda_s3_config = [{
+    #     'LambdaFunctionArn': function_arn,
+    #     'Events': ['s3:ObjectCreated:Put'],
+    #     'Filter': {
+    #         'Key': {
+    #             'FilterRules': [
+    #                 {'Name': 'prefix', 'Value': prefix}
+    #                 for prefix in set(s3_prefixes).union(this_lambda_s3_prefixes)
+    #             ]
+    #         }
+    #     }
+    # }]
+    
     logger.info('Updated lambda config:\n%s', this_lambda_s3_config)
 
     # Update the bucket notification config
