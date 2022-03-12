@@ -103,15 +103,9 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     ]
     logger.info('Notification config:\n%s', notif_config)
 
-    try:
-        _ = s3.put_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME,
-            NotificationConfiguration=notif_config)
-    except ClientError:
-        raise Exception(
-            f'Old notification config:\n{notif_config_old}'
-            f'New notification config:\n{notif_config}'
-        )
+    _ = s3.put_bucket_notification_configuration(
+        Bucket=LEnv.BUCKET_NAME,
+        NotificationConfiguration=notif_config)
 
     logger.info('S3 triggers %s are set for lambda %s.', ', '.join(s3_prefixes), function_name)
 
