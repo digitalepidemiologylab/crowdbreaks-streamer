@@ -51,7 +51,6 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         Bucket=LEnv.BUCKET_NAME
     )
     notif_config.pop('ResponseMetadata')
-    notif_config_old = notif_config
     logger.info('Old notification config:\n%s', notif_config)
 
     function_name, function_arn = get_function_name_arn(lambda_name)
@@ -65,7 +64,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         for conf in this_lambda_s3_config
         if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'Prefix'
     ]
-    logger.info('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
+    logger.debug('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
 
     # Template for an S3 trigger entry
     lambda_config_template = lambda s3_prefix: {
@@ -94,14 +93,14 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     this_lambda_s3_config.extend([
         lambda_config_template(prefix) for prefix in prefixes_to_add
     ])
-    logger.info('Updated lambda config:\n%s', this_lambda_s3_config)
+    logger.debug('Updated lambda config:\n%s', this_lambda_s3_config)
 
     # Update the bucket notification config
     notif_config['LambdaFunctionConfigurations'] = [
         *this_lambda_s3_config,
         *other_lambda_s3_configs
     ]
-    logger.info('Notification config:\n%s', notif_config)
+    logger.info('Updated notification config:\n%s', notif_config)
 
     _ = s3.put_bucket_notification_configuration(
         Bucket=LEnv.BUCKET_NAME,

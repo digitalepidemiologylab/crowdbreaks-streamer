@@ -135,8 +135,7 @@ def handle_stream_config():
             if conf.storage_mode not in [StorageMode.S3,
                                          StorageMode.S3_NO_RETWEETS]:
                 s3_prefixes.append(AWSEnv.STORAGE_BUCKET_PREFIX + conf.slug)
-        set_s3_triggers(
-            get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME)[1], s3_prefixes)
+        set_s3_triggers(AWSEnv.LAMBDA_S3_ES_NAME, s3_prefixes)
 
 
 def handle_stream_state():
