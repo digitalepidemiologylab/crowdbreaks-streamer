@@ -119,7 +119,7 @@ def handle_stream_config():
     #     ECSEnv.CLUSTER, ECSEnv.SERVICE)
 
     # Restart streaming if configs are different
-    if config_manager_old.write() != config_manager_new.write():
+    if config_manager_old.config != config_manager_new.config:
         if state is True:
             logger.info('The config changed. Going to restart the streamer.')
             stop_streamer()
