@@ -30,7 +30,6 @@ def main():
         lambda_local_zip_path,
         policy_path,
         push_to_s3=True,
-        s3_trigger=True,
         s3_prefixes=('configs/stream')
     )
 

@@ -50,7 +50,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         Bucket=LEnv.BUCKET_NAME
     )
     notif_config.pop('ResponseMetadata')
-    logger.info('Old notification config:\n%s', notif_config)
+    logger.error('Old notification config:\n%s', notif_config)
 
     function_name, function_arn = get_function_name_arn(lambda_name)
     this_lambda_s3_config, other_lambda_s3_configs = \
@@ -63,7 +63,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         for conf in this_lambda_s3_config
         if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'Prefix'
     ]
-    logger.info('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
+    logger.error('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
 
     # Template for an S3 trigger entry
     lambda_config_template = lambda s3_prefix: {
@@ -92,7 +92,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     this_lambda_s3_config.extend([
         lambda_config_template(prefix) for prefix in prefixes_to_add
     ])
-    logger.info('Updated lambda config:\n%s', this_lambda_s3_config)
+    logger.error('Updated lambda config:\n%s', this_lambda_s3_config)
 
     # Update the bucket notification config
     notif_config['LambdaFunctionConfigurations'] = [
@@ -332,12 +332,14 @@ def create_lambda(
     lambda_local_zip_path,
     policy_path,
     push_to_s3=False,
-    s3_trigger=False,
     s3_prefixes=None,
     add_s3_permission=False,
     timeout=LEnv.TIMEOUT,
     memory_size=LEnv.MEMORY_SIZE
 ):
+    if s3_prefixes is not None and type(s3_prefixes) not in [tuple, list]:
+        raise ValueError("'s3_prefixes' should be either a tuple or a list.")
+
     _, role_arn = get_role_name_arn(lambda_name)
     function_name, function_arn = get_function_name_arn(lambda_name)
     layer_name, layer_arn = get_layer_name_arn(lambda_name)
@@ -488,7 +490,7 @@ def create_lambda(
             'The layer for lambda %s is already at the latest version.',
             function_name)
 
-    if add_s3_permission or s3_trigger:
+    if add_s3_permission or (s3_prefixes is not None):
         # Add permission to invoke from S3
         try:
             _ = aws_lambda.add_permission(
@@ -501,5 +503,5 @@ def create_lambda(
         except aws_lambda.exceptions.ResourceConflictException:
             pass
 
-    if s3_trigger:
+    if s3_prefixes is not None:
         set_s3_triggers(lambda_name, s3_prefixes)
