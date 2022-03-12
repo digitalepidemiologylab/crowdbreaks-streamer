@@ -82,9 +82,15 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     }
 
     # Add new prefixes to this lambda's notification config
+    prefixes_to_add = [
+        prefix for prefix in s3_prefixes
+        if prefix not in this_lambda_s3_prefixes
+    ]
+    if len(prefixes_to_add) == 0:
+        logger.info('S3 notification config is up to date.')
+        return
     this_lambda_s3_config.extend([
-        lambda_config_template(prefix)
-        for prefix in s3_prefixes if prefix not in this_lambda_s3_prefixes
+        lambda_config_template(prefix) for prefix in prefixes_to_add
     ])
     logger.info('Updated lambda config:\n%s', this_lambda_s3_config)
 
@@ -97,8 +103,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
 
     _ = s3.put_bucket_notification_configuration(
         Bucket=LEnv.BUCKET_NAME,
-        NotificationConfiguration=notif_config
-    )
+        NotificationConfiguration=notif_config)
 
     logger.info('S3 triggers %s are set for lambda %s.', ', '.join(s3_prefixes), function_name)
 
