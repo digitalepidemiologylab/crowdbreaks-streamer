@@ -7,7 +7,8 @@ from awstools.env import ECSEnv, AWSEnv
 from awstools.config import ConfigManager, StorageMode
 from awstools.s3 import get_s3_object
 from awstools.llambda import (get_function_name_arn,
-                              this_and_other_lambda_s3_configs)
+                              this_and_other_lambda_s3_configs,
+                              set_s3_triggers)
 
 FUNCTION_NAME = f'{AWSEnv.APP_NAME}-s3-to-es-{AWSEnv.ENV}'
 
@@ -128,45 +129,14 @@ def handle_stream_config():
                         'Going to stop the streamer.')
             stop_streamer()
 
-        # Bucket Lambda event notifications
-        notif_config = s3.get_bucket_notification_configuration(
-            Bucket=ECSEnv.BUCKET_NAME
-        )
-        logger.debug(notif_config)
-        notif_config.pop('ResponseMetadata')
-
-        _, other_lambda_s3_configs = this_and_other_lambda_s3_configs(
-            notif_config, FUNCTION_NAME)
-
-        rules = []
+        # Update bucket Lambda event notifications
+        s3_prefixes = []
         for conf in config_manager_new.config:
             if conf.storage_mode not in [StorageMode.S3,
                                          StorageMode.S3_NO_RETWEETS]:
-                rules.append({
-                    'Name': 'Prefix',
-                    'Value': AWSEnv.STORAGE_BUCKET_PREFIX + conf.slug})
-        filters = [{'Key': {'FilterRules': [rule]}} for rule in rules]
-
-        this_lambda_s3_config = [
-            {
-                'LambdaFunctionArn':
-                    get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME)[1],
-                'Events': ['s3:ObjectCreatedByPut:*'],
-                'Filter': filter_
-            }
-            for filter_ in filters
-        ]
-        notif_config['LambdaFunctionConfigurations'] = [
-            *this_lambda_s3_config,
-            *other_lambda_s3_configs
-        ]
-
-        logger.debug(notif_config)
-
-        _ = s3.put_bucket_notification_configuration(
-            Bucket=ECSEnv.BUCKET_NAME,
-            NotificationConfiguration=notif_config
-        )
+                s3_prefixes.append(AWSEnv.STORAGE_BUCKET_PREFIX + conf.slug)
+        set_s3_triggers(
+            get_function_name_arn(AWSEnv.LAMBDA_S3_ES_NAME)[1], s3_prefixes)
 
 
 def handle_stream_state():

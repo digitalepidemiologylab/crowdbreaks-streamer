@@ -67,7 +67,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     # Template for an S3 trigger entry
     lambda_config_template = lambda s3_prefix: {
         'LambdaFunctionArn': function_arn,
-        'Events': ['s3:ObjectCreatedByPut:*'],
+        'Events': ['s3:ObjectCreated:Put'],
         'Filter': {
             'Key': {
                 'FilterRules': [
@@ -85,20 +85,6 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         lambda_config_template(prefix)
         for prefix in s3_prefixes if prefix not in this_lambda_s3_prefixes
     ])
-
-    # this_lambda_s3_config = [{
-    #     'LambdaFunctionArn': function_arn,
-    #     'Events': ['s3:ObjectCreated:Put'],
-    #     'Filter': {
-    #         'Key': {
-    #             'FilterRules': [
-    #                 {'Name': 'prefix', 'Value': prefix}
-    #                 for prefix in set(s3_prefixes).union(this_lambda_s3_prefixes)
-    #             ]
-    #         }
-    #     }
-    # }]
-    
     logger.info('Updated lambda config:\n%s', this_lambda_s3_config)
 
     # Update the bucket notification config
