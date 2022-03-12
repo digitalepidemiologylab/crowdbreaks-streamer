@@ -103,6 +103,7 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         *this_lambda_s3_config,
         *other_lambda_s3_configs
     ]
+    logger.info('Notification config:\n%s', notif_config)
 
     _ = s3.put_bucket_notification_configuration(
         Bucket=LEnv.BUCKET_NAME,
