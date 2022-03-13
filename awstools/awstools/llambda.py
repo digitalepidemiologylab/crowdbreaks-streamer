@@ -7,6 +7,7 @@ import shutil
 import subprocess
 import sys
 import os
+from botocore.exceptions import ClientError
 
 from .env import LEnv, ESEnv
 from .session import s3, iam, aws_lambda
@@ -50,50 +51,62 @@ def set_s3_triggers(lambda_name, s3_prefixes):
         Bucket=LEnv.BUCKET_NAME
     )
     notif_config.pop('ResponseMetadata')
+    logger.info('Old notification config:\n%s', notif_config)
 
     function_name, function_arn = get_function_name_arn(lambda_name)
     this_lambda_s3_config, other_lambda_s3_configs = \
         this_and_other_lambda_s3_configs(notif_config, function_name)
+
     # Get only the prefix entries in this lambda's notification config
+    # (there's also a suffix option for a filter)
     this_lambda_s3_prefixes = [
         conf['Filter']['Key']['FilterRules'][0]['Value']
         for conf in this_lambda_s3_config
-        if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'prefix'
+        if conf['Filter']['Key']['FilterRules'][0]['Name'] == 'Prefix'
     ]
+    logger.debug('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
 
-    if this_lambda_s3_config == []:
-        # Template for an S3 trigger entry
-        lambda_config_template = lambda s3_prefix: {
-            'LambdaFunctionArn': function_arn,
-            'Events': ['s3:ObjectCreatedByPut:*'],
-            'Filter': {
-                'Key': {
-                    'FilterRules': [
-                        {
-                            'Name': 'prefix',
-                            'Value': s3_prefix
-                        },
-                    ]
-                }
+    # Template for an S3 trigger entry
+    lambda_config_template = lambda s3_prefix: {
+        'LambdaFunctionArn': function_arn,
+        'Events': ['s3:ObjectCreated:Put'],
+        'Filter': {
+            'Key': {
+                'FilterRules': [
+                    {
+                        'Name': 'Prefix',
+                        'Value': s3_prefix
+                    },
+                ]
             }
         }
-        # Add new prefixes to this lambda's notification config
-        this_lambda_s3_config.extend([
-            lambda_config_template(prefix)
-            for prefix in s3_prefixes if prefix not in this_lambda_s3_prefixes
-        ])
-        # Update the bucket notification config
-        notif_config['LambdaFunctionConfigurations'] = [
-            *this_lambda_s3_config,
-            *other_lambda_s3_configs
-        ]
+    }
 
-        _ = s3.put_bucket_notification_configuration(
-            Bucket=LEnv.BUCKET_NAME,
-            NotificationConfiguration=notif_config
-        )
+    # Add new prefixes to this lambda's notification config
+    prefixes_to_add = [
+        prefix for prefix in s3_prefixes
+        if prefix not in this_lambda_s3_prefixes
+    ]
+    if len(prefixes_to_add) == 0:
+        logger.info('S3 notification config is up to date.')
+        return
+    this_lambda_s3_config.extend([
+        lambda_config_template(prefix) for prefix in prefixes_to_add
+    ])
+    logger.debug('Updated lambda config:\n%s', this_lambda_s3_config)
 
-        logger.info('S3 triggers %s are set for lambda %s.', ', '.join(s3_prefixes), function_name)
+    # Update the bucket notification config
+    notif_config['LambdaFunctionConfigurations'] = [
+        *this_lambda_s3_config,
+        *other_lambda_s3_configs
+    ]
+    logger.info('Updated notification config:\n%s', notif_config)
+
+    _ = s3.put_bucket_notification_configuration(
+        Bucket=LEnv.BUCKET_NAME,
+        NotificationConfiguration=notif_config)
+
+    logger.info('S3 triggers %s are set for lambda %s.', ', '.join(s3_prefixes), function_name)
 
 
 def zip_lambda_func(lambda_dir):
@@ -320,12 +333,14 @@ def create_lambda(
     lambda_local_zip_path,
     policy_path,
     push_to_s3=False,
-    s3_trigger=False,
     s3_prefixes=None,
     add_s3_permission=False,
     timeout=LEnv.TIMEOUT,
     memory_size=LEnv.MEMORY_SIZE
 ):
+    if s3_prefixes is not None and type(s3_prefixes) not in [tuple, list]:
+        raise ValueError("'s3_prefixes' should be either a tuple or a list.")
+
     _, role_arn = get_role_name_arn(lambda_name)
     function_name, function_arn = get_function_name_arn(lambda_name)
     layer_name, layer_arn = get_layer_name_arn(lambda_name)
@@ -476,7 +491,7 @@ def create_lambda(
             'The layer for lambda %s is already at the latest version.',
             function_name)
 
-    if add_s3_permission or s3_trigger:
+    if add_s3_permission or (s3_prefixes is not None):
         # Add permission to invoke from S3
         try:
             _ = aws_lambda.add_permission(
@@ -489,5 +504,5 @@ def create_lambda(
         except aws_lambda.exceptions.ResourceConflictException:
             pass
 
-    if s3_trigger:
+    if s3_prefixes is not None:
         set_s3_triggers(lambda_name, s3_prefixes)

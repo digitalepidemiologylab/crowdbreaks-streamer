@@ -29,8 +29,7 @@ def main():
         lambda_name,
         lambda_local_zip_path,
         policy_path,
-        push_to_s3=True,
-        s3_trigger=False
+        push_to_s3=True
     )
 
 
