@@ -11,7 +11,7 @@ logger.setLevel(logging.INFO)
 
 
 def main():
-    lambda_name = 'streamer-management'
+    lambda_name = 'subsample-annotations'
     lambda_dir = os.path.dirname(os.path.realpath(__file__))
 
     policy_path = os.path.join(
