@@ -96,6 +96,11 @@ def handler(event, context):
     logger.debug(event)
 
     key = event['Records'][-1]['s3']['object']['key']
+    logger.debug(key)
+    if 'results' not in key:
+        logger.info("'%s' is not a results object.", key)
+        return
+
     key_name = '.'.join(key.split('.')[:-1])
     output_key = key_name + '_evaluate.csv'
 
