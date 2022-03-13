@@ -19,15 +19,11 @@
             "Action": [
                 "s3:GetObject",
                 "s3:PutObject",
-                "s3:ListBucket",
-                "es:ESHttpPut",
-                "es:ESHttpHead",
-                "es:ESHttpGet"
+                "s3:ListBucket"
             ],
             "Resource": [
                 "arn:aws:s3:::BUCKET_NAME",
-                "arn:aws:s3:::BUCKET_NAME/*",
-                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*"
+                "arn:aws:s3:::BUCKET_NAME/*"
             ]
         }
     ]
