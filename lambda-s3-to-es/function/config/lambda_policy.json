@@ -11,10 +11,6 @@
             "Action": [
                 "s3:GetObject",
                 "s3:ListBucket",
-                "es:ESHttpPost",
-                "es:ESHttpPut",
-                "es:ESHttpGet",
-                "es:ESHttpHead",
                 "logs:CreateLogStream",
                 "logs:PutLogEvents",
                 "sagemaker:InvokeEndpoint"
@@ -22,7 +18,6 @@
             "Resource": [
                 "arn:aws:s3:::BUCKET_NAME",
                 "arn:aws:s3:::BUCKET_NAME/*",
-                "arn:aws:es:REGION:ACCOUNT_NUM:domain/DOMAIN/*",
                 "arn:aws:sagemaker:REGION:ACCOUNT_NUM:endpoint/MODEL_NAME",
                 "arn:aws:logs:REGION:ACCOUNT_NUM:log-group:/aws/lambda/FUNCTION_NAME:*"
             ]
