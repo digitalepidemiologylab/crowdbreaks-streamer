@@ -1,1 +1,1 @@
-git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git@12-sample-lambda#egg=awstools&subdirectory=awstools
+git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git#egg=awstools&subdirectory=awstools
