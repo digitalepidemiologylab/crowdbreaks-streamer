@@ -64,26 +64,21 @@ def handler(event, context):
 
         s.query = Q('function_score', **random_sample)
         s = s[0:1000]
-        s = s.source(['id_str', 'text'])
+        s = s.source(['text'])
         response = s.execute()
 
-        sampled_tweets = [[hit.id_str, hit.text] for hit in response]
+        sampled_tweets = [[hit.meta.id, hit.text] for hit in response]
 
         sampled_tweets_df = pd.DataFrame(
             sampled_tweets, columns=['id_str', 'text'])
 
-        # {'bool': {
-        #     'must_not': [{'exists': {'field': 'is_retweet'}}, {'exists': {'field': 'has_quote'}}],
-        #     'must': [{'range': {'created_at': {'gte': '2021-12-01T00:00:00.000Z'}}}]
-        # }}
-
         csv_buffer = StringIO()
         sampled_tweets_df.to_csv(csv_buffer)
         df_sha256 = sha256(csv_buffer.getvalue().encode()).hexdigest()
-        datetime_stamp = datetime.now().strftime('%Y-%m-%dT%T')
+        datetime_stamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
         output_key = join(
             AWSEnv.SAMPLES_PREFIX, f"project_{conf.slug}",
-            f"auto-sample_{conf.slug}_{datetime_stamp}_{df_sha256}.csv")
+            f"auto-sample-{conf.slug}-{datetime_stamp}-{df_sha256}.csv")
         s3.put_object(
             Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME,
             Key=output_key)
