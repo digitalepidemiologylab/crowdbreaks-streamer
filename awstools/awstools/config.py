@@ -48,6 +48,7 @@ class Conf:
     image_storage_mode: ImageStorageMode
     model_endpoints: Optional[Dict]
     covid: bool
+    auto_mturking: bool
 
 
 @dataclass(frozen=True)

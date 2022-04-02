@@ -1,0 +1,4 @@
+git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git#egg=awstools&subdirectory=awstools
+numpy
+pandas
+elasticsearch_dsl

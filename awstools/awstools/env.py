@@ -50,6 +50,8 @@ class AWSEnv(Env):
         'AWS_STREAM_STATE_S3_KEY', 'configs/stream/state.json')
     ENDPOINTS_PREFIX = os.environ.get(
         'ENDPOINTS_PREFIX', 'configs/models/')
+    SAMPLES_PREFIX = os.environ.get(
+        'SAMPLES_PREFIX', 'other/csv/automatic-samples')
 
     LAMBDA_S3_ES_NAME = os.environ.get(
         'LAMBDA_S3_ES_NAME', 's3-to-es')
