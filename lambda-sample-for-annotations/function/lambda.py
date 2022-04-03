@@ -24,6 +24,20 @@ def only_digits(string):
     return re.sub('[^0-9]', '', string)
 
 
+def put_csv_to_s3(csv_buffer, conf_slug, text=False):
+    df_sha256 = sha256(csv_buffer.getvalue().encode()).hexdigest()
+    datetime_stamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    if text:
+        f_name = f"auto-sample-text-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
+    else:
+        f_name = f"auto-sample-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
+    output_key = join(
+        AWSEnv.SAMPLES_PREFIX, f"project_{conf_slug}", f_name)
+    s3.put_object(
+        Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME,
+        Key=output_key)
+
+
 def handler(event, context):
     logger.debug(event['resources'][0])
     cron_arn = event['resources'][0]
@@ -68,17 +82,17 @@ def handler(event, context):
         response = s.execute()
 
         sampled_tweets = [[hit.meta.id, hit.text] for hit in response]
-
         sampled_tweets_df = pd.DataFrame(
             sampled_tweets, columns=['id_str', 'text'])
 
+        # Save a CSV for an MTurk batch
         csv_buffer = StringIO()
-        sampled_tweets_df.to_csv(csv_buffer)
-        df_sha256 = sha256(csv_buffer.getvalue().encode()).hexdigest()
-        datetime_stamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
-        output_key = join(
-            AWSEnv.SAMPLES_PREFIX, f"project_{conf.slug}",
-            f"auto-sample-{conf.slug}-{datetime_stamp}-{df_sha256}.csv")
-        s3.put_object(
-            Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME,
-            Key=output_key)
+        sampled_tweets_df.to_csv(
+            csv_buffer, header=False, index=False, columns=['id_str'])
+        put_csv_to_s3(csv_buffer, conf.slug, text=False)
+
+        # Save a CSV for manual inspection
+        csv_buffer = StringIO()
+        sampled_tweets_df.to_csv(
+            csv_buffer, header=True, index=True)
+        put_csv_to_s3(csv_buffer, conf.slug, text=True)
