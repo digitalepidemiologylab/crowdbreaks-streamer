@@ -49,6 +49,7 @@ class Conf:
     model_endpoints: Optional[Dict]
     covid: bool
     auto_mturking: bool
+    tweets_per_batch: Optional[int]
 
 
 @dataclass(frozen=True)

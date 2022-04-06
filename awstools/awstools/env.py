@@ -52,6 +52,8 @@ class AWSEnv(Env):
         'ENDPOINTS_PREFIX', 'configs/models/')
     SAMPLES_PREFIX = os.environ.get(
         'SAMPLES_PREFIX', 'other/csv/automatic-samples')
+    SAMPLE_STATUS_S3_KEY = os.environ.get(
+        'SAMPLE_STATUS_S3_KEY', 'other/csv/automatic-samples/status.json')
 
     LAMBDA_S3_ES_NAME = os.environ.get(
         'LAMBDA_S3_ES_NAME', 's3-to-es')

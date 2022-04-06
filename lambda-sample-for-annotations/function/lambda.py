@@ -2,6 +2,7 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from hashlib import sha256
 from io import StringIO
+import json
 import logging
 from os.path import join
 import re
@@ -36,6 +37,7 @@ def put_csv_to_s3(csv_buffer, conf_slug, text=False):
     s3.put_object(
         Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME,
         Key=output_key)
+    return output_key
 
 
 def handler(event, context):
@@ -58,6 +60,8 @@ def handler(event, context):
 
     relevant_confs = [conf for conf in config_manager.config if conf.auto_mturking is True]
 
+    sample_status = {'text': [], 'no_text': []}
+
     for conf in relevant_confs:
         s = Search(using=es, index=conf.es_index_name)
 
@@ -77,7 +81,11 @@ def handler(event, context):
             'replace', 'functions': [{ 'random_score': {} }], 'query': q }
 
         s.query = Q('function_score', **random_sample)
-        s = s[0:1000]
+        try:
+            s = s[0:conf.tweets_per_batch]
+        except AttributeError as exc:
+            logger.error('%s: %s', type(exc).__name__, str(exc))
+            continue
         s = s.source(['text'])
         response = s.execute()
 
@@ -89,10 +97,16 @@ def handler(event, context):
         csv_buffer = StringIO()
         sampled_tweets_df.to_csv(
             csv_buffer, header=False, index=False, columns=['id_str'])
-        put_csv_to_s3(csv_buffer, conf.slug, text=False)
+        output_key = put_csv_to_s3(csv_buffer, conf.slug, text=False)
+        sample_status['no_text'].append(output_key)
 
         # Save a CSV for manual inspection
         csv_buffer = StringIO()
         sampled_tweets_df.to_csv(
             csv_buffer, header=True, index=True)
-        put_csv_to_s3(csv_buffer, conf.slug, text=True)
+        output_key = put_csv_to_s3(csv_buffer, conf.slug, text=True)
+        sample_status['text'].append(output_key)
+
+    s3.put_object(
+        Body=json.dumps(sample_status), Bucket=AWSEnv.BUCKET_NAME,
+        Key=AWSEnv.SAMPLE_STATUS_S3_KEY)
