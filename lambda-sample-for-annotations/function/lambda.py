@@ -18,7 +18,8 @@ from awstools.session import es, s3
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-DATE_FORMAT = '%Y-%m-%dT%T.000Z'
+DATE_FORMAT_ES = '%Y-%m-%dT%T.000Z'
+DATE_FORMAT_S3 = '%Y%m%d%H%M%S'
 
 
 def only_digits(string):
@@ -27,11 +28,11 @@ def only_digits(string):
 
 def put_csv_to_s3(csv_buffer, conf_slug, text=False):
     df_sha256 = sha256(csv_buffer.getvalue().encode()).hexdigest()
-    datetime_stamp = datetime.now().strftime('%Y-%m-%d-%H-%M-%S')
+    datetime_stamp = datetime.now().strftime(DATE_FORMAT_S3)
     if text:
-        f_name = f"auto-sample-text-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
+        f_name = f"auto_sample-text-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
     else:
-        f_name = f"auto-sample-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
+        f_name = f"auto_sample-no_text-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
     output_key = join(
         AWSEnv.SAMPLES_PREFIX, f"project_{conf_slug}", f_name)
     s3.put_object(
@@ -69,7 +70,7 @@ def handler(event, context):
             'created_at': {
                 'gte': (date.today() + relativedelta(
                     months=-sample_each
-                )).strftime(DATE_FORMAT)
+                )).strftime(DATE_FORMAT_ES)
             }
         }
 

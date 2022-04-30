@@ -1,3 +1,4 @@
+from datetime import datetime
 from io import StringIO
 import logging
 
@@ -106,19 +107,26 @@ def handler(event, context):
         logger.info("'%s' is not a results object.", key)
         return
     # Avoid vicious cycle
-    elif key.endswith('_evaluate.csv'):
+    elif 'evaluate' in key:
         logger.warning("'%s' is a subsample already.", key)
         return
-    key_name = '.'.join(key.split('.')[:-1])
+    folder = key.split('/')[:-1]
+    object_name = key.split('/')[-1]
+    date_now = datetime.now().strftime('%Y%m%d')
+    output_key = '/'.join([*folder, '-'.join(['evaluate', date_now, object_name])])
+    output_key_ids = '/'.join([*folder, '-'.join(['evaluate_ids', date_now, object_name])])
 
-    output_key = key_name + '_evaluate.csv'
     logger.debug(output_key)
 
     df = pd.read_csv(StringIO(get_s3_object(AWSEnv.BUCKET_NAME, key)))
     logger.info('Unique tweets in the original sample: %s', len(df.tweet_id.unique()))
+
     df_sampled = sample_tweets_for_all_workers(df, n_samples=1, min_tweet_count=10)
     logger.info('Unique tweets in the subsample: %s', len(df_sampled.tweet_id.unique()))
-
     csv_buffer = StringIO()
     df_sampled.to_csv(csv_buffer)
     s3.put_object(Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME, Key=output_key)
+
+    csv_buffer = StringIO()
+    df_sampled.to_csv(csv_buffer, header=False, index=False, columns=['tweet_id'])
+    s3.put_object(Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME, Key=output_key_ids)
