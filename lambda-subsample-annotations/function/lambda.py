@@ -10,6 +10,7 @@ from awstools.env import AWSEnv
 from awstools.s3 import get_s3_object
 
 FUNCTION_NAME = f'{AWSEnv.APP_NAME}-subsample-annotations-{AWSEnv.ENV}'
+MIN_TWEET_COUNT = 10
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -25,12 +26,14 @@ def get_tweet_counts(unique_workers, df_sampled):
     return tweet_counts
 
 
-def sample_tweets_from_each_worker(df, n_samples=1):
+def sample_tweets_from_each_worker(df, n_samples=1, min_tweet_count=MIN_TWEET_COUNT):
     # Sample tweets from each worker
     df = df.convert_dtypes()
     df_dtypes = {k: pd.Series(dtype=v) for k, v in dict(df.dtypes).items()}
 
-    unique_workers = np.sort(df.worker_id.unique())
+    # Exclude workers who have less than MIN_TWEET_COUNT tweets labeled
+    tweet_counts = get_tweet_counts(df.worker_id.unique(), df)
+    unique_workers = np.sort([k for k, v in tweet_counts.items() if v >= min_tweet_count])
     df_sampled = pd.DataFrame(df_dtypes)
 
     while not np.array_equal(np.sort(df_sampled.worker_id.unique()), unique_workers):
@@ -59,7 +62,7 @@ def sample_tweets_from_each_worker(df, n_samples=1):
     return df_sampled
 
 
-def sample_more_tweets_for_min_workers(df, df_sampled, n_samples=1, min_tweet_count=10):
+def sample_more_tweets_for_min_workers(df, df_sampled, n_samples=1, min_tweet_count=MIN_TWEET_COUNT):
     # Sample more tweets from workers with minimal number of tweets
     unique_workers = np.sort(df.worker_id.unique())
     tweet_counts = get_tweet_counts(unique_workers, df_sampled)
@@ -91,7 +94,7 @@ def sample_more_tweets_for_min_workers(df, df_sampled, n_samples=1, min_tweet_co
     return df_sampled
 
 
-def sample_tweets_for_all_workers(df, n_samples=1, min_tweet_count=10):
+def sample_tweets_for_all_workers(df, n_samples=1, min_tweet_count=MIN_TWEET_COUNT):
     df_sampled = sample_tweets_from_each_worker(df, n_samples)
     df_sampled = sample_more_tweets_for_min_workers(
         df, df_sampled, n_samples, min_tweet_count)
@@ -121,12 +124,13 @@ def handler(event, context):
     df = pd.read_csv(StringIO(get_s3_object(AWSEnv.BUCKET_NAME, key)))
     logger.info('Unique tweets in the original sample: %s', len(df.tweet_id.unique()))
 
-    df_sampled = sample_tweets_for_all_workers(df, n_samples=1, min_tweet_count=10)
+    df_sampled = sample_tweets_for_all_workers(df, n_samples=1, min_tweet_count=MIN_TWEET_COUNT)
     logger.info('Unique tweets in the subsample: %s', len(df_sampled.tweet_id.unique()))
     csv_buffer = StringIO()
     df_sampled.to_csv(csv_buffer)
     s3.put_object(Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME, Key=output_key)
 
     csv_buffer = StringIO()
-    df_sampled.to_csv(csv_buffer, header=False, index=False, columns=['tweet_id'])
+    df_sampled_ids = df_sampled[['tweet_id', 'text']].drop_duplicates()
+    df_sampled_ids.to_csv(csv_buffer, header=False, index=False)
     s3.put_object(Body=csv_buffer.getvalue(), Bucket=AWSEnv.BUCKET_NAME, Key=output_key_ids)
