@@ -21,7 +21,7 @@ get_worker_tweets = lambda df, worker_id: df[df.worker_id == worker_id].tweet_id
 def get_tweet_counts(unique_workers, df_sampled):
     tweet_counts = {}
     for worker_id in unique_workers:
-        count = len(df_sampled[df_sampled.worker_id == worker_id].tweet_id)
+        count = len(get_worker_tweets(df_sampled, worker_id))
         tweet_counts[worker_id] = count
     return tweet_counts
 
@@ -50,7 +50,7 @@ def sample_tweets_from_each_worker(df, n_samples=1, min_tweet_count=MIN_TWEET_CO
                 ]))
         else:
             unsampled_worker_ids = unique_workers
-        logger.debug('sample_tweets_from_each_worker: %s', unsampled_worker_ids)
+        print('sample_tweets_from_each_worker: %s', unsampled_worker_ids)
         worker_id = np.random.choice(unsampled_worker_ids, 1)[0]
 
         df_worker = df[df.worker_id == worker_id]
@@ -62,28 +62,28 @@ def sample_tweets_from_each_worker(df, n_samples=1, min_tweet_count=MIN_TWEET_CO
     return df_sampled
 
 
-def sample_more_tweets_for_min_workers(df, df_sampled, n_samples=1, min_tweet_count=MIN_TWEET_COUNT):
+def sample_more_tweets_for_min_workers(df, df_sampled, n_samples=1, min_tweet_count=10):
     # Sample more tweets from workers with minimal number of tweets
-    unique_workers = np.sort(df.worker_id.unique())
-    tweet_counts = get_tweet_counts(unique_workers, df_sampled)
+    # Exclude workers who have less than MIN_TWEET_COUNT tweets labeled
+    tweet_counts = get_tweet_counts(df.worker_id.unique(), df)
+    unique_workers = np.sort([k for k, v in tweet_counts.items() if v >= min_tweet_count])
     
     while min(get_tweet_counts(unique_workers, df_sampled).values()) < min_tweet_count:
         min_count = min(tweet_counts.values())
         workers_with_min_count = [k for k, v in tweet_counts.items() if v == min_count]
-        logger.debug('sample_more_tweets_for_min_workers: %s', workers_with_min_count)
         worker_id = np.random.choice(workers_with_min_count, 1)[0]
         worker_tweets = get_worker_tweets(df, worker_id)
 
         unsampled_worker_tweets = np.delete(
             worker_tweets,
             np.where([
-                tweet_id in df_sampled.tweet_id.tolist()
+                tweet_id in df_sampled.tweet_id.unique().tolist()
                 for tweet_id in worker_tweets.tolist()
             ]))
         if len(unsampled_worker_tweets) == 0:
             return df_sampled
 
-        logger.debug('sample_more_tweets_for_min_workers 2: %s', unsampled_worker_tweets)
+        print('sample_more_tweets_for_min_workers 2: %s', unsampled_worker_tweets)
         sampled_worker_tweets = np.random.choice(unsampled_worker_tweets, n_samples, replace=False)
         worker_tweets_in_df = [tweet_id in sampled_worker_tweets.tolist() for tweet_id in df.tweet_id]
         sampled_tweets = df[worker_tweets_in_df]
