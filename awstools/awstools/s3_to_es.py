@@ -261,7 +261,7 @@ def handle_jsonls(jsonls, model_endpoints):
     statuses_es = []
     for status in statuses:
         statuses_es.append(ProcessTweet(
-            status, standardize_func='standardize', geo_code=geo_code
+            status, standardize_func='standardize_anonymize', geo_code=geo_code
         ).extract_es(extract_geo=True))
 
     # Add 'predictions' field to statuses
