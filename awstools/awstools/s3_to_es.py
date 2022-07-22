@@ -219,12 +219,15 @@ def handle_jsonls(jsonls, model_endpoints):
     def predictions_from_output(output, primary=False):
         max_prob = max(output['probabilities'])
         ind_max_prob = output['probabilities'].index(max_prob)
-        prefix = 'primary_' if primary else ''
-        return {
-            f'{prefix}probability': max_prob,
-            f'{prefix}label': output['labels'][ind_max_prob],
-            f'{prefix}label_val': output['label_vals'][ind_max_prob]
+        predictions = {
+            'probability': max_prob,
+            'label': output['labels'][ind_max_prob],
+            'label_val': output['label_vals'][ind_max_prob]
         }
+        if primary:
+            return {'primary': predictions}
+        else:
+            return predictions
 
     # Fill metadata with predictions
     for question_tag in endpoint_names:
