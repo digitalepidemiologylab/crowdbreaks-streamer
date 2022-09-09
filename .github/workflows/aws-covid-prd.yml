@@ -73,7 +73,7 @@ jobs:
       id: task-def-1
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition-covid-1-prd.json
+        task-definition: streamer/task-definitions/task-definition-covid-1-prd.json
         container-name: streamer-covid-app
         image: ${{ steps.build-image.outputs.image }}
 
@@ -81,7 +81,7 @@ jobs:
       id: task-def-2
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition-covid-2-prd.json
+        task-definition: streamer/task-definitions/task-definition-covid-2-prd.json
         container-name: streamer-covid-app
         image: ${{ steps.build-image.outputs.image }}
 
@@ -89,7 +89,7 @@ jobs:
       id: task-def-3
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition-covid-3-prd.json
+        task-definition: streamer/task-definitions/task-definition-covid-3-prd.json
         container-name: streamer-covid-app
         image: ${{ steps.build-image.outputs.image }}
 
@@ -97,7 +97,7 @@ jobs:
       id: task-def-4
       uses: aws-actions/amazon-ecs-render-task-definition@v1
       with:
-        task-definition: task-definition-covid-4-prd.json
+        task-definition: streamer/task-definitions/task-definition-covid-4-prd.json
         container-name: streamer-covid-app
         image: ${{ steps.build-image.outputs.image }}
 

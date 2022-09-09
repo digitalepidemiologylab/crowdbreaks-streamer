@@ -2,13 +2,14 @@ import logging
 import json
 
 from enum import Enum
-from typing import List, Dict, Set, Optional
 from dataclasses import dataclass, asdict, field
+from typing import List, Dict, Set, Optional
 
-import dacite
 from .s3 import get_s3_object
 from .session import s3
 from .env import AWSEnv
+
+import dacite
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +59,7 @@ class FilterConf:
     lang: Set[str] = field(default_factory=set)
 
 
-class ConfigManager():
+class ConfigManager:
     """Read, write and validate project configs."""
     def __init__(self, s3_client=s3, version_id=None):
         self.dict, self.config = self._load(s3_client, version_id)
