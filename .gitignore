@@ -4,8 +4,8 @@
 *.ipynb_checkpoints*
 *.ipynb
 *__pycache__
+*pytest_cache
 logs
-sagemaker
 tweet-schemas
 es-snapshot
 es-migration
