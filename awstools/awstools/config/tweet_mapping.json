@@ -16,10 +16,19 @@
             "in_reply_to_user_id": {
                 "type": "keyword"
             },
+            "in_reply_to_status_id": {
+                "type": "keyword"
+            },
             "retweeted_user_id": {
                 "type": "keyword"
             },
+            "retweeted_status_id": {
+                "type": "keyword"
+            },
             "quoted_user_id": {
+                "type": "keyword"
+            },
+            "quoted_status_id": {
                 "type": "keyword"
             },
             "user": {
