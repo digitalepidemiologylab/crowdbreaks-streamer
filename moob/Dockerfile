@@ -7,7 +7,12 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
-RUN pip install --upgrade pip \
-    && pip install 'git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git@24#egg=moob&subdirectory=moob'
+RUN mkdir /home/moob
+COPY ./moob /home/moob
+RUN cd /home/moob \
+    && pip install --upgrade pip \
+    && pip install .
+
+WORKDIR /home
 
 ENTRYPOINT ["train-moob"]
