@@ -8,7 +8,7 @@ RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 
 RUN mkdir /home/moob
-COPY ./moob /home/moob
+COPY . /home/moob
 RUN cd /home/moob \
     && ls . \
     && pip install --upgrade pip \
