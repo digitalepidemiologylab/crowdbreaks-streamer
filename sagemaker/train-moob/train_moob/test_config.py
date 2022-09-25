@@ -8,6 +8,7 @@ from dacite.exceptions import MissingValueError
 
 test_correct = [
     {
+        'model_name': 'bert-base-uncased',
         'eval_mode': 'prequential',
         'n_estimators': 5,
         'chunk_size': 1000,
@@ -27,6 +28,7 @@ test_correct = [
         'tknr_params': {}
     },
     {
+        'model_name': 'bert-base-uncased',
         'eval_mode': 'test-then-train',
         'n_estimators': 1,
         'chunk_size': 800,
@@ -42,6 +44,7 @@ test_correct = [
         'tknr_params': {}
     },
     {
+        'model_name': 'bert-base-uncased',
         'eval_mode': 'test-then-train',
         'n_estimators': 1,
         'chunk_size': 800,
@@ -58,6 +61,7 @@ test_correct = [
 ]
 
 missing_interval = {
+    'model_name': 'bert-base-uncased',
     'eval_mode': 'prequential',
     'n_estimators': 5,
     'chunk_size': 1000,
@@ -66,6 +70,7 @@ missing_interval = {
 }
 
 missing_activation = {
+    'model_name': 'bert-base-uncased',
     'eval_mode': 'test-then-train',
     'n_estimators': 1,
     'chunk_size': 800,
@@ -80,6 +85,7 @@ missing_activation = {
 }
 
 missing_ppcs_params = {
+    'model_name': 'bert-base-uncased',
     'eval_mode': 'test-then-train',
     'n_estimators': 1,
     'chunk_size': 800,
@@ -94,6 +100,7 @@ missing_ppcs_params = {
 }
 
 missing_tknr_params = {
+    'model_name': 'bert-base-uncased',
     'eval_mode': 'test-then-train',
     'n_estimators': 1,
     'chunk_size': 800,
@@ -107,12 +114,28 @@ missing_tknr_params = {
     'ppcs_params': {}
 }
 
+missing_model_name = {
+    'eval_mode': 'test-then-train',
+    'n_estimators': 1,
+    'chunk_size': 800,
+    'interval': 100,
+    'clf_params': {
+        'activation': 'logistic',
+        'hidden_layer_sizes': [],
+        'solver': 'adam',
+        'max_iter': 500
+    },
+    'ppcs_params': {},
+    'tknr_params': {}
+}
+
 
 def test_config():
     hyperparams = [load_hyperparams(config) for config in test_correct]
 
     assert hyperparams == [
         Hyperparams(**{
+            'model_name': 'bert-base-uncased',
             'eval_mode': EvalMode.PREQUENTIAL,
             'n_estimators': 5,
             'chunk_size': 1000,
@@ -133,6 +156,7 @@ def test_config():
             'tknr_params': BertTokenizer()
         }),
         Hyperparams(**{
+            'model_name': 'bert-base-uncased',
             'eval_mode': EvalMode.TEST_THEN_TRAIN,
             'n_estimators': 1,
             'chunk_size': 800,
@@ -148,6 +172,7 @@ def test_config():
             'tknr_params': BertTokenizer()
         }),
         Hyperparams(**{
+            'model_name': 'bert-base-uncased',
             'eval_mode': EvalMode.TEST_THEN_TRAIN,
             'n_estimators': 1,
             'chunk_size': 800,
@@ -179,3 +204,7 @@ def test_config():
     with pytest.raises(MissingValueError) as excinfo:
         load_hyperparams(missing_tknr_params)
     assert 'missing value for field "tknr_params"' in str(excinfo.value)
+
+    with pytest.raises(MissingValueError) as excinfo:
+        load_hyperparams(missing_model_name)
+    assert 'missing value for field "model_name"' in str(excinfo.value)

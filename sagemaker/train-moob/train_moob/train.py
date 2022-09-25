@@ -30,10 +30,10 @@ def calculate_n_chunks(n_instances, chunk_size):
     return int(np.ceil(n_instances / chunk_size))
 
 
-def generate_embeddings(df, ppcs_params):
+def generate_embeddings(model_name, df, ppcs_params, tknr_params):
     # The following model generates 768-dimensional embeddings
-    model_name = 'bert-base-uncased'
-    
+    # model_name = 'bert-base-uncased'
+
     model = BertModel.from_pretrained(model_name)
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
@@ -42,17 +42,17 @@ def generate_embeddings(df, ppcs_params):
     preprocessed_text_list = df.text.apply(preprocess, **ppcs_params).tolist()
 
     # Tokenization
-    max_seq_length = 96
+    # max_seq_length = 96
     # Whether or not to encode the sequences with the special tokens
     # relative to their model
     special_tokens_bool = True
     tokenizer_output = tokenizer(
-        preprocessed_text_list, return_tensors='pt', **bert_tknz_params)
-    
+        preprocessed_text_list, return_tensors='pt', **tknr_params)
+
     input_ids_tensor = tokenizer_output.data['input_ids']
     token_type_ids_tensor = tokenizer_output.data['token_type_ids']
     attention_mask_tensor = tokenizer_output.data['attention_mask']
-    
+
     with torch.no_grad():
         model_output = model(
             input_ids=input_ids_tensor, token_type_ids=token_type_ids_tensor,
@@ -62,7 +62,7 @@ def generate_embeddings(df, ppcs_params):
         # because in our case no activation function (hyperbolic tangent)
         # has been applied)
         hidden_state_cls_token = model_output['last_hidden_state'][:, 0, :]
-    
+
     # Convert to Numpy array
     embeddings = hidden_state_cls_token.detach().numpy()
 
@@ -130,9 +130,9 @@ def stream_processing(
     return scores, metrics_list, clf
 
 
-def train_moob_bert(input_data_path, input_model_path,
+def train_moob_bert(model_name, input_data_path, input_model_path,
                     eval_mode, n_estimators, chunk_size, interval,
-                    clf_params, ppcs_params):
+                    clf_params, ppcs_params, tknr_params):
     """Trains an MOOB ensemble of BERT classifiers in a stream mode.
 
     Args:
@@ -155,7 +155,8 @@ def train_moob_bert(input_data_path, input_model_path,
     labels_to_num_dict = {k: v for v, k in enumerate(labels_list)}
     mapped_labels = df.label.map(labels_to_num_dict).tolist()
 
-    embeddings = pd.DataFrame(generate_embeddings(df, ppcs_params))
+    embeddings = pd.DataFrame(generate_embeddings(
+        model_name, df, ppcs_params, tknr_params))
     embeddings = pd.concat([embeddings, pd.Series(mapped_labels)], axis=1)
     # Save stream as a headerless CSV file
     # (the rightmost column corresponds to the class labels)

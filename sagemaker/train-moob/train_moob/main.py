@@ -34,9 +34,11 @@ def train():
 
     # Train MOOB
     scores, metrics_list, clf = train_moob_bert(
-        input_stream_path, input_model_path, hyperparams.clf_params,
+        hyperparams.model_name, input_stream_path, input_model_path,
         hyperparams.eval_mode, hyperparams.n_estimators,
-        hyperparams.chunk_size, hyperparams.interval)
+        hyperparams.chunk_size, hyperparams.interval,
+        hyperparams.clf_params, hyperparams.ppcs_params,
+        hyperparams.tknr_params)
     
     # At the end of the training loop, we have to save model artifacts.
     save_model_artifacts(Env.model_artifacts_dir, clf)

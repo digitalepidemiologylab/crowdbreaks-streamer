@@ -69,6 +69,7 @@ class Preprocess:
 
 @dataclass(frozen=True)
 class Hyperparams:
+    model_name: str
     eval_mode: EvalMode
     n_estimators: int
     chunk_size: int
