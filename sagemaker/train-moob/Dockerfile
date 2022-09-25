@@ -11,5 +11,4 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 # Install dependencies:
 COPY requirements.txt .
 RUN pip install --upgrade pip \
-    && pip install -r requirements.txt -t python/ \
-    && zip -r python.zip python/
+    && pip install git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git@24#egg=moob&subdirectory=moob

@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="train-moob",
+    name="moob",
     version="0.0.1",
     author="Crowdbreaks",
     author_email="info@crowdbreaks.org",
