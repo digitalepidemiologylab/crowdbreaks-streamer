@@ -10,8 +10,9 @@ ENV PATH="$VIRTUAL_ENV/bin:$PATH"
 RUN mkdir /home/moob
 COPY ./moob /home/moob
 RUN cd /home/moob \
+    && ls . \
     && pip install --upgrade pip \
-    && pip install .
+    && pip install -e .
 
 WORKDIR /home
 

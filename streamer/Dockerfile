@@ -9,7 +9,7 @@ RUN mkdir /home/streamer
 COPY ./streamer /home/streamer
 RUN cd /home/streamer \
     && pip install --upgrade pip \
-    && pip install .
+    && pip install -e .
 
 WORKDIR /home/streamer
 CMD run-stream
