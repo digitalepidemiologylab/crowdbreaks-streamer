@@ -1,8 +1,8 @@
 from pathlib import Path
 import pytest
 
-from config import MLPClassifier, Activation, Solver
-from train import train_moob_bert
+from .config import MLPClassifier, Activation, Solver
+from .train import train_moob_bert
 
 
 def test_train():

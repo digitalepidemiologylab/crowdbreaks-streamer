@@ -1,3 +1,4 @@
+from functools import wraps
 import json
 import os
 import pickle
@@ -79,13 +80,16 @@ def write_failure_file(failure_file_path, failure_reason):
     failure_file.close()
 
 
-def handle_exceptions(func, failure_path, exc=Exception):
-    def wrapper():
-        try:
-            func()
-        except exc as e:
-            write_failure_file(failure_path, str(e))
-            print(e, file=sys.stderr)
-            sys.exit(1)
-
-    return wrapper
+def handle_exceptions(failure_path, exc=Exception):
+    def handle_exc(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            try:
+                func(*args, **kwargs)
+            except exc as e:
+                write_failure_file(
+                    failure_path, f'{type(exc).__name__}: {str(exc)}')
+                print(e, file=sys.stderr)
+                sys.exit(1)
+        return wrapper
+    return handle_exc

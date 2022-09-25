@@ -3,9 +3,9 @@ import os
 import logging
 import pickle
 
-from config import EvalMode
-from ensembles import MOOB  # Custom ensemble class
-from env import Env
+from .config import EvalMode
+from .ensembles import MOOB  # Custom ensemble class
+from .env import Env
 
 import numpy as np
 import pandas as pd

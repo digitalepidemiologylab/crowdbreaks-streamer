@@ -9,8 +9,12 @@ from .helpers import (load_json_and_print, load_data_paths_and_print,
 from .train import train_moob_bert
 
 
-@handle_exceptions
+@handle_exceptions(Env.failure_path)
 def train():
+    if (len(sys.argv) < 2) or (sys.argv[1] != "train"):
+        print("Missing required argument 'train'.", file=sys.stderr)
+        sys.exit(1)
+
     print("\nLoading config...")
 
     hyperparams = load_json_and_print(Env.hyperparams_path)
@@ -38,11 +42,3 @@ def train():
     save_model_artifacts(Env.model_artifacts_dir, clf)
     
     print("\nTraining completed!")
-
-
-if __name__ == "__main__":
-    if (sys.argv[1] == "train"):
-        train()
-    else:
-        print("Missing required argument 'train'.", file=sys.stderr)
-        sys.exit(1)

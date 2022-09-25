@@ -1,6 +1,6 @@
 import pytest
 
-from config import (EvalMode, Activation, Solver, MLPClassifier, Preprocess,
+from .config import (EvalMode, Activation, Solver, MLPClassifier, Preprocess,
                     BertTokenizer, Hyperparams, load_hyperparams)
 
 from dacite.exceptions import MissingValueError
