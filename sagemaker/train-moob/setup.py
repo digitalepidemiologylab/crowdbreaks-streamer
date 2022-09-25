@@ -1,7 +1,7 @@
 import setuptools
 
 setuptools.setup(
-    name="train_moob",
+    name="train-moob",
     version="0.0.1",
     author="Crowdbreaks",
     author_email="info@crowdbreaks.org",
@@ -9,7 +9,10 @@ setuptools.setup(
     url="https://github.com/digitalepidemiologylab/crowdbreaks-streamer",
     packages=setuptools.find_packages(),
     install_requires=[
-        'torch', 'transformers', 'strlearn', 'spacy'],
+        'numpy', 'sklearn', 'torch', 'transformers', 'stream-learn',
+        'pandas', 'spacy', 'dacite', 'aenum',
+        'twiprocess @ git+https://github.com/digitalepidemiologylab/twiprocess.git'],
+    entry_points={'console_scripts': ['train-moob=train_moob.main:train']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
