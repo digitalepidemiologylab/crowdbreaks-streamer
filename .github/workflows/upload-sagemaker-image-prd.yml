@@ -21,7 +21,7 @@ on:
 #       - master
   workflow_dispatch:
 
-name: Upload a Sagemaker image for training MOOB
+name: Upload a Sagemaker image for training MOOB (Production)
 
 jobs:
   deploy:
@@ -47,7 +47,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: crowdbreaks-moob
+        ECR_REPOSITORY: crowdbreaks-moob-prd
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
