@@ -1,0 +1,2 @@
+sagemaker
+git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git#egg=awstools&subdirectory=awstools

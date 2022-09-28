@@ -1,9 +1,7 @@
 import sys
-import time
 
 from .config import load_hyperparams
 from .env import Env
-from .helpers import ExitSignalHandler
 from .helpers import (load_json_and_print, load_data_paths_and_print,
                       print_env_var, handle_exceptions, save_model_artifacts)
 from .train import train_moob_bert
@@ -26,9 +24,6 @@ def train():
 
     print_env_var(Env.training_job_name_env)
     print_env_var(Env.training_job_arn_env)
-        
-    # This object is used to handle SIGTERM and SIGKILL signals.
-    signal_handler = ExitSignalHandler()
 
     print("\nRunning training...")
 
