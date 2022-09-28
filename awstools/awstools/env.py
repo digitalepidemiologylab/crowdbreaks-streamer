@@ -108,3 +108,12 @@ class ECSEnv(AWSEnv):
 class SMEnv(AWSEnv):
     BATCH_SIZE_DEFAULT = int(os.environ.get('BATCH_SIZE_DEFAULT', '1'))
     BATCH_SIZE_FASTTEXT = int(os.environ.get('BATCH_SIZE_FASTTEXT', '100'))
+
+
+class SagemakerTrainEnv(AWSEnv):
+    HYPERPARAMS_S3_KEY = os.environ.get(
+        'HYPERPARAMS_S3_KEY', 'sagemaker/hyperparams.json')
+    ECREPO_NAME = os.environ.get('ECREPO_NAME', f'crowdbreaks-moob-{Env.ENV}')
+    INSTANCE_TYPE = os.environ.get('INSTANCE_TYPE', 'ml.t2.medium')
+    OUTPUT_PREFIX = os.environ.get(
+        'OUTPUT_PREFIX', f's3://{AWSEnv.BUCKET_NAME}/sagemaker/output/')

@@ -7,7 +7,6 @@ import shutil
 import subprocess
 import sys
 import os
-from botocore.exceptions import ClientError
 
 from .env import LEnv, ESEnv
 from .session import s3, iam, aws_lambda
@@ -336,7 +335,8 @@ def create_lambda(
     s3_prefixes=None,
     add_s3_permission=False,
     timeout=LEnv.TIMEOUT,
-    memory_size=LEnv.MEMORY_SIZE
+    memory_size=LEnv.MEMORY_SIZE,
+    more_env_vars=None
 ):
     if s3_prefixes is not None and type(s3_prefixes) not in [tuple, list]:
         raise ValueError("'s3_prefixes' should be either a tuple or a list.")
@@ -393,6 +393,16 @@ def create_lambda(
             if count > 6:
                 raise TimeoutError
             try:
+                env_vars = {
+                    'ES_CLOUD_ID': ESEnv.CLOUD_ID,
+                    'ES_API_KEY': ESEnv.API_KEY,
+                    'ES_INDEX_PREFIX': ESEnv.INDEX_PREFIX,
+                    'AWS_ACCOUNT_NUM': ESEnv.ACCOUNT_NUM,
+                    'APP_NAME': ESEnv.APP_NAME,
+                    'ENV': ESEnv.ENV
+                }
+                if more_env_vars is not None:
+                    env_vars = {**env_vars, **more_env_vars}
                 response = aws_lambda.create_function(
                     FunctionName=function_name,
                     Runtime='python3.8',
@@ -406,22 +416,9 @@ def create_lambda(
                     Timeout=timeout,
                     MemorySize=memory_size,
                     Publish=True,
-                    Environment={
-                        'Variables': {
-                            'ES_CLOUD_ID': ESEnv.CLOUD_ID,
-                            'ES_API_KEY': ESEnv.API_KEY,
-                            'ES_INDEX_PREFIX': ESEnv.INDEX_PREFIX,
-                            'AWS_ACCOUNT_NUM': ESEnv.ACCOUNT_NUM,
-                            'APP_NAME': ESEnv.APP_NAME,
-                            'ENV': ESEnv.ENV
-                        }
-                    },
-                    Tags={
-                        'project': LEnv.APP_NAME
-                    },
-                    Layers=[
-                        layer_arn + f':{latest_version}',
-                    ]
+                    Environment={'Variables': env_vars},
+                    Tags={'project': LEnv.APP_NAME},
+                    Layers=[layer_arn + f':{latest_version}']
                 )
             except aws_lambda.exceptions.InvalidParameterValueException as exc:
                 logger.warning('%s: %s', type(exc).__name__, str(exc))
