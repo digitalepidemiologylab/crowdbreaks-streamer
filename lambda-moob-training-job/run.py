@@ -39,6 +39,7 @@ def main():
         lambda_local_zip_path,
         policy_path,
         push_to_s3=True,
+        s3_prefixes=(Env.DATA_PREFIX,),
         more_env_vars=more_env_vars
     )
 
