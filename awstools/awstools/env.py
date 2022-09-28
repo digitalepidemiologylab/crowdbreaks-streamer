@@ -117,3 +117,4 @@ class SagemakerTrainEnv(AWSEnv):
     INSTANCE_TYPE = os.environ.get('INSTANCE_TYPE', 'ml.t2.medium')
     OUTPUT_PREFIX = os.environ.get(
         'OUTPUT_PREFIX', f's3://{AWSEnv.BUCKET_NAME}/sagemaker/output/')
+    DATA_PREFIX = os.environ.get('DATA_PREFIX', 'sagemaker/data/train/')
