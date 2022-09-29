@@ -38,7 +38,7 @@ def run(stream_uri):
         }]
     )
     hyperparams = get_hyperparams()
-    moob_est.set_hyperparameters(hyperparams)
+    moob_est.set_hyperparameters(**hyperparams)
 
     model_uri = get_model_uri()
     stream_config = sagemaker.TrainingInput(stream_uri, content_type='text/csv')

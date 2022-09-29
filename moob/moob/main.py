@@ -3,7 +3,8 @@ import sys
 from .config import load_hyperparams
 from .env import Env
 from .helpers import (load_json_and_print, load_data_paths_and_print,
-                      print_env_var, handle_exceptions, save_model_artifacts)
+                      print_env_var, handle_exceptions, save_model_artifacts,
+                      write_output_file)
 from .train import train_moob_bert
 
 
@@ -17,7 +18,8 @@ def train():
 
     hyperparams = load_json_and_print(Env.hyperparams_path)
     hyperparams = load_hyperparams(hyperparams)
-    input_data_paths = load_data_paths_and_print(Env.inputdataconfig_path)
+    input_data_paths = load_data_paths_and_print(
+        Env.inputdataconfig_path, Env.data_dir)
     input_stream_path = input_data_paths['stream']
     input_model_path = input_data_paths.get('model')
     resource_config = load_json_and_print(Env.resource_path)
@@ -34,8 +36,10 @@ def train():
         hyperparams.chunk_size, hyperparams.interval,
         hyperparams.clf_params, hyperparams.ppcs_params,
         hyperparams.tknr_params)
-    
+
     # At the end of the training loop, we have to save model artifacts.
     save_model_artifacts(Env.model_artifacts_dir, clf)
-    
+    write_output_file(Env.output_path / 'scores', scores)
+    write_output_file(Env.output_path / 'metrics_list', metrics_list)
+
     print("\nTraining completed!")

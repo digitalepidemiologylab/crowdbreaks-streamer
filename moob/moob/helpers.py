@@ -30,13 +30,14 @@ def print_json_object(json_object):
 
 def load_json_and_print(path):
     if path.exists() and path.is_file():
-        object = load_json_object(path)
+        json_object = load_json_object(path)
         print(f'\n{path}: ')
-        print_json_object(object)
+        print_json_object(json_object)
+        return json_object
 
 
 def print_env_var(key):
-    if (key in os.environ):
+    if key in os.environ:
         print(f'\n{key}: ')
         print(os.environ[key])
 
@@ -78,6 +79,12 @@ def write_failure_file(failure_file_path, failure_reason):
     failure_file = failure_file_path.open('w')
     failure_file.write(failure_reason)
     failure_file.close()
+
+
+def write_output_file(output_file_path, output_info):
+    output_file = output_file_path.open('w')
+    output_file.write(output_info)
+    output_file.close()
 
 
 def handle_exceptions(failure_path, exc=Exception):

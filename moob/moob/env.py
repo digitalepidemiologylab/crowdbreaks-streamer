@@ -9,6 +9,7 @@ class Env(Constant):
     data_dir = Path('/opt/ml/input/data/')
     embeddings_path = data_dir.joinpath('embeddings_with_labels_full_stream.csv')
     failure_path = Path('/opt/ml/output/failure')
+    output_path = Path('/opt/ml/output/')
     model_artifacts_dir = Path('/opt/ml/model/')
 
     training_job_name_env = 'TRAINING_JOB_NAME'

@@ -3,10 +3,6 @@ import os
 import logging
 import pickle
 
-from .config import EvalMode
-from .ensembles import MOOB  # Custom ensemble class
-from .env import Env
-
 import numpy as np
 import pandas as pd
 from strlearn.streams import CSVParser
@@ -20,6 +16,10 @@ from transformers import BertModel, BertTokenizer
 from twiprocess.preprocess import preprocess
 
 from matplotlib import pyplot as plt
+
+from .config import EvalMode
+from .ensembles import MOOB  # Custom ensemble class
+from .env import Env
 
 
 logger = logging.getLogger(__name__)
@@ -45,7 +45,7 @@ def generate_embeddings(model_name, df, ppcs_params, tknr_params):
     # max_seq_length = 96
     # Whether or not to encode the sequences with the special tokens
     # relative to their model
-    special_tokens_bool = True
+    # special_tokens_bool = True
     tokenizer_output = tokenizer(
         preprocessed_text_list, return_tensors='pt', **tknr_params)
 
@@ -173,11 +173,11 @@ def train_moob_bert(model_name, input_data_path, input_model_path,
     n_chunks = calculate_n_chunks(n_instances, chunk_size)
 
     clf = pickle.load(input_model_path) if input_model_path else None
-    
+
     logger.info('Process data...')
     return stream_processing(eval_mode, n_estimators, chunk_size, n_chunks,
                              interval, clf, clf_params)
-    
+
 
 
 # Metric plot
@@ -209,7 +209,7 @@ def test_then_train(n_chunks, n_instances, chunk_size):
         else:
             upper_bound = lower_bound + chunk_size
         all_chunks_list.append([lower_bound, upper_bound])
-    
+
     return all_chunks_list
 
 
@@ -225,12 +225,12 @@ def plot_metrics(
         all_chunks_list = test_then_train(n_chunks, n_instances, chunk_size)
 
     fig, ax = plt.subplots(figsize=(7, 7), nrows=1, ncols=1, dpi=300)
-    
+
     logger.info('Generate figure...')
     for m, metric in enumerate(metrics_list):
         # ax.plot(evaluator_scores[:, m], marker='o', label=metric.__name__)
         ax.plot(evaluator_scores[:, m], marker='o')
-    
+
     xticks_list = df.created_at[np.array(all_chunks_list)[:,0]].tolist()
     xticks_list = [timestamp.strftime('%Y-%m-%d') for timestamp in xticks_list]
     ax.set_xticks(np.arange(0, len(evaluator_scores)))
