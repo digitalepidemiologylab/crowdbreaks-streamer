@@ -28,8 +28,16 @@
         },
         {
             "Effect": "Allow",
-            "Action": "sagemaker:CreateTrainingJob",
+            "Action": [
+                "sagemaker:CreateTrainingJob",
+                "sagemaker:AddTags"
+            ],
             "Resource": "arn:aws:sagemaker:REGION:ACCOUNT_NUM:training-job/crowdbreaks-moob-*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": ["iam:PassRole"],
+            "Resource": "arn:aws:iam::874942657130:role/crowdbreaks-sagemaker"
         }
     ]
 }
