@@ -22,12 +22,10 @@ def get_hyperparams():
 
 
 def run(stream_uri):
-    role = sagemaker.get_execution_role()
-
     moob_est = Estimator(
         image_uri=f'{Env.ACCOUNT_NUM}.dkr.ecr.{Env.REGION}.amazonaws.com/'
                 f'{Env.ECREPO_NAME}:latest',
-        role=role,
+        role=Env.SAGEMAKER_ROLE,
         instance_count=1,
         instance_type=Env.INSTANCE_TYPE,
         output_path=Env.OUTPUT_PREFIX,
@@ -55,6 +53,10 @@ def handler(event, context):
     # a lot of records (a lot of files in a short period)
     assert len(event['Records']) == 1
 
-    stream_uri = event['Records'][-1]['s3']['object']['key']
+    record = event['Records'][-1]
+    bucket = record['s3']['bucket']['name']
+    key = record['s3']['object']['key']
+
+    stream_uri = f's3://{bucket}/{key}'
 
     run(stream_uri)
