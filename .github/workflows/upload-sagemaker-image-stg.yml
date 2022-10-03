@@ -47,7 +47,7 @@ jobs:
       id: build-image
       env:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-        ECR_REPOSITORY: crowdbreaks-moob-stg
+        ECR_REPOSITORY: crowdbreaks-sagemaker/moob-stg
         IMAGE_TAG: ${{ github.sha }}
       run: |
         # Build a docker container and
