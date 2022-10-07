@@ -29,7 +29,7 @@ def run(stream_uri):
         instance_count=1,
         instance_type=Env.INSTANCE_TYPE,
         output_path=Env.OUTPUT_PREFIX,
-        base_job_name=Env.ECREPO_NAME,
+        base_job_name=Env.JOB_NAME,
         tags=[{
             "Key": "project",
             "Value": "crowdbreaks"

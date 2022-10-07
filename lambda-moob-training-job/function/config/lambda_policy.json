@@ -32,7 +32,7 @@
                 "sagemaker:CreateTrainingJob",
                 "sagemaker:AddTags"
             ],
-            "Resource": "arn:aws:sagemaker:REGION:ACCOUNT_NUM:training-job/crowdbreaks-moob-*"
+            "Resource": "arn:aws:sagemaker:REGION:ACCOUNT_NUM:training-job/JOB_NAME-*"
         },
         {
             "Effect": "Allow",

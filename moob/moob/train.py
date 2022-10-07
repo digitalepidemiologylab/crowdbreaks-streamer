@@ -37,7 +37,7 @@ def generate_embeddings(model_name, df, ppcs_params, tknr_params):
     model = BertModel.from_pretrained(model_name)
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
-    ppcs_params = {k: v for k, v in ppcs_params.items() if v is not None }
+    ppcs_params = {k: v for k, v in ppcs_params.items() if v is not None}
 
     preprocessed_text_list = df.text.apply(preprocess, **ppcs_params).tolist()
 
