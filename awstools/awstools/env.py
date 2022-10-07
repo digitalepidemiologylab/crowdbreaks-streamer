@@ -114,7 +114,8 @@ class SagemakerTrainEnv(AWSEnv):
     HYPERPARAMS_S3_KEY = os.environ.get(
         'HYPERPARAMS_S3_KEY', 'sagemaker/hyperparams.json')
     ECREPO_NAME = os.environ.get('ECREPO_NAME', f'crowdbreaks-sagemaker/moob-{Env.ENV}')
-    INSTANCE_TYPE = os.environ.get('INSTANCE_TYPE', 'ml.t2.medium')
+    JOB_NAME = os.environ.get('JOB_NAME', f'crowdbreaks-moob-{Env.ENV}')
+    INSTANCE_TYPE = os.environ.get('INSTANCE_TYPE', 'ml.m5.large')
     OUTPUT_PREFIX = os.environ.get(
         'OUTPUT_PREFIX', f's3://{AWSEnv.BUCKET_NAME}/sagemaker/output/')
     DATA_PREFIX = os.environ.get('DATA_PREFIX', 'sagemaker/data/train/')

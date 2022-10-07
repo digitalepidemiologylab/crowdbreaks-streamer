@@ -9,6 +9,7 @@ import sys
 import os
 
 from .env import LEnv, ESEnv
+from .env import SagemakerTrainEnv as SMEnv
 from .session import s3, iam, aws_lambda
 from .firehose import get_bucket_arn
 
@@ -175,7 +176,8 @@ def prepare_policy(policy_path, function_name):
         policy = policy.replace('REGION', LEnv.REGION)
         policy = policy.replace('DOMAIN', ESEnv.DOMAIN)
         policy = policy.replace('FUNCTION_NAME', function_name)
-        policy = policy.replace('MODEL_NAME', LEnv.APP_NAME + '-*')
+        policy = policy.replace('MODEL_NAME', LEnv.APP_NAME)
+        policy = policy.replace('JOB_NAME', SMEnv.JOB_NAME)
     return policy
 
 
