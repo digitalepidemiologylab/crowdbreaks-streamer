@@ -37,7 +37,12 @@
         {
             "Effect": "Allow",
             "Action": ["iam:PassRole"],
-            "Resource": "arn:aws:iam::874942657130:role/crowdbreaks-sagemaker"
+            "Resource": "arn:aws:iam::ACCOUNT_NUM:role/crowdbreaks-sagemaker"
+        },
+        {
+            "Effect": "Allow",
+            "Action": ["ecr:DescribeImages"],
+            "Resource": "arn:aws:ecr:eu-central-1:ACCOUNT_NUM:repository/crowdbreaks-sagemaker/moob-*"
         }
     ]
 }

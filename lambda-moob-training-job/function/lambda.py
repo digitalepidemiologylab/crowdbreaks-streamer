@@ -4,6 +4,7 @@ import logging
 import sagemaker
 from sagemaker.estimator import Estimator
 
+from awstools.session import ecr
 from awstools.env import SagemakerTrainEnv as Env
 from awstools.s3 import get_long_s3_object
 
@@ -15,6 +16,17 @@ def get_model_uri():
     return
 
 
+def get_image_uri():
+    jmespath_expression = 'sort_by(imageDetails, &to_string(imagePushedAt))[-1].imageTags'
+    paginator = ecr.get_paginator('describe_images')
+    iterator = paginator.paginate(repositoryName=Env.ECREPO_NAME)
+    filter_iterator = iterator.search(jmespath_expression)
+    latest_tag =  list(filter_iterator)[0]
+
+    return f'{Env.ACCOUNT_NUM}.dkr.ecr.{Env.REGION}.amazonaws.com/' \
+           f'{Env.ECREPO_NAME}:{latest_tag}'
+
+
 def get_hyperparams():
     return json.loads(get_long_s3_object(
         Env.BUCKET_NAME, Env.HYPERPARAMS_S3_KEY,
@@ -23,8 +35,7 @@ def get_hyperparams():
 
 def run(stream_uri):
     moob_est = Estimator(
-        image_uri=f'{Env.ACCOUNT_NUM}.dkr.ecr.{Env.REGION}.amazonaws.com/'
-                f'{Env.ECREPO_NAME}:latest',
+        image_uri=get_image_uri(),
         role=Env.SAGEMAKER_ROLE,
         instance_count=1,
         instance_type=Env.INSTANCE_TYPE,
