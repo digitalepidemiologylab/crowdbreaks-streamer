@@ -5,6 +5,7 @@ import pickle
 import pprint
 import signal
 import sys
+import traceback
 
 
 # Signal handler
@@ -93,10 +94,10 @@ def handle_exceptions(failure_path, exc=Exception):
         def wrapper(*args, **kwargs):
             try:
                 func(*args, **kwargs)
-            except exc as e:
+            except exc:
                 write_failure_file(
-                    failure_path, f'{type(exc).__name__}: {str(exc)}')
-                print(e, file=sys.stderr)
+                    failure_path, traceback.format_exc())
+                traceback.print_exc()
                 sys.exit(1)
         return wrapper
     return handle_exc
