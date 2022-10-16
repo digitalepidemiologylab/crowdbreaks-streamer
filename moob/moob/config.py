@@ -1,6 +1,7 @@
 from enum import Enum
 from dataclasses import dataclass
-from typing import List, Optional, Union
+import json
+from typing import List, Optional
 
 import dacite
 
@@ -87,5 +88,5 @@ converter = {
 
 
 def load_hyperparams(d):
-    return dacite.from_dict(data_class=Hyperparams, data=d['hyperparams'],
+    return dacite.from_dict(data_class=Hyperparams, data=json.loads(d),
                             config=dacite.Config(type_hooks=converter))
