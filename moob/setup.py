@@ -12,7 +12,7 @@ setuptools.setup(
         'numpy', 'sklearn', 'torch', 'transformers', 'stream-learn',
         'pandas', 'spacy', 'dacite', 'aenum',
         'twiprocess @ git+https://github.com/digitalepidemiologylab/twiprocess.git'],
-    entry_points={'console_scripts': ['train-moob=train_moob.main:train']},
+    entry_points={'console_scripts': ['train-moob=moob.main:train']},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
