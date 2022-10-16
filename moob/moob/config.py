@@ -87,5 +87,5 @@ converter = {
 
 
 def load_hyperparams(d):
-    return dacite.from_dict(data_class=Hyperparams, data=d,
+    return dacite.from_dict(data_class=Hyperparams, data=d['hyperparams'],
                             config=dacite.Config(type_hooks=converter))

@@ -20,7 +20,7 @@ def train():
         print(json_file.read())
 
     hyperparams = load_json_and_print(Env.hyperparams_path)
-    hyperparams = load_hyperparams(hyperparams)
+    hyperparams = load_hyperparams(hyperparams['hyperparams'])
     input_data_paths = load_data_paths_and_print(
         Env.inputdataconfig_path, Env.data_dir)
     input_stream_path = input_data_paths['stream']
