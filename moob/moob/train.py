@@ -1,4 +1,3 @@
-
 import os
 import logging
 import pickle
@@ -30,6 +29,11 @@ def calculate_n_chunks(n_instances, chunk_size):
     return int(np.ceil(n_instances / chunk_size))
 
 
+def prepare_params(params):
+    params = params.__dict__.copy()
+    return {k: v for k, v in params.items() if v is not None}
+
+
 def generate_embeddings(model_name, df, ppcs_params, tknr_params):
     # The following model generates 768-dimensional embeddings
     # model_name = 'bert-base-uncased'
@@ -37,17 +41,16 @@ def generate_embeddings(model_name, df, ppcs_params, tknr_params):
     model = BertModel.from_pretrained(model_name)
     tokenizer = BertTokenizer.from_pretrained(model_name)
 
-    ppcs_params = {k: v for k, v in ppcs_params.items() if v is not None}
-
-    preprocessed_text_list = df.text.apply(preprocess, **ppcs_params).tolist()
+    preprocessed_text_list = df.text.apply(
+        preprocess, **prepare_params(ppcs_params)).tolist()
 
     # Tokenization
     # max_seq_length = 96
     # Whether or not to encode the sequences with the special tokens
     # relative to their model
     # special_tokens_bool = True
-    tokenizer_output = tokenizer(
-        preprocessed_text_list, return_tensors='pt', **tknr_params)
+    tokenizer_output = tokenizer(preprocessed_text_list, return_tensors='pt',
+                                 **prepare_params(tknr_params))
 
     input_ids_tensor = tokenizer_output.data['input_ids']
     token_type_ids_tensor = tokenizer_output.data['token_type_ids']
@@ -84,7 +87,7 @@ def stream_processing(
         # mlp_classifier = MLPClassifier(
         #     activation='logistic', hidden_layer_sizes=(), solver='adam',
         #     max_iter=500, random_state=0)
-        mlp_classifier = MLPClassifier(**clf_params.__dict__.copy())
+        mlp_classifier = MLPClassifier(**prepare_params(clf_params))
         # Note about the optimization algorithm (solver for weight optimization): 
         # the default solver ‘adam’ works pretty well on relatively large datasets
         # (with thousands of training samples or more) in terms of both

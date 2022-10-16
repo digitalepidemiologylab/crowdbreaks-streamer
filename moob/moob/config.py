@@ -11,39 +11,39 @@ class EvalMode(Enum):
     TEST_THEN_TRAIN = 2
 
 
-class Activation(Enum):
-    IDENTITY = 1
-    LOGISTIC = 2
-    TANH = 3
-    RELU = 4
+# class Activation(Enum):
+#     IDENTITY = 1
+#     LOGISTIC = 2
+#     TANH = 3
+#     RELU = 4
 
 
-class Solver(Enum):
-    LBFGS = 1
-    SGD = 2
-    ADAM = 3
+# class Solver(Enum):
+#     LBFGS = 1
+#     SGD = 2
+#     ADAM = 3
 
 
-class Padding(Enum):
-    LONGEST = 1
-    MAX_LENGTH = 2
-    DO_NOT_PAD = 3
+# class Padding(Enum):
+#     LONGEST = 1
+#     MAX_LENGTH = 2
+#     DO_NOT_PAD = 3
 
 
 # https://huggingface.co/docs/transformers/main_classes/tokenizer#transformers.PreTrainedTokenizer.__call__
 @dataclass(frozen=True)
 class BertTokenizer:
     truncation: Optional[bool] = None
-    padding: Optional[Padding] = None
+    padding: Optional[str] = None
     max_length: Optional[int] = None
     add_special_tokens: Optional[bool] = None
 
 
 @dataclass(frozen=True)
 class MLPClassifier:
-    activation: Activation
+    activation: str
     hidden_layer_sizes: List[int]
-    solver: Solver
+    solver: str
     max_iter: int
     random_state: Optional[int] = None
 
@@ -82,8 +82,8 @@ class Hyperparams:
 
 converter = {
     EvalMode: lambda x: EvalMode[x.upper().replace('-', '_')],
-    Activation: lambda x: Activation[x.upper()],
-    Solver: lambda x: Solver[x.upper()]
+    # Activation: lambda x: Activation[x.upper()],
+    # Solver: lambda x: Solver[x.upper()]
 }
 
 
