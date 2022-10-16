@@ -16,6 +16,9 @@ def train():
 
     print("\nLoading config...")
 
+    with Env.hyperparams_path.open() as json_file:
+        print(json_file.read())
+
     hyperparams = load_json_and_print(Env.hyperparams_path)
     hyperparams = load_hyperparams(hyperparams)
     input_data_paths = load_data_paths_and_print(
