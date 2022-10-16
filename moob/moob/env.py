@@ -3,7 +3,7 @@ from aenum import Constant
 
 
 class Env(Constant):
-    hyperparams_path = Path('/opt/ml/input/config/hyperparams.json')
+    hyperparams_path = Path('/opt/ml/input/config/hyperparameters.json')
     inputdataconfig_path = Path('/opt/ml/input/config/inputdataconfig.json')
     resource_path = Path('/opt/ml/input/config/resourceconfig.json')
     data_dir = Path('/opt/ml/input/data/')
