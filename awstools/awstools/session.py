@@ -26,6 +26,7 @@ aws_lambda = session.client('lambda')
 iam = session.client('iam')
 firehose = session.client('firehose')
 ecs = session.client('ecs')
+ecr = session.client('ecr')
 
 credentials = session.get_credentials()
 
