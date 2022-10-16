@@ -95,7 +95,7 @@ def stream_processing(
         # For small datasets, however, ‘lbfgs’ can converge faster and perform better 
         # (Reminder: LBFGS = Limited-memory BFGS, where BFGS stands for
         # the Broyden-Fletcher-Goldfarb-Shanno algorithm).
-        
+
         # Create base estimator
         base = SampleWeightedMetaEstimator(base_classifier=mlp_classifier)
         # Ensemble approach: Multiclass Oversampling-based Online Bagging (MOOB)
@@ -157,10 +157,15 @@ def train_moob_bert(model_name, input_data_path, input_model_path,
     labels_list = sorted(df.label.unique())
     labels_to_num_dict = {k: v for v, k in enumerate(labels_list)}
     mapped_labels = df.label.map(labels_to_num_dict).tolist()
+    print(len(mapped_labels))
 
-    embeddings = pd.DataFrame(generate_embeddings(
-        model_name, df, ppcs_params, tknr_params))
+    embeddings = generate_embeddings(model_name, df, ppcs_params, tknr_params)
+    print(embeddings.shape)
+    embeddings = pd.DataFrame(embeddings)
+    print(embeddings.info())
     embeddings = pd.concat([embeddings, pd.Series(mapped_labels)], axis=1)
+    print(embeddings.info())
+
     # Save stream as a headerless CSV file
     # (the rightmost column corresponds to the class labels)
     embeddings.to_csv(Env.embeddings_path, index=False, header=False)
