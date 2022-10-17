@@ -102,6 +102,8 @@ def stream_processing(
         clf = MOOB(base_estimator=base, n_estimators=n_estimators)
 
     # Load data stream
+    # Label convertion from int to float happens here:
+    # TODO: Account for it
     stream = CSVParser(Env.embeddings_path, chunk_size=chunk_size, n_chunks=n_chunks)
     stream.classes_ = np.array([0, 1, 2])
 

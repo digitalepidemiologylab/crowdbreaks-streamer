@@ -25,6 +25,7 @@ class MOOB(StreamingEnsemble):
 
 
     def partial_fit(self, X, y, classes=None):
+        y = y.astype(np.int64)
         super().partial_fit(X, y, classes)
         if not self.green_light:
             return self
