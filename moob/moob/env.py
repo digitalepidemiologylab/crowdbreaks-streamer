@@ -11,6 +11,7 @@ class Env(Constant):
     failure_path = Path('/opt/ml/output/failure')
     output_path = Path('/opt/ml/output/')
     model_artifacts_dir = Path('/opt/ml/model/')
+    model_artifacts_fname = 'model_output.joblib'
 
     training_job_name_env = 'TRAINING_JOB_NAME'
     training_job_arn_env = 'TRAINING_JOB_ARN'

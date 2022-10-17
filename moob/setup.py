@@ -10,7 +10,7 @@ setuptools.setup(
     packages=setuptools.find_packages(),
     install_requires=[
         'numpy', 'sklearn', 'torch', 'transformers', 'stream-learn',
-        'pandas', 'spacy', 'dacite', 'aenum',
+        'pandas', 'spacy', 'dacite', 'aenum', 'joblib',
         'twiprocess @ git+https://github.com/digitalepidemiologylab/twiprocess.git'],
     entry_points={'console_scripts': ['train-moob=moob.main:train']},
     classifiers=[

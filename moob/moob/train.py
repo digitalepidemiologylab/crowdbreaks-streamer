@@ -1,6 +1,6 @@
+from joblib import load
 import os
 import logging
-import pickle
 
 import numpy as np
 import pandas as pd
@@ -182,7 +182,7 @@ def train_moob_bert(model_name, input_data_path, input_model_path,
     # (22 chunks with chunk_size=1000 tweets, and 1 chunk with 814 tweets)
     n_chunks = calculate_n_chunks(n_instances, chunk_size)
 
-    clf = pickle.load(input_model_path) if input_model_path else None
+    clf = load(input_model_path) if input_model_path else None
 
     logger.info('Process data...')
     return stream_processing(eval_mode, n_estimators, chunk_size, n_chunks,

@@ -1,11 +1,12 @@
 from functools import wraps
 import json
 import os
-import pickle
 import pprint
 import signal
 import sys
 import traceback
+
+from joblib import dump
 
 
 # Signal handler
@@ -71,9 +72,9 @@ def load_data_paths_and_print(inputdataconfig_path, data_dir):
     return input_data_paths
 
 
-def save_model_artifacts(model_artifacts_path, model):
+def save_model_artifacts(model_artifacts_path, model_artifacts_fname, model):
     if model_artifacts_path.exists() and model_artifacts_path.is_dir():
-        pickle.dump(model, model_artifacts_path)
+        dump(model, model_artifacts_path.joinpath(model_artifacts_fname))
 
 
 def write_failure_file(failure_file_path, failure_reason):

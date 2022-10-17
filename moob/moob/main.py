@@ -41,7 +41,9 @@ def train():
         hyperparams.tknr_params)
 
     # At the end of the training loop, we have to save model artifacts.
-    save_model_artifacts(Env.model_artifacts_dir, clf)
+    print(type(clf))
+    save_model_artifacts(
+        Env.model_artifacts_dir, Env.model_artifacts_fname, clf)
     write_output_file(Env.output_path / 'scores', scores)
     write_output_file(Env.output_path / 'metrics_list', metrics_list)
 
