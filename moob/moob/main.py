@@ -1,5 +1,7 @@
 import sys
 
+from numpy import array2string
+
 from .config import load_hyperparams
 from .env import Env
 from .helpers import (load_json_and_print, load_data_paths_and_print,
@@ -44,7 +46,9 @@ def train():
     print(type(clf))
     save_model_artifacts(
         Env.model_artifacts_dir, Env.model_artifacts_fname, clf)
-    write_output_file(Env.output_path / 'scores', scores)
+    write_output_file(
+        Env.output_path / 'scores',
+        array2string(scores, formatter={'float_kind': lambda x: '%.5f' % x}))
     write_output_file(Env.output_path / 'metrics_list', metrics_list)
 
     print("\nTraining completed!")
