@@ -60,7 +60,7 @@ def load_data_paths_and_print(inputdataconfig_path, data_dir):
 
     input_data_paths = {}
     for key in input_data_config:
-        channel_path = data_dir.joinpath(key)
+        channel_path = data_dir / key
         files = files_in_path(channel_path)
         if len(files) != 1:
             raise ValueError('There should be exactly one file per channel '
@@ -74,7 +74,7 @@ def load_data_paths_and_print(inputdataconfig_path, data_dir):
 
 def save_model_artifacts(model_artifacts_path, model_artifacts_fname, model):
     if model_artifacts_path.exists() and model_artifacts_path.is_dir():
-        dump(model, model_artifacts_path.joinpath(model_artifacts_fname))
+        dump(model, model_artifacts_path / model_artifacts_fname)
 
 
 def write_failure_file(failure_file_path, failure_reason):

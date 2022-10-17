@@ -47,8 +47,8 @@ def train():
     save_model_artifacts(
         Env.model_artifacts_dir, Env.model_artifacts_fname, clf)
     scores = array2string(scores, formatter={'float_kind': lambda x: '%.5f' % x})
-    write_output_file(Env.output_path / 'scores', scores)
+    write_output_file(Env.output_path / 'scores.txt', scores)
     metrics_list = '[' + ' '.join(str(m) for m in metrics_list) + ']'
-    write_output_file(Env.output_path / 'metrics_list', metrics_list)
+    write_output_file(Env.output_path / 'metrics_list.txt', metrics_list)
 
     print("\nTraining completed!")
