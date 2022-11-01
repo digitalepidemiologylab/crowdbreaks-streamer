@@ -44,7 +44,6 @@ class MOOB(StreamingEnsemble):
         self.chunk_tdcs = np.ones((self.X_.shape[0], self.classes_.shape[0]))
 
         for iteration, label in enumerate(self.y_):
-            print(label, type(label))
             complementary_labels = [c for c in self.classes_ if c != label]
             self.current_tdcs_[0, label] = (
                     self.current_tdcs_[0, label] * self.time_decay_factor

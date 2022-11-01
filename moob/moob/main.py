@@ -50,6 +50,7 @@ def train():
     write_output_file(Env.output_path / 'scores.txt', scores)
     metrics_list = '[' + ' '.join(str(m) for m in metrics_list) + ']'
     write_output_file(Env.output_path / 'metrics_list.txt', metrics_list)
+    print('Printing output_path')
     print(*Env.output_path.iterdir(), sep="\n")
 
     print("\nTraining completed!")
