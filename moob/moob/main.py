@@ -1,6 +1,6 @@
 import sys
 
-from numpy import array2string
+import numpy as np
 
 from .config import load_hyperparams
 from .env import Env
@@ -46,10 +46,11 @@ def train():
     print(type(clf))
     save_model_artifacts(
         Env.model_artifacts_dir, Env.model_artifacts_fname, clf)
-    scores = array2string(scores, formatter={'float_kind': lambda x: '%.5f' % x})
-    write_output_file(Env.output_path / 'scores', scores)
+    # scores = np.array2string(scores, formatter={'float_kind': lambda x: '%.5f' % x})
+    np.savetxt(Env.output_path / 'data/scores.csv', scores, delimiter=',')
+    # write_output_file(Env.output_path / 'data/scores.txt', scores)
     metrics_list = '[' + ' '.join(str(m) for m in metrics_list) + ']'
-    write_output_file(Env.output_path / 'metrics_list', metrics_list)
+    write_output_file(Env.output_path / 'data/metrics_list.json', metrics_list)
     print('Printing output_path')
     print(*Env.output_path.iterdir(), sep="\n")
 
