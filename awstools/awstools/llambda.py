@@ -340,6 +340,10 @@ def create_lambda(
     memory_size=LEnv.MEMORY_SIZE,
     more_env_vars=None
 ):
+    """
+    Note that when updating a lambda, only code diffs will be applied.
+    Env variables/S3 triggers need to be updated manually in the console.
+    """
     if s3_prefixes is not None and type(s3_prefixes) not in [tuple, list]:
         raise ValueError("'s3_prefixes' should be either a tuple or a list.")
 
