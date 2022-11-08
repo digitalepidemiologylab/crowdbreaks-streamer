@@ -10,15 +10,12 @@ from strlearn.evaluators import Prequential, TestThenTrain
 from strlearn.metrics import geometric_mean_score_1
 from sklearn.neural_network import MLPClassifier
 
-import torch
-from transformers import BertModel, BertTokenizer
-from twiprocess.preprocess import preprocess
-
 from matplotlib import pyplot as plt
 
 from .config import EvalMode
 from .ensembles import MOOB  # Custom ensemble class
 from .env import Env
+from .process import input_data_to_embeddings
 
 
 logger = logging.getLogger(__name__)
@@ -27,49 +24,6 @@ logger.setLevel(logging.INFO)
 
 def calculate_n_chunks(n_instances, chunk_size):
     return int(np.ceil(n_instances / chunk_size))
-
-
-def prepare_params(params):
-    params = params.__dict__.copy()
-    return {k: v for k, v in params.items() if v is not None}
-
-
-def generate_embeddings(model_name, df, ppcs_params, tknr_params):
-    # The following model generates 768-dimensional embeddings
-    # model_name = 'bert-base-uncased'
-
-    model = BertModel.from_pretrained(model_name)
-    tokenizer = BertTokenizer.from_pretrained(model_name)
-
-    preprocessed_text_list = df.text.apply(
-        preprocess, **prepare_params(ppcs_params)).tolist()
-
-    # Tokenization
-    # max_seq_length = 96
-    # Whether or not to encode the sequences with the special tokens
-    # relative to their model
-    # special_tokens_bool = True
-    tokenizer_output = tokenizer(preprocessed_text_list, return_tensors='pt',
-                                 **prepare_params(tknr_params))
-
-    input_ids_tensor = tokenizer_output.data['input_ids']
-    token_type_ids_tensor = tokenizer_output.data['token_type_ids']
-    attention_mask_tensor = tokenizer_output.data['attention_mask']
-
-    with torch.no_grad():
-        model_output = model(
-            input_ids=input_ids_tensor, token_type_ids=token_type_ids_tensor,
-            attention_mask=attention_mask_tensor)
-        # Extract hidden state corresponding to the CLS token
-        # (this is different the pooled output produced by BertPooler
-        # because in our case no activation function (hyperbolic tangent)
-        # has been applied)
-        hidden_state_cls_token = model_output['last_hidden_state'][:, 0, :]
-
-    # Convert to Numpy array
-    embeddings = hidden_state_cls_token.detach().numpy()
-
-    return embeddings
 
 
 def stream_processing(
@@ -87,7 +41,7 @@ def stream_processing(
         # mlp_classifier = MLPClassifier(
         #     activation='logistic', hidden_layer_sizes=(), solver='adam',
         #     max_iter=500, random_state=0)
-        mlp_classifier = MLPClassifier(**prepare_params(clf_params))
+        mlp_classifier = MLPClassifier(**clf_params.__dict__.copy())
         # Note about the optimization algorithm (solver for weight optimization): 
         # the default solver ‘adam’ works pretty well on relatively large datasets
         # (with thousands of training samples or more) in terms of both
@@ -95,7 +49,7 @@ def stream_processing(
         # For small datasets, however, ‘lbfgs’ can converge faster and perform better 
         # (Reminder: LBFGS = Limited-memory BFGS, where BFGS stands for
         # the Broyden-Fletcher-Goldfarb-Shanno algorithm).
-
+        
         # Create base estimator
         base = SampleWeightedMetaEstimator(base_classifier=mlp_classifier)
         # Ensemble approach: Multiclass Oversampling-based Online Bagging (MOOB)
@@ -154,25 +108,13 @@ def train_moob_bert(model_name, input_data_path, input_model_path,
         raise ValueError("In case there is no 'input_model_path', "
                          "'clf_params' should exist, and vice versa.")
 
-    df = pd.read_csv(input_data_path, parse_dates=['created_at'])
-    df = df.sort_values(by=['created_at'])
-    labels_list = sorted(df.label.unique())
-    labels_to_num_dict = {k: v for v, k in enumerate(labels_list)}
-    mapped_labels = df.label.map(labels_to_num_dict).tolist()
-    print(len(mapped_labels))
-
-    embeddings = generate_embeddings(model_name, df, ppcs_params, tknr_params)
-    print(embeddings.shape)
-    embeddings = pd.DataFrame(embeddings)
-    print(embeddings.info())
-    embeddings = pd.concat([embeddings, pd.Series(mapped_labels)], axis=1)
-    print(embeddings.info())
-
+    embeddings, n_instances = input_data_to_embeddings(
+        input_data_path, model_name, ppcs_params, tknr_params)
     # Save stream as a headerless CSV file
     # (the rightmost column corresponds to the class labels)
     embeddings.to_csv(Env.embeddings_path, index=False, header=False)
 
-    n_instances = len(df)
+    n_instances = len(embeddings)
     # n_chunks represents the number of chunks in a stream to which
     # a test-then-train procedure would be applied. 
     # That's how this parameter should be understood,
