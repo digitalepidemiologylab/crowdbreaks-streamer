@@ -49,7 +49,7 @@ def stream_processing(
         # For small datasets, however, ‘lbfgs’ can converge faster and perform better 
         # (Reminder: LBFGS = Limited-memory BFGS, where BFGS stands for
         # the Broyden-Fletcher-Goldfarb-Shanno algorithm).
-        
+
         # Create base estimator
         base = SampleWeightedMetaEstimator(base_classifier=mlp_classifier)
         # Ensemble approach: Multiclass Oversampling-based Online Bagging (MOOB)

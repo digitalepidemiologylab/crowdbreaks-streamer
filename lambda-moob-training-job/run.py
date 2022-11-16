@@ -5,7 +5,7 @@ from awstools.llambda import (create_lambda,
                               create_lambda_layer,
                               zip_lambda_func,
                               zip_lambda_layer)
-from awstools.env import SagemakerTrainEnv as Env
+from awstools.env import SMAEnv
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -28,18 +28,18 @@ def main():
     )
 
     more_env_vars = {
-        'BUCKET_NAME': Env.BUCKET_NAME,
-        'HYPERPARAMS_S3_KEY': Env.HYPERPARAMS_S3_KEY,
-        'ECREPO_NAME': Env.ECREPO_NAME,
-        'INSTANCE_TYPE': Env.INSTANCE_TYPE,
-        'OUTPUT_PREFIX': Env.OUTPUT_PREFIX
+        'BUCKET_NAME': SMAEnv.BUCKET_NAME,
+        'HYPERPARAMS_S3_KEY': SMAEnv.HYPERPARAMS_S3_KEY,
+        'ECREPO_NAME': SMAEnv.ECREPO_NAME,
+        'INSTANCE_TYPE': SMAEnv.INSTANCE_TYPE,
+        'OUTPUT_PREFIX': SMAEnv.OUTPUT_PREFIX
     }
     create_lambda(
         lambda_name,
         lambda_local_zip_path,
         policy_path,
         push_to_s3=True,
-        s3_prefixes=(Env.DATA_PREFIX,),
+        s3_prefixes=(SMAEnv.DATA_PREFIX,),
         more_env_vars=more_env_vars
     )
 

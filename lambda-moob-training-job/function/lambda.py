@@ -5,7 +5,7 @@ import sagemaker
 from sagemaker.estimator import Estimator
 
 from awstools.session import ecr
-from awstools.env import SagemakerTrainEnv as Env
+from awstools.env import SMAEnv
 from awstools.s3 import get_long_s3_object
 
 logger = logging.getLogger(__name__)
@@ -19,28 +19,28 @@ def get_model_uri():
 def get_image_uri():
     jmespath_expression = 'sort_by(imageDetails, &to_string(imagePushedAt))[-1].imageTags'
     paginator = ecr.get_paginator('describe_images')
-    iterator = paginator.paginate(repositoryName=Env.ECREPO_NAME)
+    iterator = paginator.paginate(repositoryName=SMAEnv.ECREPO_NAME)
     filter_iterator = iterator.search(jmespath_expression)
     latest_tag =  list(filter_iterator)[0]
 
-    return f'{Env.ACCOUNT_NUM}.dkr.ecr.{Env.REGION}.amazonaws.com/' \
-           f'{Env.ECREPO_NAME}:{latest_tag}'
+    return f'{SMAEnv.ACCOUNT_NUM}.dkr.ecr.{SMAEnv.REGION}.amazonaws.com/' \
+           f'{SMAEnv.ECREPO_NAME}:{latest_tag}'
 
 
 def get_hyperparams():
     return json.loads(get_long_s3_object(
-        Env.BUCKET_NAME, Env.HYPERPARAMS_S3_KEY,
+        SMAEnv.BUCKET_NAME, SMAEnv.HYPERPARAMS_S3_KEY,
         {'CompressionType': 'NONE', 'JSON': {'Type': 'DOCUMENT'}}))
 
 
 def run(stream_uri):
     moob_est = Estimator(
         image_uri=get_image_uri(),
-        role=Env.SAGEMAKER_ROLE,
+        role=SMAEnv.SAGEMAKER_ROLE,
         instance_count=1,
-        instance_type=Env.INSTANCE_TYPE,
-        output_path=Env.OUTPUT_PREFIX,
-        base_job_name=Env.JOB_NAME,
+        instance_type=SMAEnv.INSTANCE_TYPE,
+        output_path=SMAEnv.OUTPUT_PREFIX,
+        base_job_name=SMAEnv.JOB_NAME,
         tags=[{
             "Key": "project",
             "Value": "crowdbreaks"
@@ -55,6 +55,9 @@ def run(stream_uri):
     if model_uri is not None:
         fit_params['model'] = sagemaker.TrainingInput(model_uri)
     moob_est.fit(fit_params, wait=False)
+
+    job_name = moob_est._current_job_name
+    
 
 
 def handler(event, context):

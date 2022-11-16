@@ -8,6 +8,8 @@ import traceback
 
 from joblib import dump
 
+from .config import hyperparams_from_dict
+
 
 # Signal handler
 class ExitSignalHandler:
@@ -36,6 +38,7 @@ def load_json_and_print(path):
         print(f'\n{path}: ')
         print_json_object(json_object)
         return json_object
+    raise ValueError(f"Path '{path}' either does not exist or is not a file.")
 
 
 def print_env_var(key):
@@ -83,10 +86,10 @@ def write_failure_file(failure_file_path, failure_reason):
     failure_file.close()
 
 
-def write_output_file(output_file_path, output_info):
-    output_file = output_file_path.open('w')
-    output_file.write(output_info)
-    output_file.close()
+def write_to_file(file_path, data):
+    file = file_path.open('w')
+    file.write(data)
+    file.close()
 
 
 def handle_exceptions(failure_path, exc=Exception):
@@ -102,3 +105,8 @@ def handle_exceptions(failure_path, exc=Exception):
                 sys.exit(1)
         return wrapper
     return handle_exc
+
+
+def load_hyperparams(hyperparams_path):
+    hyperparams_dict = load_json_and_print(hyperparams_path)['hyperparams']
+    return hyperparams_from_dict(hyperparams_dict)

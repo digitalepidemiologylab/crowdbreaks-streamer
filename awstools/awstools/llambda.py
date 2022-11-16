@@ -9,7 +9,7 @@ import sys
 import os
 
 from .env import LEnv, ESEnv
-from .env import SagemakerTrainEnv as SMEnv
+from .env import SMAEnv as SMEnv
 from .session import s3, iam, aws_lambda
 from .firehose import get_bucket_arn
 
@@ -67,7 +67,8 @@ def set_s3_triggers(lambda_name, s3_prefixes):
     logger.debug('This lambda prefixes: %s', ', '.join(this_lambda_s3_prefixes))
 
     # Template for an S3 trigger entry
-    lambda_config_template = lambda s3_prefix: {
+    def lambda_config_template (s3_prefix):
+        return {
         'LambdaFunctionArn': function_arn,
         'Events': ['s3:ObjectCreated:Put'],
         'Filter': {

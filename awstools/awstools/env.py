@@ -49,14 +49,14 @@ class AWSEnv(Env):
     STREAM_STATE_S3_KEY = os.environ.get(
         'AWS_STREAM_STATE_S3_KEY', 'configs/stream/state.json')
     ENDPOINTS_PREFIX = os.environ.get(
-        'ENDPOINTS_PREFIX', 'configs/models/')
+        'AWS_ENDPOINTS_PREFIX', 'configs/models/')
     SAMPLES_PREFIX = os.environ.get(
-        'SAMPLES_PREFIX', 'other/csv/automatic-samples')
+        'AWS_SAMPLES_PREFIX', 'other/csv/automatic-samples')
     SAMPLE_STATUS_S3_KEY = os.environ.get(
-        'SAMPLE_STATUS_S3_KEY', 'other/csv/automatic-samples/status.json')
+        'AWS_SAMPLE_STATUS_S3_KEY', 'other/csv/automatic-samples/status.json')
 
     LAMBDA_S3_ES_NAME = os.environ.get(
-        'LAMBDA_S3_ES_NAME', 's3-to-es')
+        'AWS_LAMBDA_S3_ES_NAME', 's3-to-es')
 
 
 class KFEnv(AWSEnv):
@@ -89,8 +89,6 @@ class LEnv(AWSEnv):
 
 
 class ESEnv(AWSEnv):
-    # HOST = os.environ.get('ES_HOST', '')
-    # PORT = os.environ.get('ES_PORT', '')
     CLOUD_ID = os.environ.get('ES_CLOUD_ID', '')
     API_KEY = os.environ.get('ES_API_KEY', '')
     INDEX_PREFIX = os.environ.get('ES_INDEX_PREFIX', 'project_')
@@ -105,20 +103,21 @@ class ECSEnv(AWSEnv):
         'ECS_SERVICE', f'streamer-{Env.ENV}-service')
 
 
-class SMEnv(AWSEnv):
-    BATCH_SIZE_DEFAULT = int(os.environ.get('BATCH_SIZE_DEFAULT', '1'))
-    BATCH_SIZE_FASTTEXT = int(os.environ.get('BATCH_SIZE_FASTTEXT', '100'))
+class SMEnv(AWSEnv): # Sagemaker (inference)
+    BATCH_SIZE_DEFAULT = int(os.environ.get('SM_BATCH_SIZE_DEFAULT', '1'))
+    BATCH_SIZE_FASTTEXT = int(os.environ.get('SM_BATCH_SIZE_FASTTEXT', '100'))
 
 
-class SagemakerTrainEnv(AWSEnv):
+class SMAEnv(AWSEnv): # Sagemaker Auto (training and deployment)
     HYPERPARAMS_S3_KEY = os.environ.get(
-        'HYPERPARAMS_S3_KEY', 'sagemaker/hyperparams.json')
-    ECREPO_NAME = os.environ.get('ECREPO_NAME', f'crowdbreaks-sagemaker/moob-{Env.ENV}')
-    JOB_NAME = os.environ.get('JOB_NAME', f'crowdbreaks-moob-{Env.ENV}')
-    INSTANCE_TYPE = os.environ.get('INSTANCE_TYPE', 'ml.m5.large')
+        'SMA_HYPERPARAMS_S3_KEY', 'sagemaker/hyperparameters.json')
+    ECREPO_NAME = os.environ.get('SMA_ECREPO_NAME', f'crowdbreaks-sagemaker/moob-{Env.ENV}')
+    JOB_NAME = os.environ.get('SMA_JOB_NAME', f'crowdbreaks-moob-{Env.ENV}')
+    INSTANCE_TYPE = os.environ.get('SMA_INSTANCE_TYPE', 'ml.m5.large')
     OUTPUT_PREFIX = os.environ.get(
-        'OUTPUT_PREFIX', f's3://{AWSEnv.BUCKET_NAME}/sagemaker/output/')
-    DATA_PREFIX = os.environ.get('DATA_PREFIX', 'sagemaker/data/train/')
+        'SMA_OUTPUT_PREFIX', f's3://{AWSEnv.BUCKET_NAME}/sagemaker/output/')
+    DATA_PREFIX = os.environ.get('SMA_DATA_PREFIX', 'sagemaker/data/train/')
     SAGEMAKER_ROLE = os.environ.get(
-        'SAGEMAKER_ROLE',
+        'SMA_SAGEMAKER_ROLE',
         f'arn:aws:iam::{AWSEnv.ACCOUNT_NUM}:role/crowdbreaks-sagemaker')
+    ENDPOINT_NAME = os.environ.get('SMA_ENDPOINT_NAME', f'{Env.APP_NAME}-{Env.ENV}')

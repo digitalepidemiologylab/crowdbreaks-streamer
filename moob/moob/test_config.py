@@ -1,7 +1,7 @@
 import pytest
 
 from .config import (EvalMode, Activation, Solver, MLPClassifier, Preprocess,
-                    BertTokenizer, Hyperparams, load_hyperparams)
+                    BertTokenizer, Hyperparams, hyperparams_from_dict)
 
 from dacite.exceptions import MissingValueError
 
@@ -131,7 +131,7 @@ missing_model_name = {
 
 
 def test_config():
-    hyperparams = [load_hyperparams(config) for config in test_correct]
+    hyperparams = [hyperparams_from_dict(config) for config in test_correct]
 
     assert hyperparams == [
         Hyperparams(**{
@@ -190,21 +190,21 @@ def test_config():
     ]
 
     with pytest.raises(MissingValueError) as excinfo:
-        load_hyperparams(missing_interval)
+        hyperparams_from_dict(missing_interval)
     assert 'missing value for field "interval"' in str(excinfo.value)
 
     with pytest.raises(MissingValueError) as excinfo:
-        load_hyperparams(missing_activation)
+        hyperparams_from_dict(missing_activation)
     assert 'missing value for field "clf_params.activation"' in str(excinfo.value)
 
     with pytest.raises(MissingValueError) as excinfo:
-        load_hyperparams(missing_ppcs_params)
+        hyperparams_from_dict(missing_ppcs_params)
     assert 'missing value for field "ppcs_params"' in str(excinfo.value)
 
     with pytest.raises(MissingValueError) as excinfo:
-        load_hyperparams(missing_tknr_params)
+        hyperparams_from_dict(missing_tknr_params)
     assert 'missing value for field "tknr_params"' in str(excinfo.value)
 
     with pytest.raises(MissingValueError) as excinfo:
-        load_hyperparams(missing_model_name)
+        hyperparams_from_dict(missing_model_name)
     assert 'missing value for field "model_name"' in str(excinfo.value)

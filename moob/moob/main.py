@@ -2,11 +2,10 @@ import sys
 
 import numpy as np
 
-from .config import load_hyperparams
 from .env import Env
 from .helpers import (load_json_and_print, load_data_paths_and_print,
-                      print_env_var, handle_exceptions, save_model_artifacts,
-                      write_output_file)
+                      load_hyperparams, print_env_var, handle_exceptions,
+                      save_model_artifacts, write_to_file)
 from .train import train_moob_bert
 
 
@@ -21,8 +20,7 @@ def train():
     with Env.hyperparams_path.open() as json_file:
         print(json_file.read())
 
-    hyperparams = load_json_and_print(Env.hyperparams_path)
-    hyperparams = load_hyperparams(hyperparams['hyperparams'])
+    hyperparams = load_hyperparams(Env.hyperparams_path)
     input_data_paths = load_data_paths_and_print(
         Env.inputdataconfig_path, Env.data_dir)
     input_stream_path = input_data_paths['stream']
@@ -46,11 +44,13 @@ def train():
     print(type(clf))
     save_model_artifacts(
         Env.model_artifacts_dir, Env.model_artifacts_fname, clf)
-    # scores = np.array2string(scores, formatter={'float_kind': lambda x: '%.5f' % x})
+    # Save hyperparameters to model artifacts path to be read by
+    # the inference container
+    Env.hyperparams_path.write_bytes(
+        (Env.model_artifacts_dir / 'hyperparameters.json').read_bytes())
     np.savetxt(Env.output_path / 'data/scores.csv', scores, delimiter=',')
-    # write_output_file(Env.output_path / 'data/scores.txt', scores)
     metrics_list = '[' + ' '.join(str(m) for m in metrics_list) + ']'
-    write_output_file(Env.output_path / 'data/metrics_list.json', metrics_list)
+    write_to_file(Env.output_path / 'data/metrics_list.json', metrics_list)
     print('Printing output_path')
     print(*Env.output_path.iterdir(), sep="\n")
 
