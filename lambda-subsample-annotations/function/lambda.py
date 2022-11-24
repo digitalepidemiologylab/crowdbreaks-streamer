@@ -11,6 +11,7 @@ from awstools.s3 import get_s3_object
 
 FUNCTION_NAME = f'{AWSEnv.APP_NAME}-subsample-annotations-{AWSEnv.ENV}'
 MIN_TWEET_COUNT = 10
+DATETIME_FORMAT_S3 = '%Y%m%d%H%M%S'
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
@@ -115,9 +116,9 @@ def handler(event, context):
         return
     folder = key.split('/')[:-1]
     object_name = key.split('/')[-1]
-    date_now = datetime.now().strftime('%Y%m%d')
-    output_key = '/'.join([*folder, '-'.join(['evaluate', date_now, object_name])])
-    output_key_ids = '/'.join([*folder, '-'.join(['evaluate_ids', date_now, object_name])])
+    datetime_now = datetime.utcnow().strftime(DATETIME_FORMAT_S3)
+    output_key = '/'.join([*folder, '-'.join(['evaluate', datetime_now, object_name])])
+    output_key_ids = '/'.join([*folder, '-'.join(['evaluate_ids', datetime_now, object_name])])
 
     logger.debug(output_key)
 

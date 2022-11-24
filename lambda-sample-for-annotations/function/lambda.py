@@ -2,7 +2,6 @@ from datetime import date, datetime
 from dateutil.relativedelta import relativedelta
 from hashlib import sha256
 from io import StringIO
-import json
 import logging
 from os.path import join
 import re
@@ -18,8 +17,8 @@ from awstools.session import es, s3
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-DATE_FORMAT_ES = '%Y-%m-%dT%T.000Z'
-DATE_FORMAT_S3 = '%Y%m%d%H%M%S'
+DATETIME_FORMAT_ES = '%Y-%m-%dT%T.000Z'
+DATETIME_FORMAT_S3 = '%Y%m%d%H%M%S'
 
 
 def only_digits(string):
@@ -28,7 +27,7 @@ def only_digits(string):
 
 def put_csv_to_s3(csv_buffer, conf_slug, text=False):
     df_sha256 = sha256(csv_buffer.getvalue().encode()).hexdigest()
-    datetime_stamp = datetime.now().strftime(DATE_FORMAT_S3)
+    datetime_stamp = datetime.utcnow().strftime(DATETIME_FORMAT_S3)
     if text:
         f_name = f"auto_sample-text-{conf_slug}-{datetime_stamp}-{df_sha256}.csv"
     else:
@@ -61,8 +60,6 @@ def handler(event, context):
 
     relevant_confs = [conf for conf in config_manager.config if conf.auto_mturking is True]
 
-    sample_status = {'text': [], 'no_text': []}
-
     for conf in relevant_confs:
         s = Search(using=es, index=conf.es_index_name)
 
@@ -70,7 +67,7 @@ def handler(event, context):
             'created_at': {
                 'gte': (date.today() + relativedelta(
                     months=-sample_each
-                )).strftime(DATE_FORMAT_ES)
+                )).strftime(DATETIME_FORMAT_ES)
             }
         }
 
@@ -98,16 +95,10 @@ def handler(event, context):
         csv_buffer = StringIO()
         sampled_tweets_df.to_csv(
             csv_buffer, header=False, index=False, columns=['id_str'])
-        output_key = put_csv_to_s3(csv_buffer, conf.slug, text=False)
-        sample_status['no_text'].append(output_key)
+        _ = put_csv_to_s3(csv_buffer, conf.slug, text=False)
 
         # Save a CSV for manual inspection
         csv_buffer = StringIO()
         sampled_tweets_df.to_csv(
             csv_buffer, header=True, index=True)
-        output_key = put_csv_to_s3(csv_buffer, conf.slug, text=True)
-        sample_status['text'].append(output_key)
-
-    s3.put_object(
-        Body=json.dumps(sample_status), Bucket=AWSEnv.BUCKET_NAME,
-        Key=AWSEnv.SAMPLE_STATUS_S3_KEY)
+        _ = put_csv_to_s3(csv_buffer, conf.slug, text=True)
