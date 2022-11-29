@@ -9,10 +9,11 @@ setuptools.setup(
     url="https://github.com/digitalepidemiologylab/crowdbreaks-streamer",
     packages=setuptools.find_packages(),
     install_requires=[
-        'python-dotenv', 'aenum', 'dacite', 'tweepy @ git+https://github.com/utanashati/tweepy.git',
+        'python-dotenv', 'aenum', 'dacite', 'tweepy',
         'awstools @ git+https://github.com/digitalepidemiologylab/crowdbreaks-streamer.git#egg=awstools&subdirectory=awstools'],
     entry_points={'console_scripts': [
-        'run-stream=streamer.run:main']},
+        'run-stream=streamer.run:main',
+        'run-stream-v2=streamer.run_v2:main',]},
     package_data={'streamer': ['streamer.env']},
     classifiers=[
         "Programming Language :: Python :: 3",

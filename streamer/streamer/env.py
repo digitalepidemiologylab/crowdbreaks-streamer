@@ -10,10 +10,12 @@ load_dotenv(dotenv_path=env_path)
 
 class TwiEnv(Constant):
     """Twitter API config."""
-    CONSUMER_KEY = os.environ.get('TWI_CONSUMER_KEY')
-    CONSUMER_SECRET = os.environ.get('TWI_CONSUMER_SECRET')
-    OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN')
-    OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET')
+    CONSUMER_KEY = os.environ.get('TWI_CONSUMER_KEY', '')
+    CONSUMER_SECRET = os.environ.get('TWI_CONSUMER_SECRET', '')
+    OAUTH_TOKEN = os.environ.get('TWI_OAUTH_TOKEN', '')
+    OAUTH_TOKEN_SECRET = os.environ.get('TWI_OAUTH_TOKEN_SECRET', '')
+
+    BEARER_TOKEN = os.environ.get('TWI_BEARER_TOKEN', '')
 
     COVID_STREAM_NAME = os.environ.get('COVID_STREAM_NAME', 'None')
     COVID_PARTITION = os.environ.get('COVID_PARTITION', '0')
