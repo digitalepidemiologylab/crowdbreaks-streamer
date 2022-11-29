@@ -70,6 +70,7 @@ def wait_some_time(n_errors_last_hour):
 
 def main():
     setup_logging()
+    logger.info('Twitter API v2')
     logger.info(os.path.dirname(os.path.realpath(__file__)))
     logger.info(os.getcwd())
 
